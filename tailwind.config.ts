@@ -13,6 +13,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -46,6 +49,20 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        hobby: {
+          arts: "hsl(var(--hobby-arts))",
+          sports: "hsl(var(--hobby-sports))",
+          music: "hsl(var(--hobby-music))",
+          cooking: "hsl(var(--hobby-cooking))",
+          reading: "hsl(var(--hobby-reading))",
+          gaming: "hsl(var(--hobby-gaming))",
+        },
+        map: {
+          bg: "hsl(var(--map-bg))",
+          road: "hsl(var(--map-road))",
+          park: "hsl(var(--map-park))",
+          location: "hsl(var(--map-location))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

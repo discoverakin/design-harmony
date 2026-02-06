@@ -1,12 +1,23 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import AppHeader from "@/components/AppHeader";
+import QuickStartSection from "@/components/QuickStartSection";
+import BrowseHobbiesSection from "@/components/BrowseHobbiesSection";
+import HobbyQuizCTA from "@/components/HobbyQuizCTA";
+import NearYouMap from "@/components/NearYouMap";
+import BottomNav from "@/components/BottomNav";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
+      <AppHeader />
+      <main className="flex-1 overflow-y-auto pb-4">
+        <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
+          <QuickStartSection />
+          <BrowseHobbiesSection />
+          <HobbyQuizCTA />
+          <NearYouMap />
+        </div>
+      </main>
+      <BottomNav />
     </div>
   );
 };

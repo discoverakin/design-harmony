@@ -9,19 +9,30 @@ import BottomNav from "@/components/BottomNav";
 import GroupCard from "@/components/community/GroupCard";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
 import ActivityItem from "@/components/community/ActivityItem";
-import { groups, communityEvents, activityFeed } from "@/data/community";
+import CreateGroupSheet from "@/components/community/CreateGroupSheet";
+import { communityEvents, activityFeed } from "@/data/community";
 import { useGroupMembership } from "@/hooks/use-group-membership";
-
-const ALL_CATEGORIES = Array.from(new Set(groups.map((g) => g.category)));
+import { useGroups } from "@/hooks/use-groups";
 
 const Community = () => {
-  const { isJoined, toggleMembership } = useGroupMembership();
+  const { isJoined, toggleMembership, joinGroup } = useGroupMembership();
+  const { allGroups, addGroup } = useGroups();
+
+  const handleCreateGroup = (data: Parameters<typeof addGroup>[0]) => {
+    const newGroup = addGroup(data);
+    joinGroup(newGroup.id);
+  };
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
+  const allCategories = useMemo(
+    () => Array.from(new Set(allGroups.map((g) => g.category))),
+    [allGroups]
+  );
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return groups.filter((g) => {
+    return allGroups.filter((g) => {
       const matchesSearch =
         !q ||
         g.name.toLowerCase().includes(q) ||
@@ -30,7 +41,7 @@ const Community = () => {
         !activeCategory || g.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [search, activeCategory]);
+  }, [search, activeCategory, allGroups]);
 
   const yourGroups = filtered.filter((g) => isJoined(g.id));
   const discoverGroups = filtered.filter((g) => !isJoined(g.id));
@@ -74,8 +85,12 @@ const Community = () => {
             </TabsList>
 
             <TabsContent value="groups" className="mt-4 pb-6">
-              {/* Search + category filter */}
+              {/* Create Group + Search + category filter */}
               <div className="mb-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-bold text-foreground">Find a group</h2>
+                  <CreateGroupSheet onCreateGroup={handleCreateGroup} />
+                </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -101,7 +116,7 @@ const Community = () => {
                   >
                     All
                   </Badge>
-                  {ALL_CATEGORIES.map((cat) => (
+                  {allCategories.map((cat) => (
                     <Badge
                       key={cat}
                       variant={activeCategory === cat ? "default" : "secondary"}

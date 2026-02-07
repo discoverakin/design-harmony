@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import HobbyCategoryCard from "./HobbyCategoryCard";
 import type { HobbyData } from "@/data/hobbies";
 
@@ -71,6 +71,13 @@ const HobbyCategoryGroup = ({
                 />
               ))}
             </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="flex items-center justify-center gap-1 w-full py-2 mt-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+            >
+              <ChevronUp className="w-3.5 h-3.5" />
+              Show less
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

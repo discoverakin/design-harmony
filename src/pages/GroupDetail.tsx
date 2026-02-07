@@ -1,13 +1,10 @@
-import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Users,
   MapPin,
   Calendar,
-  Clock,
   Shield,
-  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,13 +12,13 @@ import { Separator } from "@/components/ui/separator";
 import BottomNav from "@/components/BottomNav";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
 import { groups, communityEvents, groupMembers } from "@/data/community";
+import { useGroupMembership } from "@/hooks/use-group-membership";
 
 const GroupDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const group = groups.find((g) => g.slug === slug);
-
-  const [joined, setJoined] = useState(group?.isJoined ?? false);
+  const { isJoined, toggleMembership } = useGroupMembership();
 
   if (!group) {
     return (
@@ -34,6 +31,7 @@ const GroupDetail = () => {
     );
   }
 
+  const joined = isJoined(group.id);
   const groupEvents = communityEvents.filter((e) => e.groupSlug === group.slug);
 
   return (
@@ -73,7 +71,7 @@ const GroupDetail = () => {
             <Button
               className="w-full rounded-xl h-11 font-semibold"
               variant={joined ? "secondary" : "default"}
-              onClick={() => setJoined(!joined)}
+              onClick={() => toggleMembership(group.id)}
             >
               {joined ? "Leave Group" : "Join Group"}
             </Button>

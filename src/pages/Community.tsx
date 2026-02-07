@@ -6,8 +6,14 @@ import GroupCard from "@/components/community/GroupCard";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
 import ActivityItem from "@/components/community/ActivityItem";
 import { groups, communityEvents, activityFeed } from "@/data/community";
+import { useGroupMembership } from "@/hooks/use-group-membership";
 
 const Community = () => {
+  const { isJoined, toggleMembership } = useGroupMembership();
+
+  const yourGroups = groups.filter((g) => isJoined(g.id));
+  const discoverGroups = groups.filter((g) => !isJoined(g.id));
+
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
       <AppHeader />
@@ -48,23 +54,44 @@ const Community = () => {
 
             {/* Groups */}
             <TabsContent value="groups" className="mt-4 space-y-3 pb-6">
-              <div className="flex items-center justify-between mb-1">
-                <h2 className="text-sm font-bold text-foreground">Your Groups</h2>
-              </div>
-              {groups
-                .filter((g) => g.isJoined)
-                .map((g) => (
-                  <GroupCard key={g.id} group={g} />
-                ))}
+              {yourGroups.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-sm font-bold text-foreground">
+                      Your Groups
+                    </h2>
+                    <span className="text-[11px] text-muted-foreground">
+                      {yourGroups.length} joined
+                    </span>
+                  </div>
+                  {yourGroups.map((g) => (
+                    <GroupCard
+                      key={g.id}
+                      group={g}
+                      joined
+                      onToggleJoin={toggleMembership}
+                    />
+                  ))}
+                </>
+              )}
 
-              <div className="flex items-center justify-between mt-5 mb-1">
-                <h2 className="text-sm font-bold text-foreground">Discover Groups</h2>
-              </div>
-              {groups
-                .filter((g) => !g.isJoined)
-                .map((g) => (
-                  <GroupCard key={g.id} group={g} />
-                ))}
+              {discoverGroups.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between mt-5 mb-1">
+                    <h2 className="text-sm font-bold text-foreground">
+                      Discover Groups
+                    </h2>
+                  </div>
+                  {discoverGroups.map((g) => (
+                    <GroupCard
+                      key={g.id}
+                      group={g}
+                      joined={false}
+                      onToggleJoin={toggleMembership}
+                    />
+                  ))}
+                </>
+              )}
             </TabsContent>
 
             {/* Events */}
@@ -83,7 +110,9 @@ const Community = () => {
             {/* Activity Feed */}
             <TabsContent value="feed" className="mt-4 pb-6">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-sm font-bold text-foreground">Recent Activity</h2>
+                <h2 className="text-sm font-bold text-foreground">
+                  Recent Activity
+                </h2>
               </div>
               <div className="divide-y-0">
                 {activityFeed.map((item) => (

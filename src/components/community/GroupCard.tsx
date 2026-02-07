@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,11 @@ import type { CommunityGroup } from "@/data/community";
 
 interface GroupCardProps {
   group: CommunityGroup;
+  joined: boolean;
+  onToggleJoin: (groupId: number) => void;
 }
 
-const GroupCard = ({ group }: GroupCardProps) => {
-  const [joined, setJoined] = useState(group.isJoined);
-
+const GroupCard = ({ group, joined, onToggleJoin }: GroupCardProps) => {
   return (
     <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-border bg-card">
       <Link
@@ -41,7 +40,7 @@ const GroupCard = ({ group }: GroupCardProps) => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setJoined(!joined);
+          onToggleJoin(group.id);
         }}
       >
         {joined ? "Joined" : "Join"}

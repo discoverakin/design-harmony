@@ -21,7 +21,7 @@ const AppHeader = () => {
       {/* Spacer for centering logo */}
       <div className="w-9" />
 
-      <img src={logo} alt="Akin" className="h-12 w-auto" />
+      <img src={logo} alt="Akin" className="h-12 w-auto" key={theme} />
 
       {/* Hamburger menu */}
       <DropdownMenu>

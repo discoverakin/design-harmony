@@ -58,7 +58,13 @@ const AppHeader = () => {
             {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            onClick={() => {
+              localStorage.clear();
+              navigate("/onboarding");
+            }}
+            className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+          >
             <LogOut className="w-4 h-4" />
             Log Out
           </DropdownMenuItem>

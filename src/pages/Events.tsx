@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Plus, CalendarDays, Bookmark, Search, X } from "lucide-react";
+import { Plus, CalendarDays, Bookmark, Search, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,6 +39,11 @@ const Events = () => {
 
   const savedEvents = useMemo(
     () => approvedEvents.filter((e) => e.savedBy.includes("You")),
+    [approvedEvents]
+  );
+
+  const attendedEvents = useMemo(
+    () => approvedEvents.filter((e) => (e.attendedBy || []).includes("You")),
     [approvedEvents]
   );
 
@@ -155,7 +160,14 @@ const Events = () => {
                 className="flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs font-semibold"
               >
                 <Bookmark className="w-3.5 h-3.5 mr-1.5" />
-                Saved ({savedEvents.length})
+                Saved
+              </TabsTrigger>
+              <TabsTrigger
+                value="attended"
+                className="flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs font-semibold"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                Past
               </TabsTrigger>
             </TabsList>
 
@@ -193,6 +205,30 @@ const Events = () => {
                 </div>
               ) : (
                 savedEvents.map((evt) => (
+                  <EventListCard key={evt.id} event={evt} />
+                ))
+              )}
+            </TabsContent>
+
+            {/* Attended / Past */}
+            <TabsContent value="attended" className="mt-4 space-y-3 pb-6">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-sm font-bold text-foreground">Past Events</h2>
+                {attendedEvents.length > 0 && (
+                  <span className="text-[11px] text-muted-foreground">
+                    {attendedEvents.length} attended
+                  </span>
+                )}
+              </div>
+              {attendedEvents.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-3xl mb-2">✅</p>
+                  <p className="text-sm text-muted-foreground">
+                    No attended events yet. RSVP to an event, go, and mark it as attended to see it here.
+                  </p>
+                </div>
+              ) : (
+                attendedEvents.map((evt) => (
                   <EventListCard key={evt.id} event={evt} />
                 ))
               )}

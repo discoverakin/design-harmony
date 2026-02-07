@@ -8,6 +8,7 @@ import Homepage from "./pages/Homepage";
 import HobbyDetail from "./pages/HobbyDetail";
 import Community from "./pages/Community";
 import HobbyQuiz from "./pages/HobbyQuiz";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/home" element={<Homepage />} />
           <Route path="/community" element={<Community />} />
           <Route path="/quiz" element={<HobbyQuiz />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/hobby/:slug" element={<HobbyDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

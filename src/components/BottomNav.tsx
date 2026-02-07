@@ -1,9 +1,9 @@
-import { Compass, Home, Users, User } from "lucide-react";
+import { Compass, Home, CalendarDays, Users, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
   { icon: Compass, label: "Discover", path: "/" },
-  { icon: Home, label: "Homepage", path: "/home" },
+  { icon: CalendarDays, label: "Events", path: "/events" },
   { icon: Users, label: "Community", path: "/community" },
   { icon: User, label: "Profile", path: "/profile" },
 ];

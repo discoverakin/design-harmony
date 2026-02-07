@@ -11,13 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import BottomNav from "@/components/BottomNav";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
-import { groups, communityEvents, groupMembers } from "@/data/community";
+import EditGroupSheet from "@/components/community/EditGroupSheet";
+import DeleteGroupDialog from "@/components/community/DeleteGroupDialog";
+import { communityEvents, groupMembers } from "@/data/community";
 import { useGroupMembership } from "@/hooks/use-group-membership";
+import { useGroups, isCustomGroup } from "@/hooks/use-groups";
+import { toast } from "sonner";
 
 const GroupDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const group = groups.find((g) => g.slug === slug);
+  const { allGroups, updateGroup, deleteGroup } = useGroups();
+  const group = allGroups.find((g) => g.slug === slug);
   const { isJoined, toggleMembership } = useGroupMembership();
 
   if (!group) {
@@ -33,6 +38,20 @@ const GroupDetail = () => {
 
   const joined = isJoined(group.id);
   const groupEvents = communityEvents.filter((e) => e.groupSlug === group.slug);
+  const canEdit = isCustomGroup(group.id);
+
+  const handleSave = (data: Parameters<typeof updateGroup>[1]) => {
+    const newSlug = updateGroup(group.id, data);
+    if (newSlug && newSlug !== slug) {
+      navigate(`/community/${newSlug}`, { replace: true });
+    }
+  };
+
+  const handleDelete = () => {
+    deleteGroup(group.id);
+    toast.success("Group deleted.");
+    navigate("/community", { replace: true });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -60,6 +79,14 @@ const GroupDetail = () => {
               {group.members} members
             </span>
           </div>
+
+          {/* Edit / Delete for custom groups */}
+          {canEdit && (
+            <div className="flex items-center gap-2 mt-3">
+              <EditGroupSheet group={group} onSave={handleSave} />
+              <DeleteGroupDialog groupName={group.name} onConfirm={handleDelete} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -169,16 +196,22 @@ const GroupDetail = () => {
                 Group Guidelines
               </h2>
             </div>
-            <div className="space-y-2">
-              {group.rules.map((rule, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="text-xs text-muted-foreground font-medium mt-0.5 flex-shrink-0">
-                    {i + 1}.
-                  </span>
-                  <p className="text-sm text-muted-foreground">{rule}</p>
-                </div>
-              ))}
-            </div>
+            {group.rules.length > 0 ? (
+              <div className="space-y-2">
+                {group.rules.map((rule, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-xs text-muted-foreground font-medium mt-0.5 flex-shrink-0">
+                      {i + 1}.
+                    </span>
+                    <p className="text-sm text-muted-foreground">{rule}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-2">
+                No guidelines yet.
+              </p>
+            )}
           </section>
         </div>
       </main>

@@ -17,6 +17,11 @@ function saveGroups(groups: CommunityGroup[]) {
 
 let nextId = 1000;
 
+/** IDs >= 1000 are user-created groups */
+export function isCustomGroup(groupId: number) {
+  return groupId >= 1000;
+}
+
 export function useGroups() {
   const [customGroups, setCustomGroups] = useState<CommunityGroup[]>(getStoredGroups);
 
@@ -64,5 +69,47 @@ export function useGroups() {
     []
   );
 
-  return { allGroups, addGroup };
+  const updateGroup = useCallback(
+    (
+      groupId: number,
+      data: {
+        name: string;
+        emoji: string;
+        category: string;
+        description: string;
+        meetingSchedule: string;
+        location: string;
+      }
+    ) => {
+      if (!isCustomGroup(groupId)) return;
+
+      const slug = data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+      setCustomGroups((prev) => {
+        const next = prev.map((g) =>
+          g.id === groupId ? { ...g, ...data, slug } : g
+        );
+        saveGroups(next);
+        return next;
+      });
+
+      return slug;
+    },
+    []
+  );
+
+  const deleteGroup = useCallback((groupId: number) => {
+    if (!isCustomGroup(groupId)) return;
+
+    setCustomGroups((prev) => {
+      const next = prev.filter((g) => g.id !== groupId);
+      saveGroups(next);
+      return next;
+    });
+  }, []);
+
+  return { allGroups, addGroup, updateGroup, deleteGroup };
 }

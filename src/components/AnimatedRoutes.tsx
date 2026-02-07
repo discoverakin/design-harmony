@@ -5,6 +5,10 @@ import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
 import Community from "@/pages/Community";
+import Events from "@/pages/Events";
+import EventDetail from "@/pages/EventDetail";
+import CreateEvent from "@/pages/CreateEvent";
+import AdminEvents from "@/pages/AdminEvents";
 import HobbyQuiz from "@/pages/HobbyQuiz";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
@@ -32,6 +36,10 @@ const AnimatedRoutes = () => {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/home" element={<PageTransition><Homepage /></PageTransition>} />
         <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
+        <Route path="/events/create" element={<PageTransition><CreateEvent /></PageTransition>} />
+        <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
+        <Route path="/admin/events" element={<PageTransition><AdminEvents /></PageTransition>} />
         <Route path="/quiz" element={<PageTransition><HobbyQuiz /></PageTransition>} />
         <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
         <Route path="/hobby/:slug" element={<PageTransition><HobbyDetail /></PageTransition>} />

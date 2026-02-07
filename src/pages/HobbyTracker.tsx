@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { BarChart3, List } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppHeader from "@/components/AppHeader";
@@ -6,9 +6,12 @@ import BottomNav from "@/components/BottomNav";
 import TrackerStats from "@/components/tracker/TrackerStats";
 import WeeklyChart from "@/components/tracker/WeeklyChart";
 import CategoryBreakdown from "@/components/tracker/CategoryBreakdown";
+import GoalsSection from "@/components/tracker/GoalsSection";
+import GoalCelebration from "@/components/tracker/GoalCelebration";
 import ActivityLogItem from "@/components/tracker/ActivityLogItem";
 import LogActivitySheet from "@/components/tracker/LogActivitySheet";
 import { useActivityLog } from "@/hooks/use-activity-log";
+import { useTrackerGoals } from "@/hooks/use-tracker-goals";
 
 const HobbyTracker = () => {
   const {
@@ -22,6 +25,18 @@ const HobbyTracker = () => {
     totalActivities,
     totalMinutes,
   } = useActivityLog();
+
+  const {
+    goalProgress,
+    addGoal,
+    deleteGoal,
+    celebratingGoalId,
+    dismissCelebration,
+  } = useTrackerGoals(logs);
+
+  const celebratingGoal = celebratingGoalId
+    ? goalProgress.find((gp) => gp.goal.id === celebratingGoalId) ?? null
+    : null;
 
   // Group logs by date for the feed
   const groupedLogs = useMemo(() => {
@@ -98,6 +113,11 @@ const HobbyTracker = () => {
 
             {/* Overview */}
             <TabsContent value="overview" className="mt-4 space-y-4 pb-6">
+              <GoalsSection
+                goalProgress={goalProgress}
+                onAddGoal={addGoal}
+                onDeleteGoal={deleteGoal}
+              />
               <WeeklyChart data={weeklyChart} />
               <CategoryBreakdown data={categoryBreakdown} />
             </TabsContent>
@@ -137,6 +157,11 @@ const HobbyTracker = () => {
       </main>
 
       <BottomNav />
+
+      <GoalCelebration
+        goalProgress={celebratingGoal}
+        onDismiss={dismissCelebration}
+      />
     </div>
   );
 };

@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronDown, ChevronUp } from "lucide-react";
 import HobbyCategoryCard from "./HobbyCategoryCard";
 import { hobbies } from "@/data/hobbies";
 
+const INITIAL_COUNT = 6;
+
 const BrowseHobbiesSection = () => {
   const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const isSearching = query.trim().length > 0;
 
@@ -21,6 +24,9 @@ const BrowseHobbiesSection = () => {
     }
     return result;
   }, [query]);
+
+  const showToggle = !isSearching && filtered.length > INITIAL_COUNT;
+  const visible = isSearching || expanded ? filtered : filtered.slice(0, INITIAL_COUNT);
 
   return (
     <section className="px-4 pt-6">
@@ -60,17 +66,38 @@ const BrowseHobbiesSection = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {filtered.map((hobby) => (
-            <HobbyCategoryCard
-              key={hobby.slug}
-              emoji={hobby.emoji}
-              label={hobby.label}
-              bgColor={hobby.bgColor}
-              slug={hobby.slug}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-3">
+            {visible.map((hobby) => (
+              <HobbyCategoryCard
+                key={hobby.slug}
+                emoji={hobby.emoji}
+                label={hobby.label}
+                bgColor={hobby.bgColor}
+                slug={hobby.slug}
+              />
+            ))}
+          </div>
+
+          {showToggle && (
+            <button
+              onClick={() => setExpanded((prev) => !prev)}
+              className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              {expanded ? (
+                <>
+                  Show less hobbies
+                  <ChevronUp className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  Show more hobbies
+                  <ChevronDown className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          )}
+        </>
       )}
     </section>
   );

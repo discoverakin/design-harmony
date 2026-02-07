@@ -5,6 +5,7 @@ import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
 import Community from "@/pages/Community";
+import GroupDetail from "@/pages/GroupDetail";
 import Events from "@/pages/Events";
 import EventDetail from "@/pages/EventDetail";
 import CreateEvent from "@/pages/CreateEvent";
@@ -36,6 +37,7 @@ const AnimatedRoutes = () => {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/home" element={<PageTransition><Homepage /></PageTransition>} />
         <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/community/:slug" element={<PageTransition><GroupDetail /></PageTransition>} />
         <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
         <Route path="/events/create" element={<PageTransition><CreateEvent /></PageTransition>} />
         <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />

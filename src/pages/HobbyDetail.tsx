@@ -1,15 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Clock, TrendingUp } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Clock } from "lucide-react";
 import { getHobbyBySlug } from "@/data/hobbies";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
-
-const difficultyColor: Record<string, string> = {
-  Beginner: "bg-green-100 text-green-800 border-green-200",
-  Intermediate: "bg-amber-100 text-amber-800 border-amber-200",
-  Advanced: "bg-red-100 text-red-800 border-red-200",
-};
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -48,13 +41,6 @@ const HobbyDetail = () => {
             <h1 className="text-3xl font-bold text-foreground leading-tight">
               {hobby.label}
             </h1>
-            <Badge
-              className={`mt-2 ${difficultyColor[hobby.difficulty]} border text-xs font-semibold`}
-              variant="outline"
-            >
-              <TrendingUp className="w-3 h-3 mr-1" />
-              {hobby.difficulty}
-            </Badge>
           </div>
         </div>
       </div>

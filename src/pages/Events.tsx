@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Plus, CalendarDays, Bookmark, Search, X, Settings } from "lucide-react";
+import { Plus, CalendarDays, Bookmark, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -178,16 +178,6 @@ const Events = () => {
                 </>
               )}
 
-              {/* Admin link */}
-              <div className="pt-2">
-                <Link
-                  to="/admin/events"
-                  className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-primary transition-colors py-2"
-                >
-                  <Settings className="w-3 h-3" />
-                  Admin Panel
-                </Link>
-              </div>
             </TabsContent>
 
             <TabsContent value="saved" className="mt-4 space-y-3 pb-6">

@@ -39,7 +39,7 @@ const AppHeader = () => {
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/settings")}
             className="gap-2 cursor-pointer"
           >
             <Settings className="w-4 h-4" />

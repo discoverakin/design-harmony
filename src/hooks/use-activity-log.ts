@@ -7,7 +7,7 @@ import {
   calculateStreak,
   getTotalMinutesThisWeek,
   getWeeklyChartData,
-  getCategoryBreakdown,
+  getHobbyBreakdown,
 } from "@/data/activity-log";
 
 export function useActivityLog() {
@@ -33,7 +33,7 @@ export function useActivityLog() {
   const streak = calculateStreak(logs);
   const weeklyMinutes = getTotalMinutesThisWeek(logs);
   const weeklyChart = getWeeklyChartData(logs);
-  const categoryBreakdown = getCategoryBreakdown(logs);
+  const hobbyBreakdown = getHobbyBreakdown(logs);
   const totalActivities = logs.length;
   const totalMinutes = logs.reduce((sum, l) => sum + l.durationMinutes, 0);
 
@@ -44,7 +44,7 @@ export function useActivityLog() {
     streak,
     weeklyMinutes,
     weeklyChart,
-    categoryBreakdown,
+    hobbyBreakdown,
     totalActivities,
     totalMinutes,
   };

@@ -5,7 +5,7 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import TrackerStats from "@/components/tracker/TrackerStats";
 import WeeklyChart from "@/components/tracker/WeeklyChart";
-import CategoryBreakdown from "@/components/tracker/CategoryBreakdown";
+import HobbyBreakdown from "@/components/tracker/HobbyBreakdown";
 import GoalsSection from "@/components/tracker/GoalsSection";
 import GoalCelebration from "@/components/tracker/GoalCelebration";
 import ActivityLogItem from "@/components/tracker/ActivityLogItem";
@@ -21,7 +21,7 @@ const HobbyTracker = () => {
     streak,
     weeklyMinutes,
     weeklyChart,
-    categoryBreakdown,
+    hobbyBreakdown,
     totalActivities,
     totalMinutes,
   } = useActivityLog();
@@ -119,7 +119,7 @@ const HobbyTracker = () => {
                 onDeleteGoal={deleteGoal}
               />
               <WeeklyChart data={weeklyChart} />
-              <CategoryBreakdown data={categoryBreakdown} />
+              <HobbyBreakdown data={hobbyBreakdown} />
             </TabsContent>
 
             {/* Activity Log */}

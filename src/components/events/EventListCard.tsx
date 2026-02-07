@@ -90,21 +90,18 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
 
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                {event.hobbyCategory}
-              </Badge>
               {event.group && (() => {
                 const linkedGroup = groups.find((g) => g.name === event.group);
                 return linkedGroup ? (
                   <Link
                     to={`/community/${linkedGroup.slug}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-[10px] text-primary font-medium truncate max-w-[100px] hover:underline"
+                    className="text-[10px] text-primary font-medium truncate max-w-[120px] hover:underline"
                   >
                     {event.group}
                   </Link>
                 ) : (
-                  <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
                     {event.group}
                   </span>
                 );

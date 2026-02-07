@@ -1,16 +1,9 @@
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -18,45 +11,35 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { hobbyCategories, type HobbyCategory } from "@/data/hobbies";
 import { useToast } from "@/hooks/use-toast";
 import type { ActivityLog } from "@/data/activity-log";
 
-const hobbyOptions: Record<HobbyCategory, { name: string; emoji: string }[]> = {
-  Creative: [
-    { name: "Painting", emoji: "🎨" },
-    { name: "Music", emoji: "🎵" },
-    { name: "Photography", emoji: "📸" },
-    { name: "Knitting", emoji: "🧶" },
-    { name: "Pottery", emoji: "🏺" },
-    { name: "Woodworking", emoji: "🪵" },
-    { name: "Film & Video", emoji: "🎬" },
-  ],
-  Active: [
-    { name: "Running", emoji: "🏃" },
-    { name: "Yoga", emoji: "🧘" },
-    { name: "Dance", emoji: "💃" },
-    { name: "Hiking", emoji: "🥾" },
-    { name: "Fitness", emoji: "💪" },
-    { name: "Swimming", emoji: "🏊" },
-    { name: "Martial Arts", emoji: "🥋" },
-    { name: "Rock Climbing", emoji: "🧗" },
-    { name: "Cycling", emoji: "🚴" },
-  ],
-  Social: [
-    { name: "Cooking", emoji: "👨‍🍳" },
-    { name: "Gaming", emoji: "🎮" },
-    { name: "Volunteering", emoji: "🤝" },
-    { name: "Language Exchange", emoji: "🌍" },
-  ],
-  Intellectual: [
-    { name: "Reading", emoji: "📚" },
-    { name: "Chess", emoji: "♟️" },
-    { name: "Writing", emoji: "✍️" },
-    { name: "Science", emoji: "🔬" },
-    { name: "Coding", emoji: "💻" },
-  ],
-};
+const hobbyOptions: { name: string; emoji: string }[] = [
+  { name: "Painting", emoji: "🎨" },
+  { name: "Music", emoji: "🎵" },
+  { name: "Photography", emoji: "📸" },
+  { name: "Knitting", emoji: "🧶" },
+  { name: "Pottery", emoji: "🏺" },
+  { name: "Woodworking", emoji: "🪵" },
+  { name: "Film & Video", emoji: "🎬" },
+  { name: "Running", emoji: "🏃" },
+  { name: "Yoga", emoji: "🧘" },
+  { name: "Dance", emoji: "💃" },
+  { name: "Hiking", emoji: "🥾" },
+  { name: "Fitness", emoji: "💪" },
+  { name: "Swimming", emoji: "🏊" },
+  { name: "Martial Arts", emoji: "🥋" },
+  { name: "Rock Climbing", emoji: "🧗" },
+  { name: "Cycling", emoji: "🚴" },
+  { name: "Cooking", emoji: "👨‍🍳" },
+  { name: "Gaming", emoji: "🎮" },
+  { name: "Volunteering", emoji: "🤝" },
+  { name: "Reading", emoji: "📚" },
+  { name: "Chess", emoji: "♟️" },
+  { name: "Writing", emoji: "✍️" },
+  { name: "Coding", emoji: "💻" },
+  { name: "Gardening", emoji: "🌱" },
+];
 
 interface LogActivitySheetProps {
   onLog: (log: Omit<ActivityLog, "id">) => void;
@@ -65,7 +48,6 @@ interface LogActivitySheetProps {
 const LogActivitySheet = ({ onLog }: LogActivitySheetProps) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<HobbyCategory>("Active");
   const [hobby, setHobby] = useState("");
   const [hours, setHours] = useState("");
   const [minutes, setMinutes] = useState("");
@@ -102,10 +84,9 @@ const LogActivitySheet = ({ onLog }: LogActivitySheetProps) => {
       return;
     }
 
-    const selectedHobby = hobbyOptions[category]?.find((h) => h.name === hobby);
+    const selectedHobby = hobbyOptions.find((h) => h.name === hobby);
 
     onLog({
-      hobbyCategory: category,
       hobbyName: hobby,
       emoji: selectedHobby?.emoji || "🎯",
       durationMinutes: totalMinutes,
@@ -137,34 +118,11 @@ const LogActivitySheet = ({ onLog }: LogActivitySheetProps) => {
         </SheetHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Category */}
-          <div>
-            <Label className="text-xs font-semibold">Category</Label>
-            <Select
-              value={category}
-              onValueChange={(val) => {
-                setCategory(val as HobbyCategory);
-                setHobby("");
-              }}
-            >
-              <SelectTrigger className="mt-1.5 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {hobbyCategories.map((cat) => (
-                  <SelectItem key={cat.key} value={cat.key}>
-                    {cat.emoji} {cat.key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Activity */}
           <div>
             <Label className="text-xs font-semibold">Activity</Label>
             <div className="flex flex-wrap gap-2 mt-1.5">
-              {hobbyOptions[category]?.map((h) => (
+              {hobbyOptions.map((h) => (
                 <button
                   key={h.name}
                   type="button"

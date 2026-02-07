@@ -7,13 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import EventListCard from "@/components/events/EventListCard";
-import EventFilters from "@/components/events/EventFilters";
 import { useEvents } from "@/hooks/use-events";
-import type { HobbyCategory } from "@/data/hobbies";
 
 const Events = () => {
   const { approvedEvents } = useEvents();
-  const [categoryFilter, setCategoryFilter] = useState<HobbyCategory | "All">("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
@@ -21,9 +18,6 @@ const Events = () => {
     let sorted = [...approvedEvents].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-    if (categoryFilter !== "All") {
-      sorted = sorted.filter((e) => e.hobbyCategory === categoryFilter);
-    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       sorted = sorted.filter(
@@ -35,7 +29,7 @@ const Events = () => {
       );
     }
     return sorted;
-  }, [approvedEvents, categoryFilter, searchQuery]);
+  }, [approvedEvents, searchQuery]);
 
   const savedEvents = useMemo(
     () => approvedEvents.filter((e) => e.savedBy.includes("You")),
@@ -140,11 +134,6 @@ const Events = () => {
             )}
           </section>
 
-          {/* Filters */}
-          <div className="px-5 pt-3 pb-1">
-            <EventFilters selected={categoryFilter} onSelect={setCategoryFilter} />
-          </div>
-
           {/* Tabs */}
           <Tabs defaultValue="upcoming" className="px-5 pt-3">
             <TabsList className="w-full bg-secondary/60 rounded-xl h-11">
@@ -177,7 +166,6 @@ const Events = () => {
                   <p className="text-3xl mb-2">📅</p>
                   <p className="text-sm text-muted-foreground">
                     No events found
-                    {categoryFilter !== "All" ? ` in ${categoryFilter}` : ""}
                     {searchQuery ? ` matching "${searchQuery}"` : ""}.
                   </p>
                 </div>
@@ -189,7 +177,6 @@ const Events = () => {
                   <EventSection title="Coming Up" events={laterEvents} />
                 </>
               )}
-
             </TabsContent>
 
             <TabsContent value="saved" className="mt-4 space-y-3 pb-6">

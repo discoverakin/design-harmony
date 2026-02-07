@@ -1,9 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import HobbyCategoryCard from "./HobbyCategoryCard";
-import HobbyCategoryGroup from "./HobbyCategoryGroup";
-import { hobbies, hobbyCategories, type HobbyCategory } from "@/data/hobbies";
-
+import { hobbies } from "@/data/hobbies";
 
 const BrowseHobbiesSection = () => {
   const [query, setQuery] = useState("");
@@ -23,17 +21,6 @@ const BrowseHobbiesSection = () => {
     }
     return result;
   }, [query]);
-
-  const groupedByCategory = useMemo(() => {
-    const map = new Map<HobbyCategory, typeof hobbies>();
-    for (const cat of hobbyCategories) {
-      map.set(cat.key, []);
-    }
-    for (const hobby of filtered) {
-      map.get(hobby.category)?.push(hobby);
-    }
-    return map;
-  }, [filtered]);
 
   return (
     <section className="px-4 pt-6">
@@ -59,51 +46,30 @@ const BrowseHobbiesSection = () => {
         )}
       </div>
 
+      {isSearching && filtered.length > 0 && (
+        <p className="text-xs text-muted-foreground mb-3">
+          {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{query.trim().slice(0, 50)}"
+        </p>
+      )}
 
-      {/* When searching: flat filtered grid */}
-      {isSearching ? (
-        filtered.length > 0 ? (
-          <div>
-            <p className="text-xs text-muted-foreground mb-3">
-              {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{query.trim().slice(0, 50)}"
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              {filtered.map((cat) => (
-                <HobbyCategoryCard
-                  key={cat.slug}
-                  emoji={cat.emoji}
-                  label={cat.label}
-                  bgColor={cat.bgColor}
-                  slug={cat.slug}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center py-8 text-center">
-            <span className="text-3xl mb-2">🔍</span>
-            <p className="text-sm text-muted-foreground">
-              No hobbies found for "{query.trim().slice(0, 50)}"
-            </p>
-          </div>
-        )
+      {isSearching && filtered.length === 0 ? (
+        <div className="flex flex-col items-center py-8 text-center">
+          <span className="text-3xl mb-2">🔍</span>
+          <p className="text-sm text-muted-foreground">
+            No hobbies found for "{query.trim().slice(0, 50)}"
+          </p>
+        </div>
       ) : (
-        /* When browsing: grouped collapsible sections */
-        <div>
-          {hobbyCategories.map((cat, i) => {
-            const categoryHobbies = groupedByCategory.get(cat.key) || [];
-            if (categoryHobbies.length === 0) return null;
-            return (
-              <HobbyCategoryGroup
-                key={cat.key}
-                title={cat.key}
-                emoji={cat.emoji}
-                description={cat.description}
-                hobbies={categoryHobbies}
-                defaultOpen={i === 0}
-              />
-            );
-          })}
+        <div className="grid grid-cols-2 gap-3">
+          {filtered.map((hobby) => (
+            <HobbyCategoryCard
+              key={hobby.slug}
+              emoji={hobby.emoji}
+              label={hobby.label}
+              bgColor={hobby.bgColor}
+              slug={hobby.slug}
+            />
+          ))}
         </div>
       )}
     </section>

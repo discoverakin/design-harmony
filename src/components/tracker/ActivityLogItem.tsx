@@ -73,9 +73,6 @@ const ActivityLogItem = ({ log, onDelete }: ActivityLogItemProps) => {
             <Calendar className="w-3 h-3" />
             {dateLabel}
           </span>
-          <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
-            {log.hobbyCategory}
-          </Badge>
         </div>
       </div>
 

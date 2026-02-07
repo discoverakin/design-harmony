@@ -129,7 +129,6 @@ const EventDetail = () => {
 
     // Auto-log to activity tracker
     addLog({
-      hobbyCategory: event.hobbyCategory,
       hobbyName: event.title,
       emoji: event.emoji,
       durationMinutes: totalMinutes,
@@ -242,9 +241,6 @@ const EventDetail = () => {
                 {event.title}
               </h1>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className="text-[10px]">
-                  {event.hobbyCategory}
-                </Badge>
                 {event.group && (() => {
                   const linkedGroup = groups.find((g) => g.name === event.group);
                   return linkedGroup ? (
@@ -431,8 +427,7 @@ const EventDetail = () => {
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 This will be automatically logged to your{" "}
                 <span className="font-semibold text-foreground">Hobby Tracker</span> as
-                a <span className="font-semibold text-foreground">{event.hobbyCategory}</span>{" "}
-                activity linked to this event.
+                an activity linked to this event.
               </p>
             </div>
 

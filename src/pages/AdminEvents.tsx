@@ -107,10 +107,8 @@ const AdminEventCard = ({
         </a>
       )}
 
-      {/* Category */}
-      <Badge variant="secondary" className="text-[10px]">
-        {event.hobbyCategory}
-      </Badge>
+
+
 
       {/* Actions */}
       <div className="flex items-center gap-2 pt-1">

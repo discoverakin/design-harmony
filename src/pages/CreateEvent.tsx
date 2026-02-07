@@ -11,16 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useEvents } from "@/hooks/use-events";
 import { useToast } from "@/hooks/use-toast";
-import { hobbyCategories, type HobbyCategory } from "@/data/hobbies";
 
 const emojiOptions = ["🎨", "🏃", "🎵", "👨‍🍳", "📚", "🎮", "🧘", "💃", "📸", "🎲", "🥾", "💪", "🏊", "🥋", "🧗", "🛹", "🧶", "🏺", "🪵", "🎬", "🌱", "🎯", "🎤", "🎭"];
 
@@ -36,7 +28,6 @@ const CreateEvent = () => {
   const [time, setTime] = useState("");
   const [location, setLocation] = useState("");
   const [emoji, setEmoji] = useState("🎯");
-  const [hobbyCategory, setHobbyCategory] = useState<HobbyCategory>("Creative");
   const [externalLink, setExternalLink] = useState("");
   const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
   const [maxAttendees, setMaxAttendees] = useState("");
@@ -79,7 +70,6 @@ const CreateEvent = () => {
       time,
       location: location.trim(),
       emoji,
-      hobbyCategory,
       externalLink: externalLink.trim() || undefined,
       flyerBase64: flyerPreview || undefined,
       createdBy: createdBy.trim() || "Anonymous",
@@ -222,10 +212,7 @@ const CreateEvent = () => {
                 id="time"
                 type="time"
                 value={time}
-                onChange={(e) => {
-                  // Format to readable time
-                  setTime(e.target.value);
-                }}
+                onChange={(e) => setTime(e.target.value)}
                 className="mt-1.5 rounded-xl"
               />
             </div>
@@ -244,28 +231,6 @@ const CreateEvent = () => {
               className="mt-1.5 rounded-xl"
               maxLength={120}
             />
-          </div>
-
-          {/* Category */}
-          <div>
-            <Label className="text-xs font-semibold text-foreground">
-              Hobby Category *
-            </Label>
-            <Select
-              value={hobbyCategory}
-              onValueChange={(val) => setHobbyCategory(val as HobbyCategory)}
-            >
-              <SelectTrigger className="mt-1.5 rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {hobbyCategories.map((cat) => (
-                  <SelectItem key={cat.key} value={cat.key}>
-                    {cat.emoji} {cat.key}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Emoji picker (simple) */}

@@ -1,8 +1,5 @@
-import type { HobbyCategory } from "./hobbies";
-
 export interface ActivityLog {
   id: string;
-  hobbyCategory: HobbyCategory;
   hobbyName: string;
   emoji: string;
   durationMinutes: number;
@@ -18,7 +15,6 @@ const STORAGE_KEY = "akin-activity-log";
 export const defaultActivityLogs: ActivityLog[] = [
   {
     id: "log-1",
-    hobbyCategory: "Active",
     hobbyName: "Running",
     emoji: "🏃",
     durationMinutes: 35,
@@ -30,7 +26,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-2",
-    hobbyCategory: "Creative",
     hobbyName: "Painting",
     emoji: "🎨",
     durationMinutes: 90,
@@ -40,7 +35,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-3",
-    hobbyCategory: "Active",
     hobbyName: "Yoga",
     emoji: "🧘",
     durationMinutes: 60,
@@ -50,7 +44,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-4",
-    hobbyCategory: "Social",
     hobbyName: "Cooking",
     emoji: "👨‍🍳",
     durationMinutes: 120,
@@ -60,7 +53,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-5",
-    hobbyCategory: "Creative",
     hobbyName: "Photography",
     emoji: "📸",
     durationMinutes: 45,
@@ -70,7 +62,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-6",
-    hobbyCategory: "Active",
     hobbyName: "Running",
     emoji: "🏃",
     durationMinutes: 28,
@@ -80,7 +71,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-7",
-    hobbyCategory: "Intellectual",
     hobbyName: "Reading",
     emoji: "📚",
     durationMinutes: 40,
@@ -90,7 +80,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-8",
-    hobbyCategory: "Creative",
     hobbyName: "Painting",
     emoji: "🎨",
     durationMinutes: 75,
@@ -101,7 +90,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-9",
-    hobbyCategory: "Active",
     hobbyName: "Swimming",
     emoji: "🏊",
     durationMinutes: 50,
@@ -111,7 +99,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-10",
-    hobbyCategory: "Social",
     hobbyName: "Gaming",
     emoji: "🎮",
     durationMinutes: 90,
@@ -123,7 +110,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-11",
-    hobbyCategory: "Active",
     hobbyName: "Running",
     emoji: "🏃",
     durationMinutes: 42,
@@ -133,7 +119,6 @@ export const defaultActivityLogs: ActivityLog[] = [
   },
   {
     id: "log-12",
-    hobbyCategory: "Creative",
     hobbyName: "Music",
     emoji: "🎵",
     durationMinutes: 30,
@@ -221,12 +206,15 @@ export function getWeeklyChartData(logs: ActivityLog[]) {
   }));
 }
 
-export function getCategoryBreakdown(logs: ActivityLog[]) {
-  const map: Record<string, number> = {};
+export function getHobbyBreakdown(logs: ActivityLog[]) {
+  const map: Record<string, { minutes: number; emoji: string }> = {};
   logs.forEach((l) => {
-    map[l.hobbyCategory] = (map[l.hobbyCategory] || 0) + l.durationMinutes;
+    if (!map[l.hobbyName]) {
+      map[l.hobbyName] = { minutes: 0, emoji: l.emoji };
+    }
+    map[l.hobbyName].minutes += l.durationMinutes;
   });
   return Object.entries(map)
-    .map(([category, minutes]) => ({ category, minutes }))
+    .map(([hobbyName, data]) => ({ hobbyName, minutes: data.minutes, emoji: data.emoji }))
     .sort((a, b) => b.minutes - a.minutes);
 }

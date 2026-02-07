@@ -1,14 +1,41 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Heart } from "lucide-react";
 import type { ActivityFeedItem } from "@/data/community";
+
+const LIKES_KEY = "akin-feed-likes";
+
+function loadLikedIds(): Set<number> {
+  try {
+    const raw = localStorage.getItem(LIKES_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch { /* ignore */ }
+  return new Set();
+}
+
+function saveLikedIds(ids: Set<number>) {
+  localStorage.setItem(LIKES_KEY, JSON.stringify([...ids]));
+}
 
 interface ActivityItemProps {
   item: ActivityFeedItem;
 }
 
 const ActivityItem = ({ item }: ActivityItemProps) => {
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(() => loadLikedIds().has(item.id));
   const likeCount = liked ? item.likes + 1 : item.likes;
+
+  const toggleLike = useCallback(() => {
+    setLiked((prev) => {
+      const ids = loadLikedIds();
+      if (prev) {
+        ids.delete(item.id);
+      } else {
+        ids.add(item.id);
+      }
+      saveLikedIds(ids);
+      return !prev;
+    });
+  }, [item.id]);
 
   return (
     <div className="flex items-start gap-3 py-3 border-b border-border last:border-b-0">
@@ -25,7 +52,7 @@ const ActivityItem = ({ item }: ActivityItemProps) => {
         <div className="flex items-center justify-between mt-1">
           <span className="text-[11px] text-muted-foreground">{item.time}</span>
           <button
-            onClick={() => setLiked(!liked)}
+            onClick={toggleLike}
             className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors"
           >
             <Heart

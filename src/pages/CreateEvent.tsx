@@ -87,9 +87,8 @@ const CreateEvent = () => {
     });
 
     toast({
-      title: "Event submitted! 🎉",
-      description:
-        "Your event has been submitted for review. It will appear once approved by an admin.",
+      title: "Event created! 🎉",
+      description: "Your event is now live. Share it with friends!",
     });
 
     navigate("/events");
@@ -329,11 +328,11 @@ const CreateEvent = () => {
             className="w-full rounded-xl h-12 text-sm font-semibold gap-2"
           >
             <CalendarPlus className="w-4 h-4" />
-            Submit for Approval
+            Create Event
           </Button>
 
           <p className="text-[11px] text-muted-foreground text-center">
-            Events are reviewed before going live. You'll see it once approved.
+            Your event will be visible to all hobby seekers in the community.
           </p>
         </form>
       </main>

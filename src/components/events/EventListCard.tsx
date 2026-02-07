@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { CommunityEvent } from "@/data/events";
+import { groups } from "@/data/community";
 
 interface EventListCardProps {
   event: CommunityEvent;
@@ -92,11 +93,22 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
               <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
                 {event.hobbyCategory}
               </Badge>
-              {event.group && (
-                <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">
-                  {event.group}
-                </span>
-              )}
+              {event.group && (() => {
+                const linkedGroup = groups.find((g) => g.name === event.group);
+                return linkedGroup ? (
+                  <Link
+                    to={`/community/${linkedGroup.slug}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[10px] text-primary font-medium truncate max-w-[100px] hover:underline"
+                  >
+                    {event.group}
+                  </Link>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">
+                    {event.group}
+                  </span>
+                );
+              })()}
             </div>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1">
               <Users className="w-3 h-3" />

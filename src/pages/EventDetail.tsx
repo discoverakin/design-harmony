@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -26,6 +26,7 @@ import {
 import { useEvents } from "@/hooks/use-events";
 import { useActivityLog } from "@/hooks/use-activity-log";
 import { useToast } from "@/hooks/use-toast";
+import { groups } from "@/data/community";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -244,11 +245,21 @@ const EventDetail = () => {
                 <Badge variant="secondary" className="text-[10px]">
                   {event.hobbyCategory}
                 </Badge>
-                {event.group && (
-                  <span className="text-[11px] text-muted-foreground">
-                    by {event.group}
-                  </span>
-                )}
+                {event.group && (() => {
+                  const linkedGroup = groups.find((g) => g.name === event.group);
+                  return linkedGroup ? (
+                    <Link
+                      to={`/community/${linkedGroup.slug}`}
+                      className="text-[11px] text-primary font-medium hover:underline"
+                    >
+                      by {event.group}
+                    </Link>
+                  ) : (
+                    <span className="text-[11px] text-muted-foreground">
+                      by {event.group}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           </div>

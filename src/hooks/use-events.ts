@@ -30,10 +30,10 @@ export function useEvents() {
         ...event,
         id: generateEventId(),
         createdAt: new Date().toISOString(),
-        attendees: [],
+        attendees: ["You"],
         attendedBy: [],
         savedBy: [],
-        status: "pending",
+        status: "approved",
       };
       setEvents((prev) => [...prev, newEvent]);
       return newEvent;

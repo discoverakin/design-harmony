@@ -1,4 +1,4 @@
-import { Compass, CalendarDays, Timer, Users, User } from "lucide-react";
+import { Compass, CalendarDays, Timer, Users } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -6,7 +6,6 @@ const navItems = [
   { icon: CalendarDays, label: "Events", path: "/events" },
   { icon: Timer, label: "Tracker", path: "/tracker" },
   { icon: Users, label: "Community", path: "/community" },
-  { icon: User, label: "Profile", path: "/profile" },
 ];
 
 const BottomNav = () => {

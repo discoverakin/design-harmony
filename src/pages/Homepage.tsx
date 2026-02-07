@@ -122,12 +122,16 @@ const Homepage = () => {
                 <Calendar className="w-4 h-4 inline-block mr-1 text-primary -mt-0.5" />
                 Upcoming
               </h2>
+              <Link to="/events" className="text-xs font-medium text-primary">
+                View all
+              </Link>
             </div>
             <div className="space-y-2">
               {upcomingEvents.map((event) => (
-                <div
+                <Link
                   key={event.title}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card"
+                  to="/events"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-secondary/40 transition-colors"
                 >
                   <span className="text-2xl flex-shrink-0">{event.emoji}</span>
                   <div className="flex-1 min-w-0">
@@ -139,7 +143,7 @@ const Homepage = () => {
                     </p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                </div>
+                </Link>
               ))}
             </div>
           </section>

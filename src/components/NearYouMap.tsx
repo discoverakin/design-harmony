@@ -51,15 +51,6 @@ const NearYouMap = () => {
           <div className="absolute -inset-1 rounded-full bg-map-location/20 animate-ping" />
         </div>
 
-        {/* Zoom controls */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2">
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-border bg-card shadow-md text-foreground font-bold text-base hover:bg-secondary transition-colors">
-            +
-          </button>
-          <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-border bg-card shadow-md text-foreground font-bold text-base hover:bg-secondary transition-colors">
-            −
-          </button>
-        </div>
       </div>
     </section>
   );

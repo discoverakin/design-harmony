@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "@/hooks/use-theme";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Settings,
   Bell,
@@ -52,6 +52,7 @@ const hobbyHistory = [
 const Profile = () => {
   const [notifications, setNotifications] = useState(true);
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -148,7 +149,13 @@ const Profile = () => {
               <Separator />
 
               {/* Log Out */}
-              <button className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-destructive/10 transition-colors">
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  navigate("/onboarding");
+                }}
+                className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-destructive/10 transition-colors"
+              >
                 <LogOut className="w-5 h-5 text-destructive" />
                 <span className="text-sm font-medium text-destructive">Log Out</span>
               </button>

@@ -51,6 +51,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          orange: "hsl(var(--brand-orange))",
+          light: "hsl(var(--brand-light))",
+          "dark-brown": "hsl(var(--brand-dark-brown))",
+          cream: "hsl(var(--brand-cream))",
+          yellow: "hsl(var(--brand-yellow))",
+          creamsicle: "hsl(var(--brand-creamsicle))",
+        },
         hobby: {
           arts: "hsl(var(--hobby-arts))",
           sports: "hsl(var(--hobby-sports))",

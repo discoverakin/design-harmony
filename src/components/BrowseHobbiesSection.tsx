@@ -12,7 +12,8 @@ const BrowseHobbiesSection = () => {
     return hobbies.filter(
       (h) =>
         h.label.toLowerCase().includes(q) ||
-        h.slug.toLowerCase().includes(q)
+        h.slug.toLowerCase().includes(q) ||
+        h.tags.some((tag) => tag.toLowerCase().includes(q))
     );
   }, [query]);
 

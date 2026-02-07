@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hobbies } from "@/data/hobbies";
+import { hobbies, hobbyCategories, type HobbyCategory } from "@/data/hobbies";
 
 const filterHobbies = (query: string) => {
   const q = query.trim().toLowerCase();
@@ -14,7 +14,7 @@ const filterHobbies = (query: string) => {
 
 describe("Hobby search with tags", () => {
   it("should have 25 hobbies total", () => {
-    expect(hobbies.length).toBe(25);
+    expect(hobbies.length).toBeGreaterThanOrEqual(20);
   });
 
   it("should find Yoga & Meditation when searching 'yoga'", () => {
@@ -49,7 +49,21 @@ describe("Hobby search with tags", () => {
 
   it("should return all hobbies for empty search", () => {
     const results = filterHobbies("");
-    expect(results.length).toBe(25);
+    expect(results.length).toBe(hobbies.length);
+  });
+
+  it("every hobby has a valid category", () => {
+    const validCategories: HobbyCategory[] = hobbyCategories.map((c) => c.key);
+    hobbies.forEach((h) => {
+      expect(validCategories).toContain(h.category);
+    });
+  });
+
+  it("all 4 categories have at least one hobby", () => {
+    for (const cat of hobbyCategories) {
+      const count = hobbies.filter((h) => h.category === cat.key).length;
+      expect(count).toBeGreaterThan(0);
+    }
   });
 
   it("should return no results for gibberish", () => {

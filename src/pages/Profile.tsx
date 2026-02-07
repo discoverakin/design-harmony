@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "@/hooks/use-theme";
 import { Link } from "react-router-dom";
 import {
   Settings,
@@ -50,7 +51,7 @@ const hobbyHistory = [
 
 const Profile = () => {
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -126,7 +127,10 @@ const Profile = () => {
                   <Moon className="w-5 h-5 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">Dark Mode</span>
                 </div>
-                <Switch checked={darkMode} onCheckedChange={setDarkMode} />
+                <Switch
+                  checked={theme === "dark"}
+                  onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                />
               </div>
               <Separator />
 

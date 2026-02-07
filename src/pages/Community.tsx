@@ -1,4 +1,5 @@
 import { Users, Calendar, MessageCircle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
@@ -53,45 +54,79 @@ const Community = () => {
             </TabsList>
 
             {/* Groups */}
-            <TabsContent value="groups" className="mt-4 space-y-3 pb-6">
-              {yourGroups.length > 0 && (
-                <>
-                  <div className="flex items-center justify-between mb-1">
-                    <h2 className="text-sm font-bold text-foreground">
-                      Your Groups
-                    </h2>
-                    <span className="text-[11px] text-muted-foreground">
-                      {yourGroups.length} joined
-                    </span>
-                  </div>
-                  {yourGroups.map((g) => (
-                    <GroupCard
-                      key={g.id}
-                      group={g}
-                      joined
-                      onToggleJoin={toggleMembership}
-                    />
-                  ))}
-                </>
-              )}
+            <TabsContent value="groups" className="mt-4 pb-6">
+              <AnimatePresence mode="popLayout">
+                {yourGroups.length > 0 && (
+                  <motion.div
+                    key="your-groups-section"
+                    layout
+                    className="mb-2"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-sm font-bold text-foreground">
+                        Your Groups
+                      </h2>
+                      <span className="text-[11px] text-muted-foreground">
+                        {yourGroups.length} joined
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      <AnimatePresence mode="popLayout">
+                        {yourGroups.map((g) => (
+                          <motion.div
+                            key={g.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                          >
+                            <GroupCard
+                              group={g}
+                              joined
+                              onToggleJoin={toggleMembership}
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
 
-              {discoverGroups.length > 0 && (
-                <>
-                  <div className="flex items-center justify-between mt-5 mb-1">
-                    <h2 className="text-sm font-bold text-foreground">
-                      Discover Groups
-                    </h2>
-                  </div>
-                  {discoverGroups.map((g) => (
-                    <GroupCard
-                      key={g.id}
-                      group={g}
-                      joined={false}
-                      onToggleJoin={toggleMembership}
-                    />
-                  ))}
-                </>
-              )}
+                {discoverGroups.length > 0 && (
+                  <motion.div
+                    key="discover-groups-section"
+                    layout
+                    className="mt-5"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="text-sm font-bold text-foreground">
+                        Discover Groups
+                      </h2>
+                    </div>
+                    <div className="space-y-3">
+                      <AnimatePresence mode="popLayout">
+                        {discoverGroups.map((g) => (
+                          <motion.div
+                            key={g.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                          >
+                            <GroupCard
+                              group={g}
+                              joined={false}
+                              onToggleJoin={toggleMembership}
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </TabsContent>
 
             {/* Events */}

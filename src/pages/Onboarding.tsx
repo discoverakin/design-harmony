@@ -7,6 +7,7 @@ interface OnboardingSlide {
   emoji: string;
   title: string;
   description: string;
+  bgToken: string;
 }
 
 const slides: OnboardingSlide[] = [
@@ -15,24 +16,28 @@ const slides: OnboardingSlide[] = [
     title: "Welcome to Akin",
     description:
       "Discover hobbies you'll love, connect with people who share your passions, and make every free moment count.",
+    bgToken: "var(--brand-cream)",
   },
   {
     emoji: "🎯",
     title: "Find Your Thing",
     description:
       "Take a quick quiz or browse categories to uncover hobbies perfectly suited to your interests and lifestyle.",
+    bgToken: "var(--brand-light)",
   },
   {
     emoji: "📍",
     title: "Explore Nearby",
     description:
       "Find classes, clubs, and meetups happening right around you. Your next favourite activity is closer than you think.",
+    bgToken: "var(--brand-cream)",
   },
   {
     emoji: "🤝",
     title: "Join the Community",
     description:
       "Share your journey, swap tips, and cheer each other on. Hobbies are better together.",
+    bgToken: "var(--brand-light)",
   },
 ];
 
@@ -77,14 +82,17 @@ const Onboarding = () => {
   const isLast = page === slides.length - 1;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto overflow-hidden">
+    <motion.div
+      className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden transition-colors duration-500"
+      style={{ backgroundColor: `hsl(${slide.bgToken})` }}
+    >
       {/* Header area with logo */}
       <div className="flex items-center justify-between px-5 pt-6">
-        <img src={logoAkin} alt="Akin" className="h-7 opacity-60" />
+        <img src={logoAkin} alt="Akin" className="h-7" />
         {page > 0 && (
           <button
             onClick={completeOnboarding}
-            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
           >
             Skip
           </button>
@@ -108,12 +116,12 @@ const Onboarding = () => {
             }}
             className="flex flex-col items-center text-center"
           >
-            {/* Emoji with animated background circle */}
+            {/* Emoji with creamsicle-tinted background circle */}
             <motion.div
               initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
-              className="w-28 h-28 rounded-full bg-secondary flex items-center justify-center mb-8 shadow-lg"
+              className="w-28 h-28 rounded-full bg-brand-creamsicle/30 flex items-center justify-center mb-8 shadow-sm"
             >
               <span className="text-6xl">{slide.emoji}</span>
             </motion.div>
@@ -152,8 +160,8 @@ const Onboarding = () => {
                 width: i === page ? 28 : 8,
                 backgroundColor:
                   i === page
-                    ? "hsl(var(--primary))"
-                    : "hsl(var(--muted))",
+                    ? "hsl(var(--brand-orange))"
+                    : "hsl(var(--brand-dark-brown) / 0.2)",
               }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               style={{ height: 8 }}
@@ -168,7 +176,7 @@ const Onboarding = () => {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               onClick={() => paginate(-1)}
-              className="flex-1 h-14 rounded-2xl border-2 border-border text-foreground font-semibold text-base hover:bg-secondary transition-colors"
+              className="flex-1 h-14 rounded-2xl border-2 border-foreground/15 text-foreground font-semibold text-base hover:bg-foreground/5 transition-colors"
             >
               Back
             </motion.button>
@@ -183,7 +191,7 @@ const Onboarding = () => {
           </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

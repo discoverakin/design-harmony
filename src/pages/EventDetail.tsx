@@ -1,4 +1,5 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -9,17 +10,33 @@ import {
   BookmarkCheck,
   ExternalLink,
   Share2,
+  CheckCircle2,
+  Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useEvents } from "@/hooks/use-events";
+import { useActivityLog } from "@/hooks/use-activity-log";
 import { useToast } from "@/hooks/use-toast";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getEvent, toggleRSVP, toggleSave } = useEvents();
+  const { getEvent, toggleRSVP, toggleSave, markAttended, unmarkAttended } = useEvents();
+  const { addLog, logs, deleteLog } = useActivityLog();
   const { toast } = useToast();
+
+  const [showAttendedSheet, setShowAttendedSheet] = useState(false);
+  const [attendedHours, setAttendedHours] = useState("");
+  const [attendedMinutes, setAttendedMinutes] = useState("");
 
   const event = getEvent(id ?? "");
 
@@ -36,6 +53,7 @@ const EventDetail = () => {
   }
 
   const isAttending = event.attendees.includes("You");
+  const hasAttended = (event.attendedBy || []).includes("You");
   const isSaved = event.savedBy.includes("You");
 
   const dateObj = new Date(event.date + "T00:00:00");
@@ -49,6 +67,11 @@ const EventDetail = () => {
   const spotsLeft = event.maxAttendees
     ? event.maxAttendees - event.attendees.length
     : null;
+
+  // Find if there's already an activity log for this event
+  const existingLog = logs.find(
+    (l) => l.source === "event" && l.eventId === event.id
+  );
 
   const handleRSVP = () => {
     toggleRSVP(event.id);
@@ -80,6 +103,64 @@ const EventDetail = () => {
     } catch {
       toast({ title: "Link copied!", description: "Share this event with friends." });
     }
+  };
+
+  const handleMarkAttended = () => {
+    setShowAttendedSheet(true);
+  };
+
+  const handleConfirmAttended = () => {
+    const totalMinutes =
+      (parseInt(attendedHours || "0", 10) || 0) * 60 +
+      (parseInt(attendedMinutes || "0", 10) || 0);
+
+    if (totalMinutes <= 0) {
+      toast({
+        title: "Add duration",
+        description: "How long did you spend at this event?",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Mark attended on the event
+    markAttended(event.id);
+
+    // Auto-log to activity tracker
+    addLog({
+      hobbyCategory: event.hobbyCategory,
+      hobbyName: event.title,
+      emoji: event.emoji,
+      durationMinutes: totalMinutes,
+      date: event.date,
+      note: `Attended "${event.title}" at ${event.location}`,
+      source: "event",
+      eventId: event.id,
+      eventTitle: event.title,
+    });
+
+    toast({
+      title: "Activity logged! ✅",
+      description: `${event.title} — ${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m added to your tracker.`,
+    });
+
+    setShowAttendedSheet(false);
+    setAttendedHours("");
+    setAttendedMinutes("");
+  };
+
+  const handleUnmarkAttended = () => {
+    unmarkAttended(event.id);
+
+    // Remove the associated activity log
+    if (existingLog) {
+      deleteLog(existingLog.id);
+    }
+
+    toast({
+      title: "Attendance removed",
+      description: "Activity log entry has been removed from your tracker.",
+    });
   };
 
   return (
@@ -126,6 +207,30 @@ const EventDetail = () => {
 
       <main className="flex-1 overflow-y-auto">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg px-5 pt-6 pb-8">
+          {/* Attended badge */}
+          {hasAttended && (
+            <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-primary/10 border-2 border-primary/20">
+              <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-foreground">
+                  You attended this event!
+                </p>
+                {existingLog && (
+                  <p className="text-[11px] text-muted-foreground">
+                    {Math.floor(existingLog.durationMinutes / 60)}h{" "}
+                    {existingLog.durationMinutes % 60}m logged to your tracker
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleUnmarkAttended}
+                className="text-[11px] text-muted-foreground hover:text-destructive transition-colors font-medium"
+              >
+                Undo
+              </button>
+            </div>
+          )}
+
           {/* Emoji + title */}
           <div className="flex items-start gap-3 mb-4">
             <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-secondary text-3xl flex-shrink-0">
@@ -220,21 +325,117 @@ const EventDetail = () => {
             </div>
           )}
 
-          {/* RSVP button */}
-          <Button
-            onClick={handleRSVP}
-            className="w-full rounded-xl h-12 text-sm font-semibold"
-            variant={isAttending ? "secondary" : "default"}
-            disabled={!isAttending && spotsLeft !== null && spotsLeft <= 0}
-          >
-            {isAttending
-              ? "Cancel RSVP"
-              : spotsLeft !== null && spotsLeft <= 0
-              ? "Event Full"
-              : "RSVP — I'm Going! 🎉"}
-          </Button>
+          {/* Action buttons */}
+          <div className="space-y-3">
+            {/* RSVP button */}
+            <Button
+              onClick={handleRSVP}
+              className="w-full rounded-xl h-12 text-sm font-semibold"
+              variant={isAttending ? "secondary" : "default"}
+              disabled={!isAttending && spotsLeft !== null && spotsLeft <= 0}
+            >
+              {isAttending
+                ? "Cancel RSVP"
+                : spotsLeft !== null && spotsLeft <= 0
+                ? "Event Full"
+                : "RSVP — I'm Going! 🎉"}
+            </Button>
+
+            {/* Mark as Attended — only show for RSVP'd users who haven't marked yet */}
+            {isAttending && !hasAttended && (
+              <Button
+                onClick={handleMarkAttended}
+                variant="outline"
+                className="w-full rounded-xl h-12 text-sm font-semibold gap-2 border-2"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Mark as Attended & Log Hours
+              </Button>
+            )}
+          </div>
         </div>
       </main>
+
+      {/* Attended duration sheet */}
+      <Sheet open={showAttendedSheet} onOpenChange={setShowAttendedSheet}>
+        <SheetContent side="bottom" className="rounded-t-3xl max-w-lg mx-auto pb-8">
+          <SheetHeader className="pb-2">
+            <SheetTitle className="text-lg">Log Your Attendance</SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-4 pt-2">
+            {/* Event preview */}
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/60">
+              <span className="text-2xl">{event.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  {event.title}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  {formattedDate} · {event.time}
+                </p>
+              </div>
+            </div>
+
+            {/* Duration */}
+            <div>
+              <Label className="text-xs font-semibold">
+                How long did you spend? *
+              </Label>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-1.5 flex-1">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={23}
+                    value={attendedHours}
+                    onChange={(e) => setAttendedHours(e.target.value)}
+                    placeholder="1"
+                    className="rounded-xl text-center"
+                  />
+                  <span className="text-xs text-muted-foreground font-medium">
+                    hr
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 flex-1">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={59}
+                    value={attendedMinutes}
+                    onChange={(e) => setAttendedMinutes(e.target.value)}
+                    placeholder="30"
+                    className="rounded-xl text-center"
+                  />
+                  <span className="text-xs text-muted-foreground font-medium">
+                    min
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
+              <Timer className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                This will be automatically logged to your{" "}
+                <span className="font-semibold text-foreground">Hobby Tracker</span> as
+                a <span className="font-semibold text-foreground">{event.hobbyCategory}</span>{" "}
+                activity linked to this event.
+              </p>
+            </div>
+
+            {/* Submit */}
+            <Button
+              onClick={handleConfirmAttended}
+              className="w-full rounded-xl h-11 text-sm font-semibold gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Confirm & Log Activity
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

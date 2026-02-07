@@ -25,12 +25,13 @@ export function useEvents() {
   );
 
   const addEvent = useCallback(
-    (event: Omit<CommunityEvent, "id" | "createdAt" | "attendees" | "savedBy" | "status">) => {
+    (event: Omit<CommunityEvent, "id" | "createdAt" | "attendees" | "attendedBy" | "savedBy" | "status">) => {
       const newEvent: CommunityEvent = {
         ...event,
         id: generateEventId(),
         createdAt: new Date().toISOString(),
         attendees: [],
+        attendedBy: [],
         savedBy: [],
         status: "pending",
       };
@@ -89,6 +90,38 @@ export function useEvents() {
     setEvents((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
+  const markAttended = useCallback(
+    (id: string, userName = "You") => {
+      setEvents((prev) =>
+        prev.map((e) => {
+          if (e.id !== id) return e;
+          const alreadyAttended = (e.attendedBy || []).includes(userName);
+          if (alreadyAttended) return e;
+          return {
+            ...e,
+            attendedBy: [...(e.attendedBy || []), userName],
+          };
+        })
+      );
+    },
+    []
+  );
+
+  const unmarkAttended = useCallback(
+    (id: string, userName = "You") => {
+      setEvents((prev) =>
+        prev.map((e) => {
+          if (e.id !== id) return e;
+          return {
+            ...e,
+            attendedBy: (e.attendedBy || []).filter((a) => a !== userName),
+          };
+        })
+      );
+    },
+    []
+  );
+
   return {
     events,
     approvedEvents,
@@ -100,5 +133,7 @@ export function useEvents() {
     toggleRSVP,
     toggleSave,
     deleteEvent,
+    markAttended,
+    unmarkAttended,
   };
 }

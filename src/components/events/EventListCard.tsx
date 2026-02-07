@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, Clock, MapPin, Users, ChevronRight } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { CommunityEvent } from "@/data/events";
 
@@ -21,6 +21,7 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
     event.date === new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
   const isAttending = event.attendees.includes("You");
+  const hasAttended = (event.attendedBy || []).includes("You");
   const spotsLeft = event.maxAttendees
     ? event.maxAttendees - event.attendees.length
     : null;
@@ -61,9 +62,14 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
             <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
               {event.title}
             </p>
-            {isAttending && (
+            {hasAttended ? (
+              <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0 gap-0.5 bg-primary/15 text-primary border-0">
+                <CheckCircle2 className="w-2.5 h-2.5" />
+                Attended
+              </Badge>
+            ) : isAttending ? (
               <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0">Going</Badge>
-            )}
+            ) : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">

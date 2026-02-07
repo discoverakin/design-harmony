@@ -1,10 +1,7 @@
-export type HobbyCategory = "Creative" | "Active" | "Social" | "Intellectual";
-
 export interface HobbyData {
   slug: string;
   emoji: string;
   label: string;
-  category: HobbyCategory;
   bgColor: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
   description: string;
@@ -18,20 +15,11 @@ export interface HobbyData {
   }[];
 }
 
-export const hobbyCategories: { key: HobbyCategory; emoji: string; description: string }[] = [
-  { key: "Creative", emoji: "🎨", description: "Express yourself through art, music, and craft" },
-  { key: "Active", emoji: "⚡", description: "Move your body and embrace the outdoors" },
-  { key: "Social", emoji: "🤝", description: "Connect, share, and grow with others" },
-  { key: "Intellectual", emoji: "🧠", description: "Learn, explore, and expand your mind" },
-];
-
 export const hobbies: HobbyData[] = [
-  // ─── Creative ─────────────────────────────────────────
   {
     slug: "arts-crafts",
     emoji: "🎨",
     label: "Arts & Crafts",
-    category: "Creative",
     bgColor: "hsl(18 100% 92%)",
     difficulty: "Beginner",
     tags: ["painting", "drawing", "pottery", "sculpture", "watercolor", "acrylic", "creative", "handmade", "diy"],
@@ -53,7 +41,6 @@ export const hobbies: HobbyData[] = [
     slug: "music",
     emoji: "🎵",
     label: "Music",
-    category: "Creative",
     bgColor: "hsl(40 100% 93%)",
     difficulty: "Intermediate",
     tags: ["guitar", "piano", "drums", "singing", "instrument", "band", "production", "songwriting", "ukulele"],
@@ -75,7 +62,6 @@ export const hobbies: HobbyData[] = [
     slug: "photography",
     emoji: "📸",
     label: "Photography",
-    category: "Creative",
     bgColor: "hsl(200 80% 93%)",
     difficulty: "Beginner",
     tags: ["camera", "photo", "portrait", "landscape", "editing", "lightroom", "street photography", "film", "digital"],
@@ -97,7 +83,6 @@ export const hobbies: HobbyData[] = [
     slug: "knitting",
     emoji: "🧶",
     label: "Knitting & Crochet",
-    category: "Creative",
     bgColor: "hsl(290 60% 93%)",
     difficulty: "Beginner",
     tags: ["yarn", "sewing", "embroidery", "textile", "fiber arts", "needlework", "weaving", "macrame", "handcraft"],
@@ -119,7 +104,6 @@ export const hobbies: HobbyData[] = [
     slug: "pottery",
     emoji: "🏺",
     label: "Pottery & Ceramics",
-    category: "Creative",
     bgColor: "hsl(25 70% 92%)",
     difficulty: "Beginner",
     tags: ["clay", "wheel throwing", "sculpting", "glazing", "kiln", "ceramics", "hand building", "earthenware", "stoneware"],
@@ -141,7 +125,6 @@ export const hobbies: HobbyData[] = [
     slug: "woodworking",
     emoji: "🪵",
     label: "Woodworking",
-    category: "Creative",
     bgColor: "hsl(30 60% 90%)",
     difficulty: "Intermediate",
     tags: ["carpentry", "furniture", "carving", "diy", "tools", "workshop", "cabinet making", "turning", "restoration"],
@@ -163,7 +146,6 @@ export const hobbies: HobbyData[] = [
     slug: "film-making",
     emoji: "🎬",
     label: "Film & Video",
-    category: "Creative",
     bgColor: "hsl(260 60% 93%)",
     difficulty: "Intermediate",
     tags: ["video editing", "directing", "cinema", "documentary", "short film", "youtube", "content creation", "animation", "vlogging"],
@@ -181,13 +163,10 @@ export const hobbies: HobbyData[] = [
       { name: "Short Film Saturdays", location: "1.9 mi away", rating: 4.7, price: "Free" },
     ],
   },
-
-  // ─── Active ───────────────────────────────────────────
   {
     slug: "sports",
     emoji: "⚽",
     label: "Sports",
-    category: "Active",
     bgColor: "hsl(209 100% 95%)",
     difficulty: "Beginner",
     tags: ["soccer", "football", "basketball", "tennis", "volleyball", "rugby", "team", "fitness", "athletic"],
@@ -209,7 +188,6 @@ export const hobbies: HobbyData[] = [
     slug: "yoga",
     emoji: "🧘",
     label: "Yoga & Meditation",
-    category: "Active",
     bgColor: "hsl(160 60% 92%)",
     difficulty: "Beginner",
     tags: ["mindfulness", "stretching", "flexibility", "wellness", "breathwork", "pilates", "zen", "relaxation", "mental health"],
@@ -231,7 +209,6 @@ export const hobbies: HobbyData[] = [
     slug: "dance",
     emoji: "💃",
     label: "Dance",
-    category: "Active",
     bgColor: "hsl(340 80% 93%)",
     difficulty: "Beginner",
     tags: ["salsa", "hip hop", "ballet", "contemporary", "latin", "swing", "ballroom", "choreography", "movement"],
@@ -253,7 +230,6 @@ export const hobbies: HobbyData[] = [
     slug: "hiking",
     emoji: "🥾",
     label: "Hiking & Outdoors",
-    category: "Active",
     bgColor: "hsl(140 50% 92%)",
     difficulty: "Beginner",
     tags: ["trails", "nature", "camping", "trekking", "backpacking", "mountains", "walking", "adventure", "wilderness"],
@@ -275,7 +251,6 @@ export const hobbies: HobbyData[] = [
     slug: "fitness",
     emoji: "💪",
     label: "Fitness & Gym",
-    category: "Active",
     bgColor: "hsl(0 70% 93%)",
     difficulty: "Beginner",
     tags: ["weightlifting", "crossfit", "running", "cycling", "cardio", "strength training", "calisthenics", "hiit", "marathon"],
@@ -297,7 +272,6 @@ export const hobbies: HobbyData[] = [
     slug: "swimming",
     emoji: "🏊",
     label: "Swimming",
-    category: "Active",
     bgColor: "hsl(195 80% 93%)",
     difficulty: "Beginner",
     tags: ["pool", "laps", "water sports", "aquatic", "diving", "snorkeling", "water polo", "triathlon", "open water"],
@@ -319,7 +293,6 @@ export const hobbies: HobbyData[] = [
     slug: "martial-arts",
     emoji: "🥋",
     label: "Martial Arts",
-    category: "Active",
     bgColor: "hsl(15 70% 93%)",
     difficulty: "Intermediate",
     tags: ["karate", "judo", "taekwondo", "boxing", "mma", "self-defense", "kickboxing", "jiu-jitsu", "kung fu"],
@@ -341,7 +314,6 @@ export const hobbies: HobbyData[] = [
     slug: "rock-climbing",
     emoji: "🧗",
     label: "Rock Climbing",
-    category: "Active",
     bgColor: "hsl(35 60% 92%)",
     difficulty: "Intermediate",
     tags: ["bouldering", "climbing gym", "outdoor climbing", "rappelling", "belaying", "sport climbing", "wall climbing"],
@@ -363,7 +335,6 @@ export const hobbies: HobbyData[] = [
     slug: "board-sports",
     emoji: "🛹",
     label: "Skateboarding & Surfing",
-    category: "Active",
     bgColor: "hsl(45 80% 92%)",
     difficulty: "Intermediate",
     tags: ["skateboard", "surfing", "snowboarding", "longboard", "skating", "waves", "skatepark", "extreme sports"],
@@ -381,13 +352,10 @@ export const hobbies: HobbyData[] = [
       { name: "Board & Balance", location: "1.4 mi away", rating: 4.7, price: "$" },
     ],
   },
-
-  // ─── Social ───────────────────────────────────────────
   {
     slug: "cooking",
     emoji: "👨‍🍳",
     label: "Cooking",
-    category: "Social",
     bgColor: "hsl(120 100% 93%)",
     difficulty: "Beginner",
     tags: ["baking", "cuisine", "recipe", "chef", "food", "meal prep", "grilling", "pastry", "fermentation"],
@@ -409,7 +377,6 @@ export const hobbies: HobbyData[] = [
     slug: "gaming",
     emoji: "🎮",
     label: "Gaming",
-    category: "Social",
     bgColor: "hsl(330 100% 95%)",
     difficulty: "Beginner",
     tags: ["video games", "board games", "tabletop", "rpg", "esports", "strategy", "multiplayer", "card games", "puzzle"],
@@ -431,7 +398,6 @@ export const hobbies: HobbyData[] = [
     slug: "gardening",
     emoji: "🌱",
     label: "Gardening",
-    category: "Social",
     bgColor: "hsl(100 60% 92%)",
     difficulty: "Beginner",
     tags: ["plants", "flowers", "vegetables", "herbs", "landscaping", "indoor plants", "succulents", "organic", "composting"],
@@ -453,7 +419,6 @@ export const hobbies: HobbyData[] = [
     slug: "volunteering",
     emoji: "🤝",
     label: "Volunteering",
-    category: "Social",
     bgColor: "hsl(170 50% 92%)",
     difficulty: "Beginner",
     tags: ["community service", "charity", "nonprofit", "helping", "social impact", "mentoring", "fundraising", "environment"],
@@ -471,13 +436,10 @@ export const hobbies: HobbyData[] = [
       { name: "Youth Mentoring Program", location: "1.6 mi away", rating: 4.7, price: "Free" },
     ],
   },
-
-  // ─── Intellectual ─────────────────────────────────────
   {
     slug: "reading",
     emoji: "📚",
     label: "Reading",
-    category: "Intellectual",
     bgColor: "hsl(270 100% 95%)",
     difficulty: "Beginner",
     tags: ["books", "fiction", "non-fiction", "literature", "book club", "audiobooks", "library", "novel", "poetry"],
@@ -499,7 +461,6 @@ export const hobbies: HobbyData[] = [
     slug: "writing",
     emoji: "✍️",
     label: "Writing",
-    category: "Intellectual",
     bgColor: "hsl(50 80% 92%)",
     difficulty: "Beginner",
     tags: ["creative writing", "journaling", "blogging", "poetry", "fiction", "storytelling", "screenwriting", "essay", "memoir"],
@@ -521,7 +482,6 @@ export const hobbies: HobbyData[] = [
     slug: "coding",
     emoji: "💻",
     label: "Coding & Tech",
-    category: "Intellectual",
     bgColor: "hsl(220 70% 93%)",
     difficulty: "Intermediate",
     tags: ["programming", "web development", "app", "python", "javascript", "software", "robotics", "ai", "data science"],
@@ -543,7 +503,6 @@ export const hobbies: HobbyData[] = [
     slug: "languages",
     emoji: "🗣️",
     label: "Language Learning",
-    category: "Intellectual",
     bgColor: "hsl(180 60% 92%)",
     difficulty: "Intermediate",
     tags: ["spanish", "french", "japanese", "mandarin", "german", "italian", "korean", "multilingual", "conversation"],
@@ -565,7 +524,6 @@ export const hobbies: HobbyData[] = [
     slug: "astronomy",
     emoji: "🔭",
     label: "Astronomy",
-    category: "Intellectual",
     bgColor: "hsl(240 50% 93%)",
     difficulty: "Beginner",
     tags: ["stargazing", "telescope", "planets", "space", "constellations", "astrophotography", "cosmos", "night sky", "science"],

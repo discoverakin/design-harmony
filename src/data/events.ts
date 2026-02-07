@@ -1,5 +1,3 @@
-import type { HobbyCategory } from "./hobbies";
-
 export type EventStatus = "pending" | "approved" | "rejected";
 
 export interface CommunityEvent {
@@ -10,7 +8,6 @@ export interface CommunityEvent {
   time: string;
   location: string;
   emoji: string;
-  hobbyCategory: HobbyCategory;
   flyerUrl?: string; // URL to flyer image or Instagram link
   externalLink?: string; // e.g. Instagram post link
   flyerBase64?: string; // uploaded flyer stored as base64
@@ -36,7 +33,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "10:00 AM",
     location: "Central Park, Main Entrance",
     emoji: "🎨",
-    hobbyCategory: "Creative",
     attendees: ["You", "Sarah K.", "Liam P."],
     attendedBy: [],
     savedBy: [],
@@ -55,7 +51,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "7:30 AM",
     location: "River Trail, South Gate",
     emoji: "🏃",
-    hobbyCategory: "Active",
     attendees: ["You", "James T.", "Nina R.", "Carlos M."],
     attendedBy: [],
     savedBy: ["You"],
@@ -74,7 +69,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "7:00 PM",
     location: "Blue Note Lounge",
     emoji: "🎵",
-    hobbyCategory: "Creative",
     attendees: ["Maria L.", "David R."],
     attendedBy: [],
     savedBy: [],
@@ -93,7 +87,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "6:30 PM",
     location: "Community Kitchen, 2nd Floor",
     emoji: "👨‍🍳",
-    hobbyCategory: "Social",
     attendees: ["Aisha M."],
     attendedBy: [],
     savedBy: ["You"],
@@ -112,7 +105,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "2:00 PM",
     location: "The Game Den Café",
     emoji: "🎲",
-    hobbyCategory: "Social",
     attendees: [],
     attendedBy: [],
     savedBy: [],
@@ -131,7 +123,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "6:30 AM",
     location: "Riverside Meadow",
     emoji: "🧘",
-    hobbyCategory: "Active",
     attendees: ["Sarah K."],
     attendedBy: [],
     savedBy: [],
@@ -151,7 +142,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "3:00 PM",
     location: "Downtown Arts District",
     emoji: "📸",
-    hobbyCategory: "Creative",
     attendees: [],
     attendedBy: [],
     savedBy: [],
@@ -169,7 +159,6 @@ export const defaultEvents: CommunityEvent[] = [
     time: "8:00 PM",
     location: "Rhythm & Motion Studio",
     emoji: "💃",
-    hobbyCategory: "Active",
     attendees: [],
     attendedBy: [],
     savedBy: [],

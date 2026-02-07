@@ -1,21 +1,11 @@
-import { useState } from "react";
-import { useTheme } from "@/hooks/use-theme";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Settings,
-  Bell,
-  Moon,
-  Globe,
-  ChevronRight,
-  LogOut,
   Trophy,
   Flame,
   Calendar,
-  ArrowRight,
+  ChevronRight,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
@@ -50,8 +40,6 @@ const hobbyHistory = [
 ];
 
 const Profile = () => {
-  const [notifications, setNotifications] = useState(true);
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -108,58 +96,20 @@ const Profile = () => {
             </div>
           </section>
 
-          {/* ── Settings ── */}
+          {/* ── Settings Link ── */}
           <section className="px-4 pt-6 pb-6">
-            <h2 className="text-lg font-bold text-foreground mb-3">Settings</h2>
-            <div className="rounded-xl border-2 border-border bg-card overflow-hidden">
-              {/* Notifications */}
-              <div className="flex items-center justify-between px-4 py-3.5">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Notifications</span>
-                </div>
-                <Switch checked={notifications} onCheckedChange={setNotifications} />
+            <button
+              onClick={() => navigate("/settings")}
+              className="flex items-center justify-between w-full px-4 py-3.5 rounded-xl border-2 border-border bg-card hover:bg-secondary/40 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Settings className="w-5 h-5 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">
+                  Settings
+                </span>
               </div>
-              <Separator />
-
-              {/* Dark Mode */}
-              <div className="flex items-center justify-between px-4 py-3.5">
-                <div className="flex items-center gap-3">
-                  <Moon className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Dark Mode</span>
-                </div>
-                <Switch
-                  checked={theme === "dark"}
-                  onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                />
-              </div>
-              <Separator />
-
-              {/* Language */}
-              <button className="flex items-center justify-between px-4 py-3.5 w-full hover:bg-secondary/40 transition-colors">
-                <div className="flex items-center gap-3">
-                  <Globe className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Language</span>
-                </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <span className="text-xs">English</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-              </button>
-              <Separator />
-
-              {/* Log Out */}
-              <button
-                onClick={() => {
-                  localStorage.clear();
-                  navigate("/onboarding");
-                }}
-                className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-destructive/10 transition-colors"
-              >
-                <LogOut className="w-5 h-5 text-destructive" />
-                <span className="text-sm font-medium text-destructive">Log Out</span>
-              </button>
-            </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
           </section>
         </div>
       </main>

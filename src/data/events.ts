@@ -15,6 +15,7 @@ export interface CommunityEvent {
   externalLink?: string; // e.g. Instagram post link
   flyerBase64?: string; // uploaded flyer stored as base64
   attendees: string[]; // list of user IDs / names who RSVP'd
+  attendedBy: string[]; // list of user IDs / names who marked attended
   savedBy: string[]; // list of user IDs / names who saved
   createdBy: string;
   status: EventStatus;
@@ -37,6 +38,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "🎨",
     hobbyCategory: "Creative",
     attendees: ["You", "Sarah K.", "Liam P."],
+    attendedBy: [],
     savedBy: [],
     createdBy: "Weekend Painters",
     status: "approved",
@@ -55,6 +57,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "🏃",
     hobbyCategory: "Active",
     attendees: ["You", "James T.", "Nina R.", "Carlos M."],
+    attendedBy: [],
     savedBy: ["You"],
     createdBy: "City Runners Club",
     status: "approved",
@@ -73,6 +76,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "🎵",
     hobbyCategory: "Creative",
     attendees: ["Maria L.", "David R."],
+    attendedBy: [],
     savedBy: [],
     createdBy: "Vinyl & Vibes",
     status: "approved",
@@ -91,6 +95,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "👨‍🍳",
     hobbyCategory: "Social",
     attendees: ["Aisha M."],
+    attendedBy: [],
     savedBy: ["You"],
     createdBy: "Home Chefs United",
     status: "approved",
@@ -109,6 +114,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "🎲",
     hobbyCategory: "Social",
     attendees: [],
+    attendedBy: [],
     savedBy: [],
     createdBy: "Tabletop Tribe",
     status: "approved",
@@ -127,6 +133,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "🧘",
     hobbyCategory: "Active",
     attendees: ["Sarah K."],
+    attendedBy: [],
     savedBy: [],
     createdBy: "Flow Studio Community",
     status: "approved",
@@ -146,6 +153,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "📸",
     hobbyCategory: "Creative",
     attendees: [],
+    attendedBy: [],
     savedBy: [],
     createdBy: "Alex W.",
     status: "pending",
@@ -163,6 +171,7 @@ export const defaultEvents: CommunityEvent[] = [
     emoji: "💃",
     hobbyCategory: "Active",
     attendees: [],
+    attendedBy: [],
     savedBy: [],
     createdBy: "Dance Community",
     status: "pending",

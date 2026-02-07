@@ -1,6 +1,9 @@
-import { Users, Calendar, MessageCircle } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Users, Calendar, MessageCircle, Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import GroupCard from "@/components/community/GroupCard";
@@ -9,11 +12,28 @@ import ActivityItem from "@/components/community/ActivityItem";
 import { groups, communityEvents, activityFeed } from "@/data/community";
 import { useGroupMembership } from "@/hooks/use-group-membership";
 
+const ALL_CATEGORIES = Array.from(new Set(groups.map((g) => g.category)));
+
 const Community = () => {
   const { isJoined, toggleMembership } = useGroupMembership();
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  const yourGroups = groups.filter((g) => isJoined(g.id));
-  const discoverGroups = groups.filter((g) => !isJoined(g.id));
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return groups.filter((g) => {
+      const matchesSearch =
+        !q ||
+        g.name.toLowerCase().includes(q) ||
+        g.category.toLowerCase().includes(q);
+      const matchesCategory =
+        !activeCategory || g.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [search, activeCategory]);
+
+  const yourGroups = filtered.filter((g) => isJoined(g.id));
+  const discoverGroups = filtered.filter((g) => !isJoined(g.id));
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -53,8 +73,55 @@ const Community = () => {
               </TabsTrigger>
             </TabsList>
 
-            {/* Groups */}
             <TabsContent value="groups" className="mt-4 pb-6">
+              {/* Search + category filter */}
+              <div className="mb-4 space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search groups…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 pr-9 h-10 rounded-xl bg-secondary/50 border-none text-sm placeholder:text-muted-foreground"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  <Badge
+                    variant={activeCategory === null ? "default" : "secondary"}
+                    className="cursor-pointer flex-shrink-0 text-[11px] px-3 py-1 rounded-full"
+                    onClick={() => setActiveCategory(null)}
+                  >
+                    All
+                  </Badge>
+                  {ALL_CATEGORIES.map((cat) => (
+                    <Badge
+                      key={cat}
+                      variant={activeCategory === cat ? "default" : "secondary"}
+                      className="cursor-pointer flex-shrink-0 text-[11px] px-3 py-1 rounded-full"
+                      onClick={() =>
+                        setActiveCategory(activeCategory === cat ? null : cat)
+                      }
+                    >
+                      {cat}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {yourGroups.length === 0 && discoverGroups.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No groups match your search.
+                </p>
+              )}
+
               <AnimatePresence mode="popLayout">
                 {yourGroups.length > 0 && (
                   <motion.div

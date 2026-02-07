@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.cdnfonts.com/css/new-spirit');
-@import url('https://fonts.googleapis.com/css2?family=Finlandica:wght@400;500;600;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/finlandica');
 
 @layer base {
   :root {

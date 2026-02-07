@@ -75,7 +75,7 @@ export const quizQuestions: QuizQuestion[] = [
         scores: { sports: 3 },
       },
       {
-        label: "A cosy book club",
+        label: "A cozy book club",
         emoji: "📖",
         scores: { reading: 3 },
       },

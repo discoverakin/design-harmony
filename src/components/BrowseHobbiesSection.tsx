@@ -4,32 +4,46 @@ import HobbyCategoryCard from "./HobbyCategoryCard";
 import HobbyCategoryGroup from "./HobbyCategoryGroup";
 import { hobbies, hobbyCategories, type HobbyCategory } from "@/data/hobbies";
 
+type Difficulty = "Beginner" | "Intermediate" | "Advanced";
+const difficulties: { label: Difficulty; emoji: string }[] = [
+  { label: "Beginner", emoji: "🌱" },
+  { label: "Intermediate", emoji: "🌿" },
+  { label: "Advanced", emoji: "🌳" },
+];
+
 const BrowseHobbiesSection = () => {
   const [query, setQuery] = useState("");
+  const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | null>(null);
 
   const isSearching = query.trim().length > 0;
 
   const filtered = useMemo(() => {
+    let result = hobbies;
     const q = query.trim().toLowerCase();
-    if (!q) return hobbies;
-    return hobbies.filter(
-      (h) =>
-        h.label.toLowerCase().includes(q) ||
-        h.slug.toLowerCase().includes(q) ||
-        h.tags.some((tag) => tag.toLowerCase().includes(q))
-    );
-  }, [query]);
+    if (q) {
+      result = result.filter(
+        (h) =>
+          h.label.toLowerCase().includes(q) ||
+          h.slug.toLowerCase().includes(q) ||
+          h.tags.some((tag) => tag.toLowerCase().includes(q))
+      );
+    }
+    if (difficultyFilter) {
+      result = result.filter((h) => h.difficulty === difficultyFilter);
+    }
+    return result;
+  }, [query, difficultyFilter]);
 
   const groupedByCategory = useMemo(() => {
     const map = new Map<HobbyCategory, typeof hobbies>();
     for (const cat of hobbyCategories) {
       map.set(cat.key, []);
     }
-    for (const hobby of hobbies) {
+    for (const hobby of filtered) {
       map.get(hobby.category)?.push(hobby);
     }
     return map;
-  }, []);
+  }, [filtered]);
 
   return (
     <section className="px-4 pt-6">
@@ -53,6 +67,25 @@ const BrowseHobbiesSection = () => {
             <X className="w-4 h-4" />
           </button>
         )}
+      </div>
+
+      {/* Difficulty filter pills */}
+      <div className="flex gap-2 mb-4">
+        {difficulties.map((d) => (
+          <button
+            key={d.label}
+            onClick={() =>
+              setDifficultyFilter((prev) => (prev === d.label ? null : d.label))
+            }
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border-2 ${
+              difficultyFilter === d.label
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-foreground border-border hover:border-primary/30"
+            }`}
+          >
+            {d.emoji} {d.label}
+          </button>
+        ))}
       </div>
 
       {/* When searching: flat filtered grid */}

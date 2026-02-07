@@ -9,6 +9,7 @@ import Events from "@/pages/Events";
 import EventDetail from "@/pages/EventDetail";
 import CreateEvent from "@/pages/CreateEvent";
 import AdminEvents from "@/pages/AdminEvents";
+import HobbyTracker from "@/pages/HobbyTracker";
 import HobbyQuiz from "@/pages/HobbyQuiz";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
@@ -40,6 +41,7 @@ const AnimatedRoutes = () => {
         <Route path="/events/create" element={<PageTransition><CreateEvent /></PageTransition>} />
         <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
         <Route path="/admin/events" element={<PageTransition><AdminEvents /></PageTransition>} />
+        <Route path="/tracker" element={<PageTransition><HobbyTracker /></PageTransition>} />
         <Route path="/quiz" element={<PageTransition><HobbyQuiz /></PageTransition>} />
         <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
         <Route path="/hobby/:slug" element={<PageTransition><HobbyDetail /></PageTransition>} />

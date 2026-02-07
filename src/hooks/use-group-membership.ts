@@ -38,5 +38,13 @@ export function useGroupMembership() {
     });
   }, []);
 
-  return { isJoined, toggleMembership };
+  const joinGroup = useCallback((groupId: number) => {
+    setMembership((prev) => {
+      const next = { ...prev, [groupId]: true };
+      saveMembership(next);
+      return next;
+    });
+  }, []);
+
+  return { isJoined, toggleMembership, joinGroup };
 }

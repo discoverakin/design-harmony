@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect as useEffectOnce } from "react";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -27,19 +27,50 @@ import { useEvents } from "@/hooks/use-events";
 import { useActivityLog } from "@/hooks/use-activity-log";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
+import { formatPrice } from "@/lib/format-price";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getEvent, toggleRSVP, toggleSave, markAttended, unmarkAttended } = useEvents();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    getEvent, toggleRSVP, toggleSave, markAttended, unmarkAttended,
+    initiatePayment, refresh, loading,
+  } = useEvents();
   const { addLog, logs, deleteLog } = useActivityLog();
   const { toast } = useToast();
 
   const [showAttendedSheet, setShowAttendedSheet] = useState(false);
   const [attendedHours, setAttendedHours] = useState("");
   const [attendedMinutes, setAttendedMinutes] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // Handle Stripe redirect return
+  useEffectOnce(() => {
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "success") {
+      toast({ title: "Payment successful!", description: "You're all set." });
+      refresh();
+      setSearchParams({}, { replace: true });
+    } else if (paymentStatus === "cancel") {
+      toast({
+        title: "Payment cancelled",
+        description: "You can try again when you're ready.",
+        variant: "destructive",
+      });
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
 
   const event = getEvent(id ?? "");
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -53,10 +84,6 @@ const EventDetail = () => {
     );
   }
 
-  const isAttending = event.attendees.includes("You");
-  const hasAttended = (event.attendedBy || []).includes("You");
-  const isSaved = event.savedBy.includes("You");
-
   const dateObj = new Date(event.date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     weekday: "long",
@@ -65,8 +92,8 @@ const EventDetail = () => {
     year: "numeric",
   });
 
-  const spotsLeft = event.maxAttendees
-    ? event.maxAttendees - event.attendees.length
+  const spotsLeft = event.max_attendees
+    ? event.max_attendees - event.rsvp_count
     : null;
 
   // Find if there's already an activity log for this event
@@ -77,8 +104,8 @@ const EventDetail = () => {
   const handleRSVP = () => {
     toggleRSVP(event.id);
     toast({
-      title: isAttending ? "RSVP cancelled" : "You're going! 🎉",
-      description: isAttending
+      title: event.is_attending ? "RSVP cancelled" : "You're going! 🎉",
+      description: event.is_attending
         ? `Removed from ${event.title}`
         : `Added to ${event.title}`,
     });
@@ -87,8 +114,8 @@ const EventDetail = () => {
   const handleSave = () => {
     toggleSave(event.id);
     toast({
-      title: isSaved ? "Removed from saved" : "Event saved! 🔖",
-      description: isSaved
+      title: event.is_saved ? "Removed from saved" : "Event saved! 🔖",
+      description: event.is_saved
         ? `Removed ${event.title} from your saved events`
         : `${event.title} saved for later`,
     });
@@ -124,10 +151,10 @@ const EventDetail = () => {
       return;
     }
 
-    // Mark attended on the event
-    markAttended(event.id);
+    // Mark attended on the event (persists to Supabase)
+    markAttended(event.id, totalMinutes);
 
-    // Auto-log to activity tracker
+    // Auto-log to activity tracker (still localStorage for now)
     addLog({
       hobbyName: event.title,
       emoji: event.emoji,
@@ -186,7 +213,7 @@ const EventDetail = () => {
           onClick={handleSave}
           className="p-2 -mr-2 rounded-lg hover:bg-accent transition-colors"
         >
-          {isSaved ? (
+          {event.is_saved ? (
             <BookmarkCheck className="w-5 h-5 text-primary" />
           ) : (
             <Bookmark className="w-5 h-5 text-foreground" />
@@ -195,10 +222,10 @@ const EventDetail = () => {
       </header>
 
       {/* Flyer */}
-      {event.flyerBase64 && (
+      {event.flyer_url && (
         <div className="w-full aspect-video bg-secondary overflow-hidden">
           <img
-            src={event.flyerBase64}
+            src={event.flyer_url}
             alt={`${event.title} flyer`}
             className="w-full h-full object-cover"
           />
@@ -208,17 +235,17 @@ const EventDetail = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg px-5 pt-6 pb-8">
           {/* Attended badge */}
-          {hasAttended && (
+          {event.has_attended && (
             <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-primary/10 border-2 border-primary/20">
               <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-foreground">
                   You attended this event!
                 </p>
-                {existingLog && (
+                {event.attendance_minutes != null && (
                   <p className="text-[11px] text-muted-foreground">
-                    {Math.floor(existingLog.durationMinutes / 60)}h{" "}
-                    {existingLog.durationMinutes % 60}m logged to your tracker
+                    {Math.floor(event.attendance_minutes / 60)}h{" "}
+                    {event.attendance_minutes % 60}m logged to your tracker
                   </p>
                 )}
               </div>
@@ -237,22 +264,34 @@ const EventDetail = () => {
               {event.emoji}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-foreground leading-tight">
-                {event.title}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-foreground leading-tight">
+                  {event.title}
+                </h1>
+                {event.price_cents > 0 && (
+                  <Badge variant="outline" className="text-xs font-semibold flex-shrink-0">
+                    {formatPrice(event.price_cents)}
+                  </Badge>
+                )}
+                {event.has_paid && event.price_cents > 0 && (
+                  <Badge className="text-[10px] px-1.5 py-0 flex-shrink-0 bg-green-500/15 text-green-600 border-0">
+                    Paid
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center gap-2 mt-1">
-                {event.group && (() => {
-                  const linkedGroup = groups.find((g) => g.name === event.group);
+                {event.group_name && (() => {
+                  const linkedGroup = groups.find((g) => g.name === event.group_name);
                   return linkedGroup ? (
                     <Link
                       to={`/community/${linkedGroup.slug}`}
                       className="text-[11px] text-primary font-medium hover:underline"
                     >
-                      by {event.group}
+                      by {event.group_name}
                     </Link>
                   ) : (
                     <span className="text-[11px] text-muted-foreground">
-                      by {event.group}
+                      by {event.created_by_name}
                     </span>
                   );
                 })()}
@@ -277,7 +316,7 @@ const EventDetail = () => {
             <div className="flex items-center gap-3 text-sm text-foreground">
               <Users className="w-4 h-4 text-primary flex-shrink-0" />
               <span>
-                {event.attendees.length} going
+                {event.rsvp_count} going
                 {spotsLeft !== null && spotsLeft > 0 && (
                   <span className="text-muted-foreground">
                     {" "}
@@ -292,9 +331,9 @@ const EventDetail = () => {
           </div>
 
           {/* External link */}
-          {event.externalLink && (
+          {event.external_link && (
             <a
-              href={event.externalLink}
+              href={event.external_link}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-primary font-medium mb-5 hover:underline"
@@ -312,44 +351,68 @@ const EventDetail = () => {
             </p>
           </div>
 
-          {/* Attendees preview */}
-          {event.attendees.length > 0 && (
+          {/* Attendee info */}
+          {event.rsvp_count > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-bold text-foreground mb-2">
-                Who's going ({event.attendees.length})
+                Who's going ({event.rsvp_count})
               </h3>
               <div className="flex flex-wrap gap-2">
-                {event.attendees.map((name) => (
-                  <Badge
-                    key={name}
-                    variant={name === "You" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {name}
+                {event.is_attending && (
+                  <Badge variant="default" className="text-xs">
+                    You
                   </Badge>
-                ))}
+                )}
+                {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    +{event.is_attending ? event.rsvp_count - 1 : event.rsvp_count} other
+                    {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) !== 1
+                      ? "s"
+                      : ""}
+                  </Badge>
+                )}
               </div>
             </div>
           )}
 
           {/* Action buttons */}
           <div className="space-y-3">
-            {/* RSVP button */}
-            <Button
-              onClick={handleRSVP}
-              className="w-full rounded-xl h-12 text-sm font-semibold"
-              variant={isAttending ? "secondary" : "default"}
-              disabled={!isAttending && spotsLeft !== null && spotsLeft <= 0}
-            >
-              {isAttending
-                ? "Cancel RSVP"
-                : spotsLeft !== null && spotsLeft <= 0
-                ? "Event Full"
-                : "RSVP — I'm Going! 🎉"}
-            </Button>
+            {/* Pay & RSVP or normal RSVP */}
+            {event.price_cents > 0 && !event.has_paid && !event.is_attending ? (
+              <Button
+                onClick={async () => {
+                  setPaymentLoading(true);
+                  await initiatePayment(event.id);
+                  setPaymentLoading(false);
+                }}
+                className="w-full rounded-xl h-12 text-sm font-semibold"
+                disabled={paymentLoading || (spotsLeft !== null && spotsLeft <= 0)}
+              >
+                {paymentLoading ? (
+                  <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : spotsLeft !== null && spotsLeft <= 0 ? (
+                  "Event Full"
+                ) : (
+                  `Pay ${formatPrice(event.price_cents)} & RSVP`
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleRSVP}
+                className="w-full rounded-xl h-12 text-sm font-semibold"
+                variant={event.is_attending ? "secondary" : "default"}
+                disabled={!event.is_attending && spotsLeft !== null && spotsLeft <= 0}
+              >
+                {event.is_attending
+                  ? "Cancel RSVP"
+                  : spotsLeft !== null && spotsLeft <= 0
+                  ? "Event Full"
+                  : "RSVP — I'm Going! 🎉"}
+              </Button>
+            )}
 
             {/* Mark as Attended — only show for RSVP'd users who haven't marked yet */}
-            {isAttending && !hasAttended && (
+            {event.is_attending && !event.has_attended && (
               <Button
                 onClick={handleMarkAttended}
                 variant="outline"

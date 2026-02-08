@@ -5,7 +5,6 @@ import {
   X,
   Clock,
   ExternalLink,
-  AlertTriangle,
   Calendar,
   MapPin,
   Trash2,
@@ -16,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEvents } from "@/hooks/use-events";
 import { useToast } from "@/hooks/use-toast";
 import type { CommunityEvent } from "@/data/events";
+import { formatPrice } from "@/lib/format-price";
 
 const AdminEventCard = ({
   event,
@@ -38,10 +38,10 @@ const AdminEventCard = ({
   return (
     <div className="p-4 rounded-xl border-2 border-border bg-card space-y-3">
       {/* Flyer preview */}
-      {event.flyerBase64 && (
+      {event.flyer_url && (
         <div className="rounded-lg overflow-hidden border border-border">
           <img
-            src={event.flyerBase64}
+            src={event.flyer_url}
             alt="Event flyer"
             className="w-full aspect-video object-cover"
           />
@@ -54,8 +54,13 @@ const AdminEventCard = ({
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">{event.title}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            by {event.createdBy}
+            by {event.created_by_name}
           </p>
+          {event.price_cents > 0 && (
+            <p className="text-[11px] font-semibold text-primary mt-0.5">
+              {formatPrice(event.price_cents)}
+            </p>
+          )}
         </div>
         <Badge
           variant={
@@ -95,9 +100,9 @@ const AdminEventCard = ({
       )}
 
       {/* External link */}
-      {event.externalLink && (
+      {event.external_link && (
         <a
-          href={event.externalLink}
+          href={event.external_link}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-xs text-primary hover:underline"
@@ -106,9 +111,6 @@ const AdminEventCard = ({
           View source link
         </a>
       )}
-
-
-
 
       {/* Actions */}
       <div className="flex items-center gap-2 pt-1">
@@ -157,6 +159,7 @@ const AdminEvents = () => {
     rejectedEvents,
     updateEventStatus,
     deleteEvent,
+    loading,
   } = useEvents();
   const { toast } = useToast();
 
@@ -190,15 +193,6 @@ const AdminEvents = () => {
         </h2>
       </header>
 
-      {/* Prototype notice */}
-      <div className="mx-5 mt-4 flex items-start gap-2 p-3 rounded-xl bg-secondary border-2 border-border">
-        <AlertTriangle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-        <p className="text-[11px] text-muted-foreground leading-relaxed">
-          <span className="font-semibold text-foreground">Prototype mode.</span> In production,
-          this panel would be behind server-side authentication. Data is stored locally.
-        </p>
-      </div>
-
       <main className="flex-1 overflow-y-auto">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg mt-3">
           <Tabs defaultValue="pending" className="px-5 pt-5">
@@ -228,7 +222,11 @@ const AdminEvents = () => {
 
             {/* Pending */}
             <TabsContent value="pending" className="mt-4 space-y-3 pb-6">
-              {pendingEvents.length === 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-10">
+                  <span className="w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : pendingEvents.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-3xl mb-2">✅</p>
                   <p className="text-sm text-muted-foreground">

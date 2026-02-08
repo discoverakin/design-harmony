@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/use-auth";
 import PageTransition from "@/components/PageTransition";
 import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
@@ -15,9 +16,28 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Onboarding from "@/pages/Onboarding";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import AdminEvents from "@/pages/AdminEvents";
 
 const hasCompletedOnboarding = () =>
   localStorage.getItem("akin-onboarding-complete") === "true";
+
+/** Redirects unauthenticated visitors to /login */
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -25,29 +45,36 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+
+        {/* Protected routes */}
         <Route
           path="/"
           element={
-            hasCompletedOnboarding() ? (
-              <PageTransition><Index /></PageTransition>
-            ) : (
-              <Navigate to="/onboarding" replace />
-            )
+            <RequireAuth>
+              {hasCompletedOnboarding() ? (
+                <PageTransition><Index /></PageTransition>
+              ) : (
+                <Navigate to="/onboarding" replace />
+              )}
+            </RequireAuth>
           }
         />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/home" element={<PageTransition><Homepage /></PageTransition>} />
-        <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
-        <Route path="/community/:slug" element={<PageTransition><GroupDetail /></PageTransition>} />
-        <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
-        <Route path="/events/create" element={<PageTransition><CreateEvent /></PageTransition>} />
-        <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
-        {/* Admin route hidden from hobby seekers — AdminEvents.tsx preserved for future admin role */}
-        <Route path="/tracker" element={<PageTransition><HobbyTracker /></PageTransition>} />
-        <Route path="/quiz" element={<PageTransition><HobbyQuiz /></PageTransition>} />
-        <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-        <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
-        <Route path="/hobby/:slug" element={<PageTransition><HobbyDetail /></PageTransition>} />
+        <Route path="/home" element={<RequireAuth><PageTransition><Homepage /></PageTransition></RequireAuth>} />
+        <Route path="/community" element={<RequireAuth><PageTransition><Community /></PageTransition></RequireAuth>} />
+        <Route path="/community/:slug" element={<RequireAuth><PageTransition><GroupDetail /></PageTransition></RequireAuth>} />
+        <Route path="/events" element={<RequireAuth><PageTransition><Events /></PageTransition></RequireAuth>} />
+        <Route path="/events/create" element={<RequireAuth><PageTransition><CreateEvent /></PageTransition></RequireAuth>} />
+        <Route path="/events/:id" element={<RequireAuth><PageTransition><EventDetail /></PageTransition></RequireAuth>} />
+        <Route path="/admin-events" element={<RequireAuth><PageTransition><AdminEvents /></PageTransition></RequireAuth>} />
+        <Route path="/tracker" element={<RequireAuth><PageTransition><HobbyTracker /></PageTransition></RequireAuth>} />
+        <Route path="/quiz" element={<RequireAuth><PageTransition><HobbyQuiz /></PageTransition></RequireAuth>} />
+        <Route path="/profile" element={<RequireAuth><PageTransition><Profile /></PageTransition></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><PageTransition><Settings /></PageTransition></RequireAuth>} />
+        <Route path="/hobby/:slug" element={<RequireAuth><PageTransition><HobbyDetail /></PageTransition></RequireAuth>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

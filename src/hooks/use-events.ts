@@ -1,20 +1,68 @@
 import { useState, useCallback, useEffect } from "react";
-import {
-  CommunityEvent,
-  EventStatus,
-  loadEvents,
-  saveEvents,
-  generateEventId,
-} from "@/data/events";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
+import type { CommunityEvent, DbEvent, EventStatus } from "@/data/events";
+import { stripePromise } from "@/lib/stripe";
 
 export function useEvents() {
-  const [events, setEvents] = useState<CommunityEvent[]>(() => loadEvents());
+  const { user } = useAuth();
+  const [events, setEvents] = useState<CommunityEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Persist on every change
+  /* ── Fetch all events + enrich with per-user flags ── */
+  const refresh = useCallback(async () => {
+    if (!user) return;
+
+    const [eventsRes, rsvpsRes, myRsvpsRes, mySavesRes, myAttRes, myPaymentsRes] =
+      await Promise.all([
+        supabase.from("events").select("*").order("date"),
+        supabase.from("event_rsvps").select("event_id"),
+        supabase.from("event_rsvps").select("event_id").eq("user_id", user.id),
+        supabase.from("event_saves").select("event_id").eq("user_id", user.id),
+        supabase
+          .from("event_attendances")
+          .select("event_id, duration_minutes")
+          .eq("user_id", user.id),
+        supabase
+          .from("event_payments")
+          .select("event_id")
+          .eq("user_id", user.id)
+          .eq("status", "completed"),
+      ]);
+
+    // Build lookup structures
+    const rsvpCounts = new Map<string, number>();
+    (rsvpsRes.data ?? []).forEach((r) => {
+      rsvpCounts.set(r.event_id, (rsvpCounts.get(r.event_id) ?? 0) + 1);
+    });
+    const myRsvpIds = new Set((myRsvpsRes.data ?? []).map((r) => r.event_id));
+    const mySaveIds = new Set((mySavesRes.data ?? []).map((s) => s.event_id));
+    const myAttMap = new Map(
+      (myAttRes.data ?? []).map((a) => [a.event_id, a.duration_minutes as number])
+    );
+    const myPaidIds = new Set((myPaymentsRes.data ?? []).map((p) => p.event_id));
+
+    const enriched: CommunityEvent[] = (
+      (eventsRes.data ?? []) as DbEvent[]
+    ).map((evt) => ({
+      ...evt,
+      rsvp_count: rsvpCounts.get(evt.id) ?? 0,
+      is_attending: myRsvpIds.has(evt.id),
+      is_saved: mySaveIds.has(evt.id),
+      has_attended: myAttMap.has(evt.id),
+      attendance_minutes: myAttMap.get(evt.id) ?? null,
+      has_paid: myPaidIds.has(evt.id),
+    }));
+
+    setEvents(enriched);
+    setLoading(false);
+  }, [user]);
+
   useEffect(() => {
-    saveEvents(events);
-  }, [events]);
+    refresh();
+  }, [refresh]);
 
+  /* ── Derived lists ── */
   const approvedEvents = events.filter((e) => e.status === "approved");
   const pendingEvents = events.filter((e) => e.status === "pending");
   const rejectedEvents = events.filter((e) => e.status === "rejected");
@@ -24,25 +72,55 @@ export function useEvents() {
     [events]
   );
 
+  /* ── Mutations (optimistic + persist) ── */
+
   const addEvent = useCallback(
-    (event: Omit<CommunityEvent, "id" | "createdAt" | "attendees" | "attendedBy" | "savedBy" | "status">) => {
+    async (input: {
+      title: string;
+      description: string;
+      date: string;
+      time: string;
+      location: string;
+      emoji: string;
+      flyer_url?: string;
+      external_link?: string;
+      max_attendees?: number;
+      group_name?: string;
+      created_by_name: string;
+      price_cents?: number;
+    }) => {
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from("events")
+        .insert({
+          ...input,
+          created_by: user.id,
+          status: "pending" as const,
+        })
+        .select()
+        .single();
+
+      if (error || !data) return null;
+
       const newEvent: CommunityEvent = {
-        ...event,
-        id: generateEventId(),
-        createdAt: new Date().toISOString(),
-        attendees: ["You"],
-        attendedBy: [],
-        savedBy: [],
-        status: "approved",
+        ...(data as DbEvent),
+        rsvp_count: 0,
+        is_attending: false,
+        is_saved: false,
+        has_attended: false,
+        attendance_minutes: null,
+        has_paid: false,
       };
       setEvents((prev) => [...prev, newEvent]);
       return newEvent;
     },
-    []
+    [user]
   );
 
   const updateEventStatus = useCallback(
-    (id: string, status: EventStatus) => {
+    async (id: string, status: EventStatus) => {
+      await supabase.from("events").update({ status }).eq("id", id);
       setEvents((prev) =>
         prev.map((e) => (e.id === id ? { ...e, status } : e))
       );
@@ -50,80 +128,159 @@ export function useEvents() {
     []
   );
 
-  const toggleRSVP = useCallback(
-    (id: string, userName = "You") => {
-      setEvents((prev) =>
-        prev.map((e) => {
-          if (e.id !== id) return e;
-          const isAttending = e.attendees.includes(userName);
-          return {
-            ...e,
-            attendees: isAttending
-              ? e.attendees.filter((a) => a !== userName)
-              : [...e.attendees, userName],
-          };
-        })
-      );
-    },
-    []
-  );
-
-  const toggleSave = useCallback(
-    (id: string, userName = "You") => {
-      setEvents((prev) =>
-        prev.map((e) => {
-          if (e.id !== id) return e;
-          const isSaved = e.savedBy.includes(userName);
-          return {
-            ...e,
-            savedBy: isSaved
-              ? e.savedBy.filter((s) => s !== userName)
-              : [...e.savedBy, userName],
-          };
-        })
-      );
-    },
-    []
-  );
-
-  const deleteEvent = useCallback((id: string) => {
+  const deleteEvent = useCallback(async (id: string) => {
+    await supabase.from("events").delete().eq("id", id);
     setEvents((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
+  const toggleRSVP = useCallback(
+    async (eventId: string) => {
+      if (!user) return;
+      const event = events.find((e) => e.id === eventId);
+      if (!event) return;
+
+      if (event.is_attending) {
+        await supabase
+          .from("event_rsvps")
+          .delete()
+          .eq("event_id", eventId)
+          .eq("user_id", user.id);
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === eventId
+              ? { ...e, is_attending: false, rsvp_count: e.rsvp_count - 1 }
+              : e
+          )
+        );
+      } else {
+        await supabase
+          .from("event_rsvps")
+          .insert({ event_id: eventId, user_id: user.id });
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === eventId
+              ? { ...e, is_attending: true, rsvp_count: e.rsvp_count + 1 }
+              : e
+          )
+        );
+      }
+    },
+    [user, events]
+  );
+
+  const toggleSave = useCallback(
+    async (eventId: string) => {
+      if (!user) return;
+      const event = events.find((e) => e.id === eventId);
+      if (!event) return;
+
+      if (event.is_saved) {
+        await supabase
+          .from("event_saves")
+          .delete()
+          .eq("event_id", eventId)
+          .eq("user_id", user.id);
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === eventId ? { ...e, is_saved: false } : e
+          )
+        );
+      } else {
+        await supabase
+          .from("event_saves")
+          .insert({ event_id: eventId, user_id: user.id });
+        setEvents((prev) =>
+          prev.map((e) =>
+            e.id === eventId ? { ...e, is_saved: true } : e
+          )
+        );
+      }
+    },
+    [user, events]
+  );
+
   const markAttended = useCallback(
-    (id: string, userName = "You") => {
+    async (eventId: string, durationMinutes: number) => {
+      if (!user) return;
+      await supabase
+        .from("event_attendances")
+        .insert({
+          event_id: eventId,
+          user_id: user.id,
+          duration_minutes: durationMinutes,
+        });
       setEvents((prev) =>
-        prev.map((e) => {
-          if (e.id !== id) return e;
-          const alreadyAttended = (e.attendedBy || []).includes(userName);
-          if (alreadyAttended) return e;
-          return {
-            ...e,
-            attendedBy: [...(e.attendedBy || []), userName],
-          };
-        })
+        prev.map((e) =>
+          e.id === eventId
+            ? {
+                ...e,
+                has_attended: true,
+                attendance_minutes: durationMinutes,
+              }
+            : e
+        )
       );
     },
-    []
+    [user]
   );
 
   const unmarkAttended = useCallback(
-    (id: string, userName = "You") => {
+    async (eventId: string) => {
+      if (!user) return;
+      await supabase
+        .from("event_attendances")
+        .delete()
+        .eq("event_id", eventId)
+        .eq("user_id", user.id);
       setEvents((prev) =>
-        prev.map((e) => {
-          if (e.id !== id) return e;
-          return {
-            ...e,
-            attendedBy: (e.attendedBy || []).filter((a) => a !== userName),
-          };
-        })
+        prev.map((e) =>
+          e.id === eventId
+            ? { ...e, has_attended: false, attendance_minutes: null }
+            : e
+        )
       );
     },
-    []
+    [user]
+  );
+
+  const initiatePayment = useCallback(
+    async (eventId: string) => {
+      if (!user) return;
+      const event = events.find((e) => e.id === eventId);
+      if (!event || event.price_cents <= 0) return;
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      const res = await fetch(
+        `${supabaseUrl}/functions/v1/create-checkout-session`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            event_id: eventId,
+            success_url: `${window.location.origin}/events/${eventId}?payment=success`,
+            cancel_url: `${window.location.origin}/events/${eventId}?payment=cancel`,
+          }),
+        }
+      );
+
+      if (!res.ok) return;
+      const { url } = await res.json();
+      if (url) {
+        window.location.href = url;
+      }
+    },
+    [user, events]
   );
 
   return {
     events,
+    loading,
     approvedEvents,
     pendingEvents,
     rejectedEvents,
@@ -135,5 +292,7 @@ export function useEvents() {
     deleteEvent,
     markAttended,
     unmarkAttended,
+    initiatePayment,
+    refresh,
   };
 }

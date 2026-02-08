@@ -3,6 +3,7 @@ import { Flame, Calendar, ChevronRight, Sparkles, TrendingUp } from "lucide-reac
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { hobbies } from "@/data/hobbies";
+import { useAuth } from "@/hooks/use-auth";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 
@@ -24,6 +25,12 @@ const recommendedHobbies = hobbies.filter(
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
+
+  const firstName =
+    authUser?.user_metadata?.full_name?.split(" ")[0] ||
+    authUser?.email?.split("@")[0] ||
+    "";
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -33,7 +40,9 @@ const Homepage = () => {
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
           {/* Greeting */}
           <section className="px-5 pt-6 pb-2">
-            <h1 className="text-2xl font-bold text-foreground">Welcome back! 👋</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              Welcome back{firstName ? `, ${firstName}` : ""}! 👋
+            </h1>
             <p className="text-sm text-muted-foreground mt-1">
               You've been on a roll — keep up the great work.
             </p>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/use-auth";
 import {
   User,
   Bell,
@@ -11,6 +12,7 @@ import {
   Shield,
   HelpCircle,
   FileText,
+  ClipboardCheck,
   ArrowLeft,
   Mail,
   Lock,
@@ -56,6 +58,7 @@ const getStoredPrefs = () => {
 const Settings = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { signOut, user } = useAuth();
   const stored = getStoredPrefs();
 
   const [pushEnabled, setPushEnabled] = useState(stored?.pushEnabled ?? true);
@@ -145,7 +148,7 @@ const Settings = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
-                  <span className="text-xs">alex@email.com</span>
+                  <span className="text-xs">{user?.email ?? "—"}</span>
                   <ChevronRight className="w-4 h-4" />
                 </div>
               </button>
@@ -375,12 +378,36 @@ const Settings = () => {
             </div>
           </section>
 
+          {/* ── Admin ── */}
+          <section className="px-4 pt-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">Admin</h2>
+            <div className="rounded-xl border-2 border-border bg-card overflow-hidden">
+              <button
+                onClick={() => navigate("/admin-events")}
+                className="flex items-center justify-between px-4 py-3.5 w-full hover:bg-secondary/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <ClipboardCheck className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <span className="text-sm font-medium text-foreground block">
+                      Event Review
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Approve or reject pending events
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+          </section>
+
           {/* ── Log Out ── */}
           <section className="px-4 pt-6 pb-6">
             <button
-              onClick={() => {
-                localStorage.clear();
-                navigate("/onboarding");
+              onClick={async () => {
+                await signOut();
+                navigate("/login", { replace: true });
               }}
               className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl border-2 border-destructive/30 hover:bg-destructive/10 transition-colors"
             >

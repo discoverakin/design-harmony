@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Menu, User, Settings, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/use-auth";
 import akinLogo from "@/assets/logo-akin.png";
 import akinLogoDark from "@/assets/logo-akin-dark.png";
 import {
@@ -14,6 +15,7 @@ import {
 const AppHeader = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const logo = theme === "dark" ? akinLogoDark : akinLogo;
 
   return (
@@ -59,9 +61,9 @@ const AppHeader = () => {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => {
-              localStorage.clear();
-              navigate("/onboarding");
+            onClick={async () => {
+              await signOut();
+              navigate("/login", { replace: true });
             }}
             className="gap-2 cursor-pointer text-destructive focus:text-destructive"
           >

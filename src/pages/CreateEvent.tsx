@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Upload,
   Link as LinkIcon,
   CalendarPlus,
   ImageIcon,
@@ -12,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useEvents } from "@/hooks/use-events";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
 const emojiOptions = ["🎨", "🏃", "🎵", "👨‍🍳", "📚", "🎮", "🧘", "💃", "📸", "🎲", "🥾", "💪", "🏊", "🥋", "🧗", "🛹", "🧶", "🏺", "🪵", "🎬", "🌱", "🎯", "🎤", "🎭"];
@@ -19,6 +19,7 @@ const emojiOptions = ["🎨", "🏃", "🎵", "👨‍🍳", "📚", "🎮", "�
 const CreateEvent = () => {
   const navigate = useNavigate();
   const { addEvent } = useEvents();
+  const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,7 +32,9 @@ const CreateEvent = () => {
   const [externalLink, setExternalLink] = useState("");
   const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
   const [maxAttendees, setMaxAttendees] = useState("");
+  const [priceDollars, setPriceDollars] = useState("");
   const [createdBy, setCreatedBy] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleFlyerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,7 +54,7 @@ const CreateEvent = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim() || !date || !time || !location.trim()) {
@@ -63,25 +66,44 @@ const CreateEvent = () => {
       return;
     }
 
-    addEvent({
+    setSubmitting(true);
+
+    const displayName =
+      createdBy.trim() ||
+      user?.user_metadata?.full_name ||
+      user?.email?.split("@")[0] ||
+      "Anonymous";
+
+    const result = await addEvent({
       title: title.trim(),
       description: description.trim(),
       date,
       time,
       location: location.trim(),
       emoji,
-      externalLink: externalLink.trim() || undefined,
-      flyerBase64: flyerPreview || undefined,
-      createdBy: createdBy.trim() || "Anonymous",
-      maxAttendees: maxAttendees ? parseInt(maxAttendees, 10) : undefined,
+      external_link: externalLink.trim() || undefined,
+      flyer_url: flyerPreview || undefined,
+      created_by_name: displayName,
+      max_attendees: maxAttendees ? parseInt(maxAttendees, 10) : undefined,
+      price_cents: priceDollars ? Math.round(parseFloat(priceDollars) * 100) : 0,
     });
 
-    toast({
-      title: "Event created! 🎉",
-      description: "Your event is now live. Share it with friends!",
-    });
+    setSubmitting(false);
 
-    navigate("/events");
+    if (result) {
+      toast({
+        title: "Event submitted! 🎉",
+        description:
+          "Your event is pending review. It will go live once approved.",
+      });
+      navigate("/events");
+    } else {
+      toast({
+        title: "Something went wrong",
+        description: "Could not create the event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -256,6 +278,31 @@ const CreateEvent = () => {
             </div>
           </div>
 
+          {/* Price */}
+          <div>
+            <Label htmlFor="price" className="text-xs font-semibold text-foreground">
+              Ticket Price (optional)
+            </Label>
+            <div className="relative mt-1.5">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                $
+              </span>
+              <Input
+                id="price"
+                type="number"
+                min={0}
+                step={0.01}
+                value={priceDollars}
+                onChange={(e) => setPriceDollars(e.target.value)}
+                placeholder="0.00 (free)"
+                className="pl-7 rounded-xl"
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Leave empty or 0 for free events
+            </p>
+          </div>
+
           {/* Max attendees */}
           <div>
             <Label htmlFor="maxAttendees" className="text-xs font-semibold text-foreground">
@@ -290,14 +337,21 @@ const CreateEvent = () => {
           {/* Submit */}
           <Button
             type="submit"
+            disabled={submitting}
             className="w-full rounded-xl h-12 text-sm font-semibold gap-2"
           >
-            <CalendarPlus className="w-4 h-4" />
-            Create Event
+            {submitting ? (
+              <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+            ) : (
+              <>
+                <CalendarPlus className="w-4 h-4" />
+                Create Event
+              </>
+            )}
           </Button>
 
           <p className="text-[11px] text-muted-foreground text-center">
-            Your event will be visible to all hobby seekers in the community.
+            Your event will be reviewed before going live.
           </p>
         </form>
       </main>

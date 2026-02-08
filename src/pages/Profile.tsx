@@ -6,21 +6,15 @@ import {
   Calendar,
   ChevronRight,
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import AchievementBadge from "@/components/profile/AchievementBadge";
 import HobbyHistoryCard from "@/components/profile/HobbyHistoryCard";
+import { format } from "date-fns";
 
-/* ── Static data ── */
-const user = {
-  name: "Alex Johnson",
-  handle: "@alexj",
-  avatarFallback: "AJ",
-  memberSince: "Jan 2025",
-  stats: { hobbies: 4, sessions: 32, streak: 12 },
-};
-
+/* ── Static data (achievements & history remain local for now) ── */
 const achievements = [
   { emoji: "🔥", label: "7-Day Streak", unlocked: true },
   { emoji: "🏅", label: "First Session", unlocked: true },
@@ -41,6 +35,33 @@ const hobbyHistory = [
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
+
+  const displayName =
+    authUser?.user_metadata?.full_name ||
+    authUser?.email?.split("@")[0] ||
+    "User";
+
+  const initials = displayName
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handle = `@${(authUser?.email?.split("@")[0] || "user").toLowerCase()}`;
+
+  const memberSince = authUser?.created_at
+    ? format(new Date(authUser.created_at), "MMM yyyy")
+    : "Recently";
+
+  const user = {
+    name: displayName,
+    handle,
+    avatarFallback: initials,
+    memberSince,
+    stats: { hobbies: 4, sessions: 32, streak: 12 },
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">

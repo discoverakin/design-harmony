@@ -10,7 +10,7 @@ import EventListCard from "@/components/events/EventListCard";
 import { useEvents } from "@/hooks/use-events";
 
 const Events = () => {
-  const { approvedEvents } = useEvents();
+  const { approvedEvents, loading } = useEvents();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
 
@@ -25,19 +25,19 @@ const Events = () => {
           e.title.toLowerCase().includes(q) ||
           e.location.toLowerCase().includes(q) ||
           e.description?.toLowerCase().includes(q) ||
-          e.group?.toLowerCase().includes(q)
+          e.group_name?.toLowerCase().includes(q)
       );
     }
     return sorted;
   }, [approvedEvents, searchQuery]);
 
   const savedEvents = useMemo(
-    () => approvedEvents.filter((e) => e.savedBy.includes("You")),
+    () => approvedEvents.filter((e) => e.is_saved),
     [approvedEvents]
   );
 
   const attendedEvents = useMemo(
-    () => approvedEvents.filter((e) => (e.attendedBy || []).includes("You")),
+    () => approvedEvents.filter((e) => e.has_attended),
     [approvedEvents]
   );
 
@@ -161,7 +161,11 @@ const Events = () => {
             </TabsList>
 
             <TabsContent value="upcoming" className="mt-4 space-y-5 pb-6">
-              {upcomingEvents.length === 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-10">
+                  <span className="w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : upcomingEvents.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-3xl mb-2">📅</p>
                   <p className="text-sm text-muted-foreground">

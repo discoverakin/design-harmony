@@ -3,6 +3,7 @@ import { Calendar, Clock, MapPin, Users, ChevronRight, CheckCircle2 } from "luci
 import { Badge } from "@/components/ui/badge";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
+import { formatPrice } from "@/lib/format-price";
 
 interface EventListCardProps {
   event: CommunityEvent;
@@ -21,10 +22,8 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
   const isTomorrow =
     event.date === new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
-  const isAttending = event.attendees.includes("You");
-  const hasAttended = (event.attendedBy || []).includes("You");
-  const spotsLeft = event.maxAttendees
-    ? event.maxAttendees - event.attendees.length
+  const spotsLeft = event.max_attendees
+    ? event.max_attendees - event.rsvp_count
     : null;
 
   return (
@@ -33,10 +32,10 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
       className="block rounded-xl border-2 border-border bg-card hover:border-primary/30 transition-colors group overflow-hidden"
     >
       {/* Flyer thumbnail */}
-      {event.flyerBase64 && !compact && (
+      {event.flyer_url && !compact && (
         <div className="w-full h-32 overflow-hidden">
           <img
-            src={event.flyerBase64}
+            src={event.flyer_url}
             alt={`${event.title} flyer`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -63,12 +62,20 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
             <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
               {event.title}
             </p>
-            {hasAttended ? (
+            {event.price_cents > 0 && (
+              <Badge
+                variant="outline"
+                className="text-[9px] px-1.5 py-0 flex-shrink-0 font-semibold"
+              >
+                {formatPrice(event.price_cents)}
+              </Badge>
+            )}
+            {event.has_attended ? (
               <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0 gap-0.5 bg-primary/15 text-primary border-0">
                 <CheckCircle2 className="w-2.5 h-2.5" />
                 Attended
               </Badge>
-            ) : isAttending ? (
+            ) : event.is_attending ? (
               <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0">Going</Badge>
             ) : null}
           </div>
@@ -90,27 +97,27 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
 
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2">
-              {event.group && (() => {
-                const linkedGroup = groups.find((g) => g.name === event.group);
+              {event.group_name && (() => {
+                const linkedGroup = groups.find((g) => g.name === event.group_name);
                 return linkedGroup ? (
                   <Link
                     to={`/community/${linkedGroup.slug}`}
                     onClick={(e) => e.stopPropagation()}
                     className="text-[10px] text-primary font-medium truncate max-w-[120px] hover:underline"
                   >
-                    {event.group}
+                    {event.group_name}
                   </Link>
                 ) : (
                   <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-                    {event.group}
+                    {event.group_name}
                   </span>
                 );
               })()}
             </div>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1">
               <Users className="w-3 h-3" />
-              {event.attendees.length}
-              {event.maxAttendees ? `/${event.maxAttendees}` : ""}
+              {event.rsvp_count}
+              {event.max_attendees ? `/${event.max_attendees}` : ""}
               {spotsLeft !== null && spotsLeft <= 5 && spotsLeft > 0 && (
                 <span className="text-primary font-medium ml-0.5">
                   · {spotsLeft} left

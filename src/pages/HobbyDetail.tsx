@@ -3,6 +3,9 @@ import { ArrowLeft, Star, MapPin, Clock } from "lucide-react";
 import { getHobbyBySlug } from "@/data/hobbies";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
+import ShareButton from "@/components/social/ShareButton";
+import AvatarStack from "@/components/social/AvatarStack";
+import TrendingBadge from "@/components/social/TrendingBadge";
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -37,11 +40,22 @@ const HobbyDetail = () => {
 
         <div className="flex items-center gap-4">
           <span className="text-6xl">{hobby.emoji}</span>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground leading-tight">
-              {hobby.label}
-            </h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-3xl font-bold text-foreground leading-tight">
+                {hobby.label}
+              </h1>
+              <TrendingBadge variant="popular" />
+            </div>
+            <div className="flex items-center gap-2 mt-1.5">
+              <AvatarStack count={42} max={4} size="sm" label="42 people tried this" />
+            </div>
           </div>
+          <ShareButton
+            title={hobby.label}
+            text={`Check out ${hobby.label} on Akin!`}
+            url={window.location.href}
+          />
         </div>
       </div>
 

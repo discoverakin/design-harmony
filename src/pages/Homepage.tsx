@@ -6,6 +6,9 @@ import { hobbies } from "@/data/hobbies";
 import { useAuth } from "@/hooks/use-auth";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
+import AvatarStack from "@/components/social/AvatarStack";
+import TrendingBadge from "@/components/social/TrendingBadge";
+import ActivityToast from "@/components/social/ActivityToast";
 
 const trackedHobbies = [
   { slug: "arts-crafts", sessionsCompleted: 7, totalSessions: 10, streak: 3, lastActivity: "Today" },
@@ -136,7 +139,7 @@ const Homepage = () => {
               </Link>
             </div>
             <div className="space-y-2">
-              {upcomingEvents.map((event) => (
+              {upcomingEvents.map((event, idx) => (
                 <Link
                   key={event.title}
                   to="/events"
@@ -144,12 +147,17 @@ const Homepage = () => {
                 >
                   <span className="text-2xl flex-shrink-0">{event.emoji}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      {event.title}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold text-foreground truncate">
+                        {event.title}
+                      </p>
+                      {idx === 0 && <TrendingBadge variant="hot" />}
+                      {idx === 2 && <TrendingBadge variant="popular" />}
+                    </div>
                     <p className="text-[11px] text-muted-foreground">
                       {event.time} · {event.location}
                     </p>
+                    <AvatarStack count={idx === 0 ? 12 : idx === 1 ? 7 : 4} max={3} label={`${idx === 0 ? 12 : idx === 1 ? 7 : 4} going`} />
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 </Link>
@@ -187,6 +195,7 @@ const Homepage = () => {
       </main>
 
       <BottomNav />
+      <ActivityToast />
     </div>
   );
 };

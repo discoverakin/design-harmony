@@ -9,7 +9,6 @@ import {
   Bookmark,
   BookmarkCheck,
   ExternalLink,
-  Share2,
   CheckCircle2,
   Timer,
 } from "lucide-react";
@@ -28,6 +27,9 @@ import { useActivityLog } from "@/hooks/use-activity-log";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
+import ShareButton from "@/components/social/ShareButton";
+import AvatarStack from "@/components/social/AvatarStack";
+import TrendingBadge from "@/components/social/TrendingBadge";
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -121,17 +123,6 @@ const EventDetail = () => {
     });
   };
 
-  const handleShare = async () => {
-    try {
-      await navigator.share?.({
-        title: event.title,
-        text: `${event.title} – ${formattedDate} at ${event.location}`,
-        url: window.location.href,
-      });
-    } catch {
-      toast({ title: "Link copied!", description: "Share this event with friends." });
-    }
-  };
 
   const handleMarkAttended = () => {
     setShowAttendedSheet(true);
@@ -203,12 +194,10 @@ const EventDetail = () => {
         <h2 className="text-sm font-semibold text-foreground flex-1 truncate">
           Event Details
         </h2>
-        <button
-          onClick={handleShare}
-          className="p-2 rounded-lg hover:bg-accent transition-colors"
-        >
-          <Share2 className="w-5 h-5 text-foreground" />
-        </button>
+        <ShareButton
+          title={event.title}
+          text={`${event.title} – ${formattedDate} at ${event.location}`}
+        />
         <button
           onClick={handleSave}
           className="p-2 -mr-2 rounded-lg hover:bg-accent transition-colors"
@@ -264,7 +253,7 @@ const EventDetail = () => {
               {event.emoji}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl font-bold text-foreground leading-tight">
                   {event.title}
                 </h1>
@@ -278,6 +267,7 @@ const EventDetail = () => {
                     Paid
                   </Badge>
                 )}
+                {event.rsvp_count >= 5 && <TrendingBadge variant="hot" />}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 {event.group_name && (() => {
@@ -357,20 +347,23 @@ const EventDetail = () => {
               <h3 className="text-sm font-bold text-foreground mb-2">
                 Who's going ({event.rsvp_count})
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {event.is_attending && (
-                  <Badge variant="default" className="text-xs">
-                    You
-                  </Badge>
-                )}
-                {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{event.is_attending ? event.rsvp_count - 1 : event.rsvp_count} other
-                    {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) !== 1
-                      ? "s"
-                      : ""}
-                  </Badge>
-                )}
+              <div className="flex items-center gap-3">
+                <AvatarStack count={event.rsvp_count} max={5} size="md" />
+                <div className="flex flex-wrap gap-1.5">
+                  {event.is_attending && (
+                    <Badge variant="default" className="text-xs">
+                      You
+                    </Badge>
+                  )}
+                  {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{event.is_attending ? event.rsvp_count - 1 : event.rsvp_count} other
+                      {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) !== 1
+                        ? "s"
+                        : ""}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -422,6 +415,14 @@ const EventDetail = () => {
                 Mark as Attended & Log Hours
               </Button>
             )}
+
+            {/* Send to a friend */}
+            <ShareButton
+              title={event.title}
+              text={`Check out "${event.title}" on ${formattedDate} at ${event.location}!`}
+              url={window.location.href}
+              variant="full"
+            />
           </div>
         </div>
       </main>

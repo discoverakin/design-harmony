@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Settings,
@@ -5,13 +6,17 @@ import {
   Flame,
   Calendar,
   ChevronRight,
+  Pencil,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import AchievementBadge from "@/components/profile/AchievementBadge";
 import HobbyHistoryCard from "@/components/profile/HobbyHistoryCard";
+import EditProfileSheet from "@/components/profile/EditProfileSheet";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
 /* ── Static data (achievements & history remain local for now) ── */
@@ -36,29 +41,35 @@ const hobbyHistory = [
 const Profile = () => {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
+  const [editOpen, setEditOpen] = useState(false);
 
-  const displayName =
+  const defaultName =
     authUser?.user_metadata?.full_name ||
     authUser?.email?.split("@")[0] ||
     "User";
+  const defaultHandle = `@${(authUser?.email?.split("@")[0] || "user").toLowerCase()}`;
 
-  const initials = displayName
+  const { profile, updateProfile } = useProfile({
+    name: defaultName,
+    handle: defaultHandle,
+  });
+
+  const initials = profile.name
     .split(" ")
     .map((w: string) => w[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
 
-  const handle = `@${(authUser?.email?.split("@")[0] || "user").toLowerCase()}`;
-
   const memberSince = authUser?.created_at
     ? format(new Date(authUser.created_at), "MMM yyyy")
     : "Recently";
 
   const user = {
-    name: displayName,
-    handle,
+    name: profile.name,
+    handle: profile.handle,
     avatarFallback: initials,
+    avatarUrl: profile.avatarUrl,
     memberSince,
     stats: { hobbies: 4, sessions: 32, streak: 12 },
   };
@@ -70,7 +81,20 @@ const Profile = () => {
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
           {/* ── Avatar & Bio ── */}
-          <ProfileAvatar user={user} />
+          <ProfileAvatar user={user} onEditClick={() => setEditOpen(true)} />
+
+          {/* Edit button */}
+          <div className="flex justify-center -mt-2 mb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 rounded-full"
+              onClick={() => setEditOpen(true)}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit Profile
+            </Button>
+          </div>
 
           {/* ── Stats Strip ── */}
           <div className="grid grid-cols-3 gap-3 px-4 -mt-1">
@@ -134,6 +158,13 @@ const Profile = () => {
           </section>
         </div>
       </main>
+
+      <EditProfileSheet
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        profile={profile}
+        onSave={updateProfile}
+      />
 
       <BottomNav />
     </div>

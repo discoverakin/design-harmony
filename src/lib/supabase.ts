@@ -1,12 +1,25 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
+let supabase: SupabaseClient;
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    "Missing Supabase environment variables. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local"
+  console.warn(
+    "Missing Supabase environment variables. Backend features will be unavailable."
   );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handler: ProxyHandler<any> = {
+    get: (_target, _prop) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return new Proxy((() => Promise.resolve({ data: null, error: new Error("Supabase not configured") })) as any, handler);
+    },
+    apply: () => Promise.resolve({ data: null, error: new Error("Supabase not configured") }),
+  };
+  supabase = new Proxy({} as SupabaseClient, handler);
+} else {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase };

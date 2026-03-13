@@ -9,6 +9,9 @@ import BottomNav from "@/components/BottomNav";
 import AvatarStack from "@/components/social/AvatarStack";
 import TrendingBadge from "@/components/social/TrendingBadge";
 import ActivityToast from "@/components/social/ActivityToast";
+import LiveActivityBanner from "@/components/social/LiveActivityBanner";
+import SocialProofStats from "@/components/social/SocialProofStats";
+import TestimonialCarousel from "@/components/social/TestimonialCarousel";
 
 const trackedHobbies = [
   { slug: "arts-crafts", sessionsCompleted: 7, totalSessions: 10, streak: 3, lastActivity: "Today" },
@@ -51,7 +54,10 @@ const Homepage = () => {
             </p>
           </section>
 
-          {/* Stats strip */}
+          {/* Live activity banner */}
+          <section className="px-5 pb-2">
+            <LiveActivityBanner />
+          </section>
           <section className="px-5 py-4">
             <div className="flex gap-3">
               <div className="flex-1 rounded-xl border-2 border-border bg-secondary/40 p-3 text-center">
@@ -166,7 +172,7 @@ const Homepage = () => {
           </section>
 
           {/* Recommended */}
-          <section className="px-5 pb-6">
+          <section className="px-5 pb-4">
             <h2 className="text-lg font-bold text-foreground mb-3">
               <Sparkles className="w-4 h-4 inline-block mr-1 text-primary -mt-0.5" />
               Recommended for you
@@ -190,6 +196,17 @@ const Homepage = () => {
                 </Link>
               ))}
             </div>
+          </section>
+
+          {/* Community stats */}
+          <section className="px-5 pb-2">
+            <SocialProofStats variant="grid" />
+          </section>
+
+          {/* Testimonials */}
+          <section className="px-5 pb-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">What hobbyists say</h2>
+            <TestimonialCarousel />
           </section>
         </div>
       </main>

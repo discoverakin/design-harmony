@@ -6,6 +6,8 @@ import BottomNav from "@/components/BottomNav";
 import ShareButton from "@/components/social/ShareButton";
 import AvatarStack from "@/components/social/AvatarStack";
 import TrendingBadge from "@/components/social/TrendingBadge";
+import TestimonialCarousel from "@/components/social/TestimonialCarousel";
+import LiveActivityBanner from "@/components/social/LiveActivityBanner";
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -112,6 +114,17 @@ const HobbyDetail = () => {
                 </button>
               ))}
             </div>
+          </section>
+
+          {/* Live activity */}
+          <section className="mb-6">
+            <LiveActivityBanner />
+          </section>
+
+          {/* Reviews */}
+          <section className="mb-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">What people say</h2>
+            <TestimonialCarousel compact />
           </section>
 
           {/* CTA */}

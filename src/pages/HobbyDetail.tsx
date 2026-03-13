@@ -116,6 +116,17 @@ const HobbyDetail = () => {
             </div>
           </section>
 
+          {/* Live activity */}
+          <section className="mb-6">
+            <LiveActivityBanner />
+          </section>
+
+          {/* Reviews */}
+          <section className="mb-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">What people say</h2>
+            <TestimonialCarousel compact />
+          </section>
+
           {/* CTA */}
           <Button className="w-full rounded-xl h-12 text-base font-semibold mb-4">
             Get started

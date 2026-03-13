@@ -135,6 +135,14 @@ const Login = () => {
               Sign Up
             </Link>
           </p>
+
+          {/* Social proof */}
+          <div className="mt-8 space-y-4">
+            <RecentJoiners />
+            <TestimonialCarousel compact />
+            <SocialProofStats variant="inline" />
+            <TrustBadges />
+          </div>
         </motion.div>
       </div>
     </div>

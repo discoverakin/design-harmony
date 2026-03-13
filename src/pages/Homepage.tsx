@@ -191,21 +191,10 @@ const Homepage = () => {
             </div>
           </section>
 
-          {/* Community stats */}
-          <section className="px-5 pb-2">
-            <SocialProofStats variant="grid" />
-          </section>
-
-          {/* Testimonials */}
-          <section className="px-5 pb-6">
-            <h2 className="text-lg font-bold text-foreground mb-3">What hobbyists say</h2>
-            <TestimonialCarousel />
-          </section>
         </div>
       </main>
 
       <BottomNav />
-      <ActivityToast />
     </div>
   );
 };

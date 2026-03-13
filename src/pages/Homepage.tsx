@@ -8,10 +8,6 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import AvatarStack from "@/components/social/AvatarStack";
 import TrendingBadge from "@/components/social/TrendingBadge";
-import ActivityToast from "@/components/social/ActivityToast";
-import LiveActivityBanner from "@/components/social/LiveActivityBanner";
-import SocialProofStats from "@/components/social/SocialProofStats";
-import TestimonialCarousel from "@/components/social/TestimonialCarousel";
 
 const trackedHobbies = [
   { slug: "arts-crafts", sessionsCompleted: 7, totalSessions: 10, streak: 3, lastActivity: "Today" },
@@ -55,9 +51,6 @@ const Homepage = () => {
           </section>
 
           {/* Live activity banner */}
-          <section className="px-5 pb-2">
-            <LiveActivityBanner />
-          </section>
           <section className="px-5 py-4">
             <div className="flex gap-3">
               <div className="flex-1 rounded-xl border-2 border-border bg-secondary/40 p-3 text-center">
@@ -198,21 +191,10 @@ const Homepage = () => {
             </div>
           </section>
 
-          {/* Community stats */}
-          <section className="px-5 pb-2">
-            <SocialProofStats variant="grid" />
-          </section>
-
-          {/* Testimonials */}
-          <section className="px-5 pb-6">
-            <h2 className="text-lg font-bold text-foreground mb-3">What hobbyists say</h2>
-            <TestimonialCarousel />
-          </section>
         </div>
       </main>
 
       <BottomNav />
-      <ActivityToast />
     </div>
   );
 };

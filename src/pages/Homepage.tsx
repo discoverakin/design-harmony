@@ -51,9 +51,6 @@ const Homepage = () => {
           </section>
 
           {/* Live activity banner */}
-          <section className="px-5 pb-2">
-            <LiveActivityBanner />
-          </section>
           <section className="px-5 py-4">
             <div className="flex gap-3">
               <div className="flex-1 rounded-xl border-2 border-border bg-secondary/40 p-3 text-center">

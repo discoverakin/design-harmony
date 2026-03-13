@@ -6,6 +6,8 @@ import BottomNav from "@/components/BottomNav";
 import ShareButton from "@/components/social/ShareButton";
 import AvatarStack from "@/components/social/AvatarStack";
 import TrendingBadge from "@/components/social/TrendingBadge";
+import TestimonialCarousel from "@/components/social/TestimonialCarousel";
+import LiveActivityBanner from "@/components/social/LiveActivityBanner";
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();

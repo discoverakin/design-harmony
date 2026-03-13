@@ -8,10 +8,6 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import AvatarStack from "@/components/social/AvatarStack";
 import TrendingBadge from "@/components/social/TrendingBadge";
-import ActivityToast from "@/components/social/ActivityToast";
-import LiveActivityBanner from "@/components/social/LiveActivityBanner";
-import SocialProofStats from "@/components/social/SocialProofStats";
-import TestimonialCarousel from "@/components/social/TestimonialCarousel";
 
 const trackedHobbies = [
   { slug: "arts-crafts", sessionsCompleted: 7, totalSessions: 10, streak: 3, lastActivity: "Today" },

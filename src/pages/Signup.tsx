@@ -6,10 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import logoAkin from "@/assets/logo-akin.png";
 import logoAkinDark from "@/assets/logo-akin-dark.png";
-import TestimonialCarousel from "@/components/social/TestimonialCarousel";
-import TrustBadges from "@/components/social/TrustBadges";
-import RecentJoiners from "@/components/social/RecentJoiners";
-import SocialProofStats from "@/components/social/SocialProofStats";
+
 
 const Signup = () => {
   const { signUp, user } = useAuth();
@@ -190,12 +187,6 @@ const Signup = () => {
                 </Link>
               </p>
 
-              {/* Social proof */}
-              <div className="mt-8 space-y-4">
-                <RecentJoiners />
-                <SocialProofStats variant="inline" />
-                <TrustBadges />
-              </div>
             </>
           )}
         </motion.div>

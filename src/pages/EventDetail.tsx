@@ -27,9 +27,7 @@ import { useActivityLog } from "@/hooks/use-activity-log";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
-import ShareButton from "@/components/social/ShareButton";
-import AvatarStack from "@/components/social/AvatarStack";
-import TrendingBadge from "@/components/social/TrendingBadge";
+
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -194,10 +192,6 @@ const EventDetail = () => {
         <h2 className="text-sm font-semibold text-foreground flex-1 truncate">
           Event Details
         </h2>
-        <ShareButton
-          title={event.title}
-          text={`${event.title} – ${formattedDate} at ${event.location}`}
-        />
         <button
           onClick={handleSave}
           className="p-2 -mr-2 rounded-lg hover:bg-accent transition-colors"
@@ -267,7 +261,6 @@ const EventDetail = () => {
                     Paid
                   </Badge>
                 )}
-                {event.rsvp_count >= 5 && <TrendingBadge variant="hot" />}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 {event.group_name && (() => {
@@ -348,7 +341,6 @@ const EventDetail = () => {
                 Who's going ({event.rsvp_count})
               </h3>
               <div className="flex items-center gap-3">
-                <AvatarStack count={event.rsvp_count} max={5} size="md" />
                 <div className="flex flex-wrap gap-1.5">
                   {event.is_attending && (
                     <Badge variant="default" className="text-xs">
@@ -416,13 +408,6 @@ const EventDetail = () => {
               </Button>
             )}
 
-            {/* Send to a friend */}
-            <ShareButton
-              title={event.title}
-              text={`Check out "${event.title}" on ${formattedDate} at ${event.location}!`}
-              url={window.location.href}
-              variant="full"
-            />
           </div>
         </div>
       </main>

@@ -4,8 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
-import AvatarStack from "@/components/social/AvatarStack";
-import TrendingBadge from "@/components/social/TrendingBadge";
+
 
 interface EventListCardProps {
   event: CommunityEvent;
@@ -72,7 +71,6 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
                 {formatPrice(event.price_cents)}
               </Badge>
             )}
-            {event.rsvp_count >= 5 && <TrendingBadge variant="hot" />}
             {event.has_attended ? (
               <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0 gap-0.5 bg-primary/15 text-primary border-0">
                 <CheckCircle2 className="w-2.5 h-2.5" />
@@ -100,7 +98,6 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
 
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2">
-              <AvatarStack count={event.rsvp_count} max={3} />
               {event.group_name && (() => {
                 const linkedGroup = groups.find((g) => g.name === event.group_name);
                 return linkedGroup ? (

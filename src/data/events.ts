@@ -16,6 +16,7 @@ export interface DbEvent {
   created_by: string | null; // auth.users UUID — null for seed data
   created_by_name: string;
   price_cents: number;
+  hobby_slug: string | null;
   status: EventStatus;
   created_at: string;
 }

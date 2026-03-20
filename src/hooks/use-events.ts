@@ -72,6 +72,14 @@ export function useEvents() {
     [events]
   );
 
+  const getEventsByHobby = useCallback(
+    (hobbySlug: string) =>
+      approvedEvents.filter(
+        (e) => e.hobby_slug === hobbySlug && e.date >= new Date().toISOString().split("T")[0]
+      ),
+    [approvedEvents]
+  );
+
   /* ── Mutations (optimistic + persist) ── */
 
   const addEvent = useCallback(
@@ -285,6 +293,7 @@ export function useEvents() {
     pendingEvents,
     rejectedEvents,
     getEvent,
+    getEventsByHobby,
     addEvent,
     updateEventStatus,
     toggleRSVP,

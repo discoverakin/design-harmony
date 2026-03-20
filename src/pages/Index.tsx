@@ -1,5 +1,6 @@
 import AppHeader from "@/components/AppHeader";
 import FeaturedHobbiesCarousel from "@/components/FeaturedHobbiesCarousel";
+import AISearch from "@/components/AISearch";
 import BrowseHobbiesSection from "@/components/BrowseHobbiesSection";
 import HobbyQuizCTA from "@/components/HobbyQuizCTA";
 import NearYouMap from "@/components/NearYouMap";
@@ -12,6 +13,7 @@ const Index = () => {
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
           <FeaturedHobbiesCarousel />
+          <AISearch />
           <BrowseHobbiesSection />
           <HobbyQuizCTA />
           <NearYouMap />

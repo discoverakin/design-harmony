@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,11 +14,19 @@ import BottomNav from "@/components/BottomNav";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
 import EditGroupSheet from "@/components/community/EditGroupSheet";
 import DeleteGroupDialog from "@/components/community/DeleteGroupDialog";
-import { communityEvents, groupMembers } from "@/data/community";
+import { communityEvents } from "@/data/community";
+import { supabase } from "@/lib/supabase";
 import { useGroupMembership } from "@/hooks/use-group-membership";
 import { useGroups, isCustomGroup, isOwnGroup } from "@/hooks/use-groups";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+
+interface GroupMember {
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  isCreator: boolean;
+}
 
 const GroupDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -41,6 +50,35 @@ const GroupDetail = () => {
   const joined = isJoined(group.id);
   const groupEvents = communityEvents.filter((e) => e.groupSlug === group.slug);
   const canEdit = isCustomGroup(group.id) || isOwnGroup(group, user?.id);
+
+  const [members, setMembers] = useState<GroupMember[]>([]);
+
+  useEffect(() => {
+    if (!group) return;
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("group_memberships")
+        .select("user_id, profiles!inner(display_name, avatar_url)")
+        .eq("group_id", group.id);
+
+      if (error || !data) {
+        console.warn("Failed to fetch group members:", error);
+        return;
+      }
+
+      const mapped: GroupMember[] = data.map((row: any) => ({
+        userId: row.user_id,
+        displayName: row.profiles?.display_name || "Member",
+        avatarUrl: row.profiles?.avatar_url || null,
+        isCreator: row.user_id === group.createdBy,
+      }));
+
+      // Sort creator first
+      mapped.sort((a, b) => (b.isCreator ? 1 : 0) - (a.isCreator ? 1 : 0));
+      setMembers(mapped);
+    })();
+  }, [group?.id, group?.createdBy, joined]);
 
   const handleSave = (data: Parameters<typeof updateGroup>[1]) => {
     const newSlug = updateGroup(group.id, data);
@@ -131,32 +169,41 @@ const GroupDetail = () => {
           <section className="px-5 py-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-foreground">
-                Members ({group.members})
+                Members ({members.length})
               </h2>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              {groupMembers.map((member) => (
-                <div
-                  key={member.name}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50"
-                >
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-base flex-shrink-0">
-                    {member.emoji}
+            {members.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2">
+                {members.map((member) => (
+                  <div
+                    key={member.userId}
+                    className="flex items-center gap-2 p-2.5 rounded-lg bg-secondary/50"
+                  >
+                    {member.avatarUrl ? (
+                      <img
+                        src={member.avatarUrl}
+                        alt={member.displayName}
+                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+                        {member.displayName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {member.displayName}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {member.isCreator ? "Organiser" : "Member"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground truncate">
-                      {member.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {member.role}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {group.members > groupMembers.length && (
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                +{group.members - groupMembers.length} more members
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No members yet. Be the first to join!
               </p>
             )}
           </section>

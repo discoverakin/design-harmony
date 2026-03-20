@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Star, MapPin, Clock, Calendar, Users } from "lucide-react";
 import { getHobbyBySlug } from "@/data/hobbies";
@@ -12,7 +11,6 @@ const HobbyDetail = () => {
   const navigate = useNavigate();
   const hobby = getHobbyBySlug(slug || "");
   const { getEventsByHobby, loading } = useEvents();
-  const classesRef = useRef<HTMLElement>(null);
 
   if (!hobby) {
     return (
@@ -28,15 +26,10 @@ const HobbyDetail = () => {
   const hobbyEvents = getEventsByHobby(hobby.slug);
 
   const handleGetStarted = () => {
-    // The scroll container is <main>, not the window, so find it and scroll manually
-    const section = classesRef.current;
-    if (!section) return;
-    const scrollable = section.closest("main");
-    if (scrollable) {
-      const offset = section.offsetTop - scrollable.offsetTop;
-      scrollable.scrollTo({ top: offset, behavior: "smooth" });
-    } else {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    console.log("Get Started clicked");
+    const el = document.getElementById("classes-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -98,7 +91,7 @@ const HobbyDetail = () => {
           </Button>
 
           {/* Classes & Events */}
-          <section className="mb-6" ref={classesRef}>
+          <section className="mb-6" id="classes-section">
             <h2 className="text-lg font-bold text-foreground mb-3">
               <MapPin className="w-4 h-4 inline-block mr-1 text-primary -mt-0.5" />
               {hobbyEvents.length > 0 ? "Upcoming classes & events" : "Nearby classes"}

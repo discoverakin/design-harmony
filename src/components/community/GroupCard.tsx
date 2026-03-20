@@ -6,7 +6,7 @@ import type { CommunityGroup } from "@/data/community";
 interface GroupCardProps {
   group: CommunityGroup;
   joined: boolean;
-  onToggleJoin: (groupId: number) => void;
+  onToggleJoin: (groupId: string) => void;
 }
 
 const GroupCard = ({ group, joined, onToggleJoin }: GroupCardProps) => {

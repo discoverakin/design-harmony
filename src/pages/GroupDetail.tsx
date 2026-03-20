@@ -15,12 +15,14 @@ import EditGroupSheet from "@/components/community/EditGroupSheet";
 import DeleteGroupDialog from "@/components/community/DeleteGroupDialog";
 import { communityEvents, groupMembers } from "@/data/community";
 import { useGroupMembership } from "@/hooks/use-group-membership";
-import { useGroups, isCustomGroup } from "@/hooks/use-groups";
+import { useGroups, isCustomGroup, isOwnGroup } from "@/hooks/use-groups";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 const GroupDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { allGroups, updateGroup, deleteGroup } = useGroups();
   const group = allGroups.find((g) => g.slug === slug);
   const { isJoined, toggleMembership } = useGroupMembership();
@@ -38,7 +40,7 @@ const GroupDetail = () => {
 
   const joined = isJoined(group.id);
   const groupEvents = communityEvents.filter((e) => e.groupSlug === group.slug);
-  const canEdit = isCustomGroup(group.id);
+  const canEdit = isCustomGroup(group.id) || isOwnGroup(group, user?.id);
 
   const handleSave = (data: Parameters<typeof updateGroup>[1]) => {
     const newSlug = updateGroup(group.id, data);

@@ -1,50 +1,95 @@
-import { useState, useCallback } from "react";
-import { groups as defaultGroups } from "@/data/community";
-
-const STORAGE_KEY = "akin-group-membership";
-
-function getStoredMembership(): Record<number, boolean> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  // Seed from default data
-  const initial: Record<number, boolean> = {};
-  defaultGroups.forEach((g) => {
-    initial[g.id] = g.isJoined;
-  });
-  return initial;
-}
-
-function saveMembership(membership: Record<number, boolean>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(membership));
-}
+import { useState, useCallback, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
 
 export function useGroupMembership() {
-  const [membership, setMembership] = useState<Record<number, boolean>>(
-    getStoredMembership
-  );
+  const { user } = useAuth();
+  const [membership, setMembership] = useState<Record<string, boolean>>({});
+
+  // Fetch current user's memberships from Supabase
+  useEffect(() => {
+    if (!user) {
+      setMembership({});
+      return;
+    }
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("group_memberships")
+        .select("group_id")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.warn("Failed to fetch memberships:", error);
+        return;
+      }
+
+      const map: Record<string, boolean> = {};
+      (data || []).forEach((row: any) => {
+        map[row.group_id] = true;
+      });
+      setMembership(map);
+    })();
+  }, [user]);
 
   const isJoined = useCallback(
-    (groupId: number) => membership[groupId] ?? false,
+    (groupId: string) => membership[groupId] ?? false,
     [membership]
   );
 
-  const toggleMembership = useCallback((groupId: number) => {
-    setMembership((prev) => {
-      const next = { ...prev, [groupId]: !prev[groupId] };
-      saveMembership(next);
-      return next;
-    });
-  }, []);
+  const toggleMembership = useCallback(
+    async (groupId: string) => {
+      if (!user) return;
 
-  const joinGroup = useCallback((groupId: number) => {
-    setMembership((prev) => {
-      const next = { ...prev, [groupId]: true };
-      saveMembership(next);
-      return next;
-    });
-  }, []);
+      const currentlyJoined = membership[groupId] ?? false;
+
+      // Optimistic update
+      setMembership((prev) => ({ ...prev, [groupId]: !currentlyJoined }));
+
+      if (currentlyJoined) {
+        const { error } = await supabase
+          .from("group_memberships")
+          .delete()
+          .eq("group_id", groupId)
+          .eq("user_id", user.id);
+
+        if (error) {
+          console.error("Failed to leave group:", error);
+          // Revert
+          setMembership((prev) => ({ ...prev, [groupId]: true }));
+        }
+      } else {
+        const { error } = await supabase
+          .from("group_memberships")
+          .insert({ group_id: groupId, user_id: user.id });
+
+        if (error) {
+          console.error("Failed to join group:", error);
+          // Revert
+          setMembership((prev) => ({ ...prev, [groupId]: false }));
+        }
+      }
+    },
+    [user, membership]
+  );
+
+  const joinGroup = useCallback(
+    async (groupId: string) => {
+      if (!user) return;
+
+      setMembership((prev) => ({ ...prev, [groupId]: true }));
+
+      const { error } = await supabase
+        .from("group_memberships")
+        .insert({ group_id: groupId, user_id: user.id });
+
+      if (error) {
+        console.error("Failed to join group:", error);
+        setMembership((prev) => ({ ...prev, [groupId]: false }));
+      }
+    },
+    [user]
+  );
 
   return { isJoined, toggleMembership, joinGroup };
 }

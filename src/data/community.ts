@@ -1,5 +1,5 @@
 export interface CommunityGroup {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   emoji: string;
@@ -10,12 +10,14 @@ export interface CommunityGroup {
   description: string;
   meetingSchedule: string;
   location: string;
+  coverImageUrl: string | null;
   recentPhotos: string[];
   rules: string[];
+  createdBy: string | null;
 }
 
 export interface CommunityEvent {
-  id: number;
+  id: string;
   title: string;
   date: string;
   time: string;
@@ -24,6 +26,7 @@ export interface CommunityEvent {
   emoji: string;
   group: string;
   groupSlug: string;
+  groupId: string;
 }
 
 export interface ActivityFeedItem {
@@ -39,18 +42,19 @@ export interface ActivityFeedItem {
 
 export const groups: CommunityGroup[] = [
   {
-    id: 1,
+    id: "00000000-0000-4000-a000-000000000001",
     name: "Weekend Painters",
     slug: "weekend-painters",
     emoji: "🎨",
     members: 48,
     bgColor: "hsl(18 100% 92%)",
     category: "Arts & Crafts",
-    isJoined: true,
+    isJoined: false,
     description:
       "A welcoming group for hobbyist painters who love spending weekends creating art. All skill levels are welcome — from first-time brushstrokes to experienced artists looking for community.",
     meetingSchedule: "Every Saturday, 10 AM – 1 PM",
     location: "Central Park Pavilion",
+    coverImageUrl: null,
     recentPhotos: [],
     rules: [
       "Be respectful and supportive of all skill levels",
@@ -58,20 +62,22 @@ export const groups: CommunityGroup[] = [
       "RSVP to events so we can plan supplies",
       "Share your work — we love seeing progress!",
     ],
+    createdBy: null,
   },
   {
-    id: 2,
+    id: "00000000-0000-4000-a000-000000000002",
     name: "City Runners Club",
     slug: "city-runners",
     emoji: "🏃",
     members: 124,
     bgColor: "hsl(209 100% 95%)",
     category: "Sports",
-    isJoined: true,
+    isJoined: false,
     description:
       "Whether you're training for a marathon or just want a casual morning jog, City Runners Club is your tribe. We run together 3× a week and celebrate every milestone.",
     meetingSchedule: "Mon / Wed / Fri, 6:30 AM",
     location: "River Trail Starting Point",
+    coverImageUrl: null,
     recentPhotos: [],
     rules: [
       "Show up on time — we start together",
@@ -79,9 +85,10 @@ export const groups: CommunityGroup[] = [
       "Wear reflective gear for early-morning runs",
       "Hydrate and have fun!",
     ],
+    createdBy: null,
   },
   {
-    id: 3,
+    id: "00000000-0000-4000-a000-000000000003",
     name: "Vinyl & Vibes",
     slug: "vinyl-vibes",
     emoji: "🎵",
@@ -93,6 +100,7 @@ export const groups: CommunityGroup[] = [
       "A community of music lovers who appreciate the warmth of vinyl records. We host listening sessions, swap records, and discuss everything from jazz to indie rock.",
     meetingSchedule: "Every other Friday, 7 PM",
     location: "Blue Note Lounge",
+    coverImageUrl: null,
     recentPhotos: [],
     rules: [
       "Handle records with care",
@@ -100,9 +108,10 @@ export const groups: CommunityGroup[] = [
       "Bring a record to share at listening nights",
       "No selling or trading without permission",
     ],
+    createdBy: null,
   },
   {
-    id: 4,
+    id: "00000000-0000-4000-a000-000000000004",
     name: "Book Worms Society",
     slug: "book-worms",
     emoji: "📚",
@@ -114,6 +123,7 @@ export const groups: CommunityGroup[] = [
       "Join fellow bookworms for monthly reads, lively discussions, and author spotlights. We rotate genres so there's always something new to explore.",
     meetingSchedule: "Last Sunday of each month, 4 PM",
     location: "Elm Street Library, Room B",
+    coverImageUrl: null,
     recentPhotos: [],
     rules: [
       "Read (or attempt!) the monthly pick before meetups",
@@ -121,9 +131,10 @@ export const groups: CommunityGroup[] = [
       "Be open to genres outside your comfort zone",
       "Recommend freely — sharing is caring",
     ],
+    createdBy: null,
   },
   {
-    id: 5,
+    id: "00000000-0000-4000-a000-000000000005",
     name: "Home Chefs United",
     slug: "home-chefs",
     emoji: "👨‍🍳",
@@ -135,6 +146,7 @@ export const groups: CommunityGroup[] = [
       "From weeknight dinners to weekend baking marathons, Home Chefs United brings together food enthusiasts who love cooking at home. Share recipes, swap tips, and eat well together.",
     meetingSchedule: "Wednesdays, 6:30 PM",
     location: "Community Kitchen, 2nd Floor",
+    coverImageUrl: null,
     recentPhotos: [],
     rules: [
       "Label all allergens when sharing food",
@@ -142,12 +154,13 @@ export const groups: CommunityGroup[] = [
       "Share your recipes — secret ingredients encouraged!",
       "Respect the kitchen space and equipment",
     ],
+    createdBy: null,
   },
 ];
 
 export const communityEvents: CommunityEvent[] = [
   {
-    id: 1,
+    id: "00000000-0000-4000-b000-000000000001",
     title: "Outdoor Sketch Walk",
     date: "Sat, Feb 8",
     time: "10:00 AM",
@@ -156,9 +169,10 @@ export const communityEvents: CommunityEvent[] = [
     emoji: "🎨",
     group: "Weekend Painters",
     groupSlug: "weekend-painters",
+    groupId: "00000000-0000-4000-a000-000000000001",
   },
   {
-    id: 2,
+    id: "00000000-0000-4000-b000-000000000002",
     title: "5K Morning Run",
     date: "Sun, Feb 9",
     time: "7:30 AM",
@@ -167,9 +181,10 @@ export const communityEvents: CommunityEvent[] = [
     emoji: "🏃",
     group: "City Runners Club",
     groupSlug: "city-runners",
+    groupId: "00000000-0000-4000-a000-000000000002",
   },
   {
-    id: 3,
+    id: "00000000-0000-4000-b000-000000000003",
     title: "Jazz Appreciation Night",
     date: "Mon, Feb 10",
     time: "7:00 PM",
@@ -178,9 +193,10 @@ export const communityEvents: CommunityEvent[] = [
     emoji: "🎵",
     group: "Vinyl & Vibes",
     groupSlug: "vinyl-vibes",
+    groupId: "00000000-0000-4000-a000-000000000003",
   },
   {
-    id: 4,
+    id: "00000000-0000-4000-b000-000000000004",
     title: "Recipe Swap Potluck",
     date: "Wed, Feb 12",
     time: "6:30 PM",
@@ -189,6 +205,7 @@ export const communityEvents: CommunityEvent[] = [
     emoji: "👨‍🍳",
     group: "Home Chefs United",
     groupSlug: "home-chefs",
+    groupId: "00000000-0000-4000-a000-000000000005",
   },
 ];
 

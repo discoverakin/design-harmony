@@ -28,7 +28,16 @@ const HobbyDetail = () => {
   const hobbyEvents = getEventsByHobby(hobby.slug);
 
   const handleGetStarted = () => {
-    classesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // The scroll container is <main>, not the window, so find it and scroll manually
+    const section = classesRef.current;
+    if (!section) return;
+    const scrollable = section.closest("main");
+    if (scrollable) {
+      const offset = section.offsetTop - scrollable.offsetTop;
+      scrollable.scrollTo({ top: offset, behavior: "smooth" });
+    } else {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   return (
@@ -79,6 +88,14 @@ const HobbyDetail = () => {
               ))}
             </ul>
           </section>
+
+          {/* CTA */}
+          <Button
+            className="w-full rounded-xl h-12 text-base font-semibold mb-6"
+            onClick={handleGetStarted}
+          >
+            Get started
+          </Button>
 
           {/* Classes & Events */}
           <section className="mb-6" ref={classesRef}>
@@ -174,13 +191,6 @@ const HobbyDetail = () => {
             )}
           </section>
 
-          {/* CTA */}
-          <Button
-            className="w-full rounded-xl h-12 text-base font-semibold mb-4"
-            onClick={handleGetStarted}
-          >
-            Get started
-          </Button>
         </div>
       </main>
 

@@ -57,30 +57,44 @@ const GroupDetail = () => {
     if (!group) return;
 
     (async () => {
-      const { data, error } = await supabase
+      // Step 1: fetch all memberships for this group
+      const { data: memberships, error: memError } = await supabase
         .from("group_memberships")
-        .select("user_id, profiles(display_name, avatar_url)")
+        .select("user_id, joined_at")
         .eq("group_id", group.id);
 
-      if (error || !data) {
-        console.warn("Failed to fetch group members:", error);
+      console.log("[GroupDetail] memberships query:", { groupId: group.id, memberships, memError });
+
+      if (memError || !memberships || memberships.length === 0) {
+        console.warn("No memberships found or error:", memError);
+        setMembers([]);
         return;
       }
 
-      const mapped: GroupMember[] = data.map((row: any) => {
-        // profiles may be null if the user doesn't have a profile row yet
-        const prof = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
-        return {
-          userId: row.user_id,
-          displayName: prof?.display_name || "Member",
-          avatarUrl: prof?.avatar_url || null,
-          isCreator: row.user_id === group.createdBy,
-        };
-      });
+      // Step 2: for each membership, fetch the profile
+      const results: GroupMember[] = await Promise.all(
+        memberships.map(async (mem: any) => {
+          const { data: profile, error: profError } = await supabase
+            .from("profiles")
+            .select("display_name, avatar_url")
+            .eq("user_id", mem.user_id)
+            .maybeSingle();
+
+          console.log("[GroupDetail] profile for user:", { userId: mem.user_id, profile, profError });
+
+          return {
+            userId: mem.user_id,
+            displayName: profile?.display_name || "Member",
+            avatarUrl: profile?.avatar_url || null,
+            isCreator: mem.user_id === group.createdBy,
+          };
+        })
+      );
 
       // Sort creator first
-      mapped.sort((a, b) => (b.isCreator ? 1 : 0) - (a.isCreator ? 1 : 0));
-      setMembers(mapped);
+      results.sort((a, b) => (b.isCreator ? 1 : 0) - (a.isCreator ? 1 : 0));
+      console.log("[GroupDetail] final members list:", results);
+      setMembers(results);
     })();
   }, [group?.id, group?.createdBy, joined]);
 

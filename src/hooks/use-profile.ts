@@ -100,10 +100,16 @@ export function useProfile(defaults?: { name: string; handle: string }) {
 
   const updateProfile = useCallback(
     async (patch: Partial<ProfileData>) => {
+      console.log("[useProfile] updateProfile called with patch:", patch);
+      console.log("[useProfile] current user:", user?.id, user?.email);
+
       // Optimistically update local state
       setProfile((prev) => ({ ...prev, ...patch }));
 
-      if (!user) return;
+      if (!user) {
+        console.warn("[useProfile] No user logged in — skipping Supabase update");
+        return;
+      }
 
       const updates: Record<string, unknown> = {};
       if (patch.name !== undefined) updates.display_name = patch.name;
@@ -111,15 +117,33 @@ export function useProfile(defaults?: { name: string; handle: string }) {
       if (patch.avatarUrl !== undefined) updates.avatar_url = patch.avatarUrl;
       if (patch.bio !== undefined) updates.bio = patch.bio;
 
-      if (Object.keys(updates).length === 0) return;
+      if (Object.keys(updates).length === 0) {
+        console.warn("[useProfile] No fields to update after mapping");
+        return;
+      }
 
-      const { error } = await supabase
+      console.log("[useProfile] Sending to Supabase profiles table:", {
+        updates,
+        userId: user.id,
+      });
+
+      const { data, error, status, statusText } = await supabase
         .from("profiles")
         .update(updates)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .select();
+
+      console.log("[useProfile] Supabase response:", {
+        data,
+        error,
+        status,
+        statusText,
+      });
 
       if (error) {
-        console.error("Failed to update profile:", error.message);
+        console.error("[useProfile] Failed to update profile:", error.message, error);
+      } else {
+        console.log("[useProfile] Profile updated successfully:", data);
       }
     },
     [user],

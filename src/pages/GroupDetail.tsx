@@ -59,7 +59,7 @@ const GroupDetail = () => {
     (async () => {
       const { data, error } = await supabase
         .from("group_memberships")
-        .select("user_id, profiles!inner(display_name, avatar_url)")
+        .select("user_id, profiles(display_name, avatar_url)")
         .eq("group_id", group.id);
 
       if (error || !data) {
@@ -67,12 +67,16 @@ const GroupDetail = () => {
         return;
       }
 
-      const mapped: GroupMember[] = data.map((row: any) => ({
-        userId: row.user_id,
-        displayName: row.profiles?.display_name || "Member",
-        avatarUrl: row.profiles?.avatar_url || null,
-        isCreator: row.user_id === group.createdBy,
-      }));
+      const mapped: GroupMember[] = data.map((row: any) => {
+        // profiles may be null if the user doesn't have a profile row yet
+        const prof = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        return {
+          userId: row.user_id,
+          displayName: prof?.display_name || "Member",
+          avatarUrl: prof?.avatar_url || null,
+          isCreator: row.user_id === group.createdBy,
+        };
+      });
 
       // Sort creator first
       mapped.sort((a, b) => (b.isCreator ? 1 : 0) - (a.isCreator ? 1 : 0));

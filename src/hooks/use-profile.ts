@@ -9,20 +9,31 @@ export interface ProfileData {
   bio: string | null;
 }
 
-export function useProfile(defaults: { name: string; handle: string }) {
+export function useProfile(defaults?: { name: string; handle: string }) {
   const { user } = useAuth();
+
+  // Derive sensible defaults from the auth user when caller doesn't supply them
+  const fallbackName =
+    defaults?.name ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "User";
+  const fallbackHandle =
+    defaults?.handle ||
+    `@${(user?.email?.split("@")[0] || "user").toLowerCase()}`;
+
   const [profile, setProfile] = useState<ProfileData>({
-    name: defaults.name,
-    handle: defaults.handle,
+    name: fallbackName,
+    handle: fallbackHandle,
     avatarUrl: null,
     bio: null,
   });
   const [loading, setLoading] = useState(true);
 
-  // Fetch profile from Supabase on mount / user change
+  // Fetch profile from Supabase on mount / user change — auto-create if missing
   useEffect(() => {
     if (!user) {
-      setProfile({ name: defaults.name, handle: defaults.handle, avatarUrl: null, bio: null });
+      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null });
       setLoading(false);
       return;
     }
@@ -40,7 +51,7 @@ export function useProfile(defaults: { name: string; handle: string }) {
 
       if (error) {
         console.error("Failed to fetch profile:", error.message);
-        setProfile({ name: defaults.name, handle: defaults.handle, avatarUrl: null, bio: null });
+        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null });
       } else if (data) {
         setProfile({
           name: data.display_name,
@@ -49,13 +60,19 @@ export function useProfile(defaults: { name: string; handle: string }) {
           bio: data.bio,
         });
       } else {
-        // No profile row yet — create one with defaults
+        // No profile row yet — auto-create from user email / metadata
+        const autoName =
+          user!.user_metadata?.full_name ||
+          user!.email?.split("@")[0] ||
+          "User";
+        const autoHandle = `@${(user!.email?.split("@")[0] || "user").toLowerCase()}`;
+
         const { data: inserted, error: insertError } = await supabase
           .from("profiles")
           .insert({
             user_id: user!.id,
-            display_name: defaults.name,
-            handle: defaults.handle,
+            display_name: autoName,
+            handle: autoHandle,
           })
           .select("display_name, handle, avatar_url, bio")
           .single();
@@ -79,7 +96,7 @@ export function useProfile(defaults: { name: string; handle: string }) {
 
     fetchProfile();
     return () => { cancelled = true; };
-  }, [user?.id, defaults.name, defaults.handle]);
+  }, [user?.id]);
 
   const updateProfile = useCallback(
     async (patch: Partial<ProfileData>) => {

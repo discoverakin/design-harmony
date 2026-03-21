@@ -30,15 +30,16 @@ serve(async (req) => {
       );
     }
 
-    // Single service role client for both auth verification and DB operations
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const token = authHeader.replace("Bearer ", "");
-    console.log("[create-checkout-session] Token prefix:", token.slice(0, 20) + "...");
+    // Create client with the user's Authorization header so Supabase handles JWT internally
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    console.log("[create-checkout-session] Auth header:", authHeader.slice(0, 30) + "...");
 
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(token);
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       console.error("[create-checkout-session] Auth failed:", authError?.message, "| user:", user);

@@ -77,12 +77,16 @@ export function useEvents() {
   const getEventsByHobby = useCallback(
     (hobbySlug: string) => {
       const today = new Date().toISOString().split("T")[0];
-      const allSlugs = approvedEvents.map((e) => ({ id: e.id, title: e.title, hobby_slug: e.hobby_slug, date: e.date }));
-      console.log("[useEvents] getEventsByHobby called with:", hobbySlug, "| today:", today, "| approvedEvents count:", approvedEvents.length, "| all hobby_slugs:", allSlugs);
+      if (approvedEvents.length > 0) {
+        console.log("[useEvents] first event full shape:", JSON.stringify(approvedEvents[0], null, 2));
+      }
+      const allSlugs = approvedEvents.map((e) => `${e.title}: hobby_slug=${JSON.stringify(e.hobby_slug)} (type=${typeof e.hobby_slug})`);
+      console.log("[useEvents] getEventsByHobby called with:", JSON.stringify(hobbySlug), "| today:", today, "| approvedEvents count:", approvedEvents.length);
+      console.log("[useEvents] all hobby_slugs:", allSlugs);
       const filtered = approvedEvents.filter(
         (e) => e.hobby_slug === hobbySlug && e.date >= today
       );
-      console.log("[useEvents] filtered result:", filtered);
+      console.log("[useEvents] filtered result count:", filtered.length, filtered.map((e) => e.title));
       return filtered;
     },
     [approvedEvents]

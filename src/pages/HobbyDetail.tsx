@@ -24,15 +24,6 @@ const HobbyDetail = () => {
   }
 
   const hobbyEvents = getEventsByHobby(hobby.slug);
-  console.log("[HobbyDetail] slug:", hobby.slug, "| loading:", loading, "| hobbyEvents:", hobbyEvents);
-
-  const handleGetStarted = () => {
-    console.log("Get Started clicked");
-    const el = document.getElementById("classes-section");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -83,16 +74,8 @@ const HobbyDetail = () => {
             </ul>
           </section>
 
-          {/* CTA */}
-          <Button
-            className="w-full rounded-xl h-12 text-base font-semibold mb-6"
-            onClick={handleGetStarted}
-          >
-            Get started
-          </Button>
-
           {/* Classes & Events */}
-          <section className="mb-6" id="classes-section">
+          <section className="pb-4">
             <h2 className="text-lg font-bold text-foreground mb-3">
               <MapPin className="w-4 h-4 inline-block mr-1 text-primary -mt-0.5" />
               {hobbyEvents.length > 0 ? "Upcoming classes & events" : "Nearby classes"}
@@ -184,7 +167,6 @@ const HobbyDetail = () => {
               </div>
             )}
           </section>
-
         </div>
       </main>
 

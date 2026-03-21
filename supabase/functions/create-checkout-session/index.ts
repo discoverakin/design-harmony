@@ -7,6 +7,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 });
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
@@ -30,14 +31,15 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Use anon key client to verify the user's JWT
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
     const token = authHeader.replace("Bearer ", "");
     console.log("[create-checkout-session] Token prefix:", token.slice(0, 20) + "...");
 
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(token);
+    } = await supabaseAuth.auth.getUser(token);
 
     if (authError || !user) {
       console.error("[create-checkout-session] Auth failed:", authError?.message, "| user:", user);
@@ -51,6 +53,9 @@ serve(async (req) => {
     }
 
     console.log("[create-checkout-session] Authenticated user:", user.id);
+
+    // Use service role client for privileged DB operations
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { event_id, success_url, cancel_url } = await req.json();
 

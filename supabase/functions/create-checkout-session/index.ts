@@ -21,20 +21,36 @@ serve(async (req) => {
 
   try {
     // Verify the user's JWT
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("[create-checkout-session] Missing Authorization header");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized", reason: "Missing Authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const token = authHeader.replace("Bearer ", "");
+    console.log("[create-checkout-session] Token prefix:", token.slice(0, 20) + "...");
+
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.error("[create-checkout-session] Auth failed:", authError?.message, "| user:", user);
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          reason: authError?.message ?? "No user returned from token",
+        }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
+    console.log("[create-checkout-session] Authenticated user:", user.id);
 
     const { event_id, success_url, cancel_url } = await req.json();
 

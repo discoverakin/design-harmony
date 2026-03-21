@@ -1,11 +1,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@14?target=deno";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-  apiVersion: "2023-10-16",
-});
-
+const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY")!;
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -77,30 +73,39 @@ serve(async (req) => {
       });
     }
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: event.title,
-              description: `RSVP payment for ${event.title}`,
-            },
-            unit_amount: event.price_cents,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url,
-      cancel_url,
-      metadata: {
-        event_id: event.id,
-        user_id: user.id,
+    // Create Stripe Checkout Session via REST API
+    const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${stripeSecretKey}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
+      body: new URLSearchParams({
+        "payment_method_types[]": "card",
+        mode: "payment",
+        success_url,
+        cancel_url,
+        "line_items[0][price_data][currency]": "usd",
+        "line_items[0][price_data][product_data][name]": event.title,
+        "line_items[0][price_data][product_data][description]": `RSVP payment for ${event.title}`,
+        "line_items[0][price_data][unit_amount]": String(event.price_cents),
+        "line_items[0][quantity]": "1",
+        "metadata[event_id]": event.id,
+        "metadata[user_id]": user.id,
+      }),
     });
+
+    const session = await stripeRes.json();
+
+    if (!stripeRes.ok) {
+      console.error("[create-checkout-session] Stripe error:", session);
+      return new Response(JSON.stringify({ error: session.error?.message ?? "Stripe error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("[create-checkout-session] Stripe session created:", session.id);
 
     // Insert a pending payment record
     await supabase.from("event_payments").insert({

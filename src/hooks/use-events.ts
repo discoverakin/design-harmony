@@ -42,6 +42,8 @@ export function useEvents() {
     );
     const myPaidIds = new Set((myPaymentsRes.data ?? []).map((p) => p.event_id));
 
+    console.log("[useEvents] raw Supabase events:", eventsRes.data, "| error:", eventsRes.error);
+
     const enriched: CommunityEvent[] = (
       (eventsRes.data ?? []) as DbEvent[]
     ).map((evt) => ({
@@ -73,10 +75,16 @@ export function useEvents() {
   );
 
   const getEventsByHobby = useCallback(
-    (hobbySlug: string) =>
-      approvedEvents.filter(
-        (e) => e.hobby_slug === hobbySlug && e.date >= new Date().toISOString().split("T")[0]
-      ),
+    (hobbySlug: string) => {
+      const today = new Date().toISOString().split("T")[0];
+      const allSlugs = approvedEvents.map((e) => ({ id: e.id, title: e.title, hobby_slug: e.hobby_slug, date: e.date }));
+      console.log("[useEvents] getEventsByHobby called with:", hobbySlug, "| today:", today, "| approvedEvents count:", approvedEvents.length, "| all hobby_slugs:", allSlugs);
+      const filtered = approvedEvents.filter(
+        (e) => e.hobby_slug === hobbySlug && e.date >= today
+      );
+      console.log("[useEvents] filtered result:", filtered);
+      return filtered;
+    },
     [approvedEvents]
   );
 

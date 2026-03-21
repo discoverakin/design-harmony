@@ -24,6 +24,7 @@ const HobbyDetail = () => {
   }
 
   const hobbyEvents = getEventsByHobby(hobby.slug);
+  console.log("[HobbyDetail] slug:", hobby.slug, "| loading:", loading, "| hobbyEvents:", hobbyEvents);
 
   const handleGetStarted = () => {
     console.log("Get Started clicked");

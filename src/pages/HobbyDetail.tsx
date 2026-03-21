@@ -1,5 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Clock, Calendar, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Users } from "lucide-react";
 import { getHobbyBySlug } from "@/data/hobbies";
 import { Button } from "@/components/ui/button";
 import BottomNav from "@/components/BottomNav";
@@ -75,14 +75,18 @@ const HobbyDetail = () => {
           </section>
 
           {/* Classes & Events */}
-          <section className="pb-4">
+          {/* Upcoming Classes */}
+          <section className="pb-6">
             <h2 className="text-lg font-bold text-foreground mb-3">
-              <MapPin className="w-4 h-4 inline-block mr-1 text-primary -mt-0.5" />
-              {hobbyEvents.length > 0 ? "Upcoming classes & events" : "Nearby classes"}
+              <Calendar className="w-4 h-4 inline-block mr-1 text-primary -mt-0.5" />
+              Upcoming Classes
             </h2>
 
-            {/* Live events from Supabase */}
-            {hobbyEvents.length > 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-6">
+                <span className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            ) : hobbyEvents.length > 0 ? (
               <div className="space-y-3">
                 {hobbyEvents.map((event) => {
                   const dateObj = new Date(event.date + "T00:00:00");
@@ -133,36 +137,11 @@ const HobbyDetail = () => {
                   );
                 })}
               </div>
-            ) : loading ? (
-              <div className="flex items-center justify-center py-6">
-                <span className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-              </div>
             ) : (
-              /* Fallback: static nearbyClasses */
-              <div className="space-y-3">
-                {hobby.nearbyClasses.map((cls) => (
-                  <div
-                    key={cls.name}
-                    className="flex items-center justify-between w-full p-4 rounded-xl border-2 border-border bg-card text-left"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{cls.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {cls.location}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="flex items-center gap-0.5 text-xs font-medium text-foreground">
-                        <Star className="w-3 h-3 fill-primary text-primary" />
-                        {cls.rating}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{cls.price}</span>
-                    </div>
-                  </div>
-                ))}
-                <p className="text-xs text-muted-foreground text-center pt-1">
-                  No upcoming events yet — check back soon!
+              <div className="flex flex-col items-center py-8 text-center">
+                <span className="text-3xl mb-2">📅</span>
+                <p className="text-sm text-muted-foreground">
+                  No upcoming classes yet — check back soon!
                 </p>
               </div>
             )}

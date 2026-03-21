@@ -84,7 +84,7 @@ export function useEvents() {
       console.log("[useEvents] getEventsByHobby called with:", JSON.stringify(hobbySlug), "| today:", today, "| approvedEvents count:", approvedEvents.length);
       console.log("[useEvents] all hobby_slugs:", allSlugs);
       const filtered = approvedEvents.filter(
-        (e) => e.hobby_slug === hobbySlug && e.date >= today
+        (e) => e.hobby_slug === hobbySlug
       );
       console.log("[useEvents] filtered result count:", filtered.length, filtered.map((e) => e.title));
       return filtered;

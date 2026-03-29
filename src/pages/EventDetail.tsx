@@ -54,7 +54,6 @@ const EventDetail = () => {
     if (paymentStatus === "success") {
       setShowPaymentSuccess(true);
       if (user) {
-        toast({ title: "You're booked! See you there 🎉", description: "Payment confirmed — you're all set." });
         refresh();
       }
       setSearchParams({}, { replace: true });

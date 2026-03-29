@@ -98,8 +98,12 @@ const EventDetail = () => {
     year: "numeric",
   });
 
+  // If user has paid but RSVP hasn't been recorded yet (webhook delay), count them
+  const paidButNotCounted = (event.has_paid || showPaymentSuccess) && !event.is_attending;
+  const displayRsvpCount = event.rsvp_count + (paidButNotCounted ? 1 : 0);
+
   const spotsLeft = event.max_attendees
-    ? event.max_attendees - event.rsvp_count
+    ? event.max_attendees - displayRsvpCount
     : null;
 
   // Find if there's already an activity log for this event
@@ -305,7 +309,7 @@ const EventDetail = () => {
             <div className="flex items-center gap-3 text-sm text-foreground">
               <Users className="w-4 h-4 text-primary flex-shrink-0" />
               <span>
-                {event.rsvp_count} going
+                {displayRsvpCount} going
                 {spotsLeft !== null && spotsLeft > 0 && (
                   <span className="text-muted-foreground">
                     {" "}
@@ -341,26 +345,27 @@ const EventDetail = () => {
           </div>
 
           {/* Attendee info */}
-          {event.rsvp_count > 0 && (
+          {displayRsvpCount > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-bold text-foreground mb-2">
-                Who's going ({event.rsvp_count})
+                Who's going ({displayRsvpCount})
               </h3>
               <div className="flex items-center gap-3">
                 <div className="flex flex-wrap gap-1.5">
-                  {event.is_attending && (
+                  {(event.is_attending || paidButNotCounted) && (
                     <Badge variant="default" className="text-xs">
                       You
                     </Badge>
                   )}
-                  {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) > 0 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{event.is_attending ? event.rsvp_count - 1 : event.rsvp_count} other
-                      {(event.is_attending ? event.rsvp_count - 1 : event.rsvp_count) !== 1
-                        ? "s"
-                        : ""}
-                    </Badge>
-                  )}
+                  {(() => {
+                    const youCounted = event.is_attending || paidButNotCounted;
+                    const others = youCounted ? displayRsvpCount - 1 : displayRsvpCount;
+                    return others > 0 ? (
+                      <Badge variant="secondary" className="text-xs">
+                        +{others} other{others !== 1 ? "s" : ""}
+                      </Badge>
+                    ) : null;
+                  })()}
                 </div>
               </div>
             </div>
@@ -393,8 +398,8 @@ const EventDetail = () => {
 
           {/* Action buttons */}
           <div className="space-y-3">
-            {/* Registered badge for paid users, Pay & RSVP, or normal RSVP */}
-            {event.price_cents > 0 && event.has_paid ? (
+            {/* Registered badge for paid users or just-completed payment */}
+            {event.price_cents > 0 && (event.has_paid || showPaymentSuccess) ? (
               <div className="flex items-center justify-center w-full rounded-xl h-12 bg-green-500/15 border-2 border-green-500/30">
                 <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4" />

@@ -50,7 +50,8 @@ serve(async (req) => {
 
     console.log("[create-checkout-session] Authenticated user:", user.id);
 
-    const { event_id, success_url, cancel_url } = await req.json();
+    const { event_id } = await req.json();
+    const origin = req.headers.get("origin") || "http://localhost:3000";
 
     // Look up the event price from DB
     const { data: event, error: eventError } = await supabase
@@ -83,8 +84,8 @@ serve(async (req) => {
       body: new URLSearchParams({
         "payment_method_types[]": "card",
         mode: "payment",
-        success_url,
-        cancel_url,
+        success_url: `${origin}/events/${event_id}?payment=success`,
+        cancel_url: `${origin}/events/${event_id}?payment=cancel`,
         "line_items[0][price_data][currency]": "usd",
         "line_items[0][price_data][product_data][name]": event.title,
         "line_items[0][price_data][product_data][description]": `RSVP payment for ${event.title}`,

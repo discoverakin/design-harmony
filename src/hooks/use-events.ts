@@ -274,10 +274,8 @@ export function useEvents() {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
 
-      console.log("[initiatePayment] headers:", {
-        Authorization: token ? `Bearer ${token.slice(0, 20)}...` : "MISSING",
-        apikey: supabaseAnonKey ? `${supabaseAnonKey.slice(0, 20)}...` : "MISSING",
-      });
+      console.log("[initiatePayment] full token:", token);
+      console.log("[initiatePayment] apikey:", supabaseAnonKey);
 
       const res = await fetch(
         `${supabaseUrl}/functions/v1/create-checkout-session`,
@@ -290,8 +288,6 @@ export function useEvents() {
           },
           body: JSON.stringify({
             event_id: eventId,
-            success_url: `${window.location.origin}/events/${eventId}?payment=success`,
-            cancel_url: `${window.location.origin}/events/${eventId}?payment=cancel`,
           }),
         }
       );

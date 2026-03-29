@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import logoAkin from "@/assets/logo-akin.png";
@@ -11,13 +11,25 @@ import logoAkinDark from "@/assets/logo-akin-dark.png";
 const Login = () => {
   const { signIn, user } = useAuth();
   const { theme } = useTheme();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  const paymentStatus = searchParams.get("payment");
+  const redirectPath = searchParams.get("redirect") || sessionStorage.getItem("redirectAfterLogin");
+  const isPaymentReturn = paymentStatus === "success";
+
+  if (user) {
+    if (redirectPath) {
+      sessionStorage.removeItem("redirectAfterLogin");
+      return <Navigate to={`${redirectPath}?payment=${paymentStatus}`} replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +37,13 @@ const Login = () => {
     setLoading(true);
 
     const { error } = await signIn(email, password);
-    if (error) setError(error);
-    setLoading(false);
+    if (error) {
+      setError(error);
+      setLoading(false);
+    } else if (redirectPath) {
+      sessionStorage.removeItem("redirectAfterLogin");
+      navigate(`${redirectPath}?payment=${paymentStatus}`, { replace: true });
+    }
   };
 
   return (
@@ -47,6 +64,15 @@ const Login = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
+          {isPaymentReturn && (
+            <div className="flex items-center gap-3 mb-6 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20">
+              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+              <p className="text-sm font-semibold text-green-700">
+                Payment successful! Sign in to view your booking 🎉
+              </p>
+            </div>
+          )}
+
           <div className="w-16 h-16 rounded-full bg-brand-creamsicle/30 flex items-center justify-center mb-6">
             <span className="text-3xl">👋</span>
           </div>
@@ -55,7 +81,9 @@ const Login = () => {
             Welcome back
           </h1>
           <p className="text-muted-foreground mb-8">
-            Sign in to continue your hobby journey.
+            {isPaymentReturn
+              ? "Sign in to see your booking details."
+              : "Sign in to continue your hobby journey."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Navigate, useSearchParams } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -21,10 +21,11 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import AdminEvents from "@/pages/AdminEvents";
 
-/** Redirects unauthenticated visitors to /login */
+/** Redirects unauthenticated visitors to /login, preserving payment return context */
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
+  const location = useLocation();
 
   if (loading || profileLoading) {
     return (
@@ -34,26 +35,18 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
-  return <>{children}</>;
-};
+  if (!user) {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get("payment");
 
-/** Like RequireAuth but allows through if ?payment= is in the URL (post-Stripe redirect) */
-const RequireAuthOrPaymentReturn = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  const { loading: profileLoading } = useProfile();
-  const [searchParams] = useSearchParams();
-  const isPaymentReturn = searchParams.get("payment") === "success" || searchParams.get("payment") === "cancel";
+    if (paymentStatus === "success" || paymentStatus === "cancel") {
+      const redirectPath = location.pathname;
+      sessionStorage.setItem("redirectAfterLogin", redirectPath);
+      return <Navigate to={`/login?payment=${paymentStatus}&redirect=${encodeURIComponent(redirectPath)}`} replace />;
+    }
 
-  if (loading || profileLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
-
-  if (!user && !isPaymentReturn) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 
@@ -97,7 +90,7 @@ const AnimatedRoutes = () => {
         <Route path="/community/:slug" element={<RequireAuth><PageTransition><GroupDetail /></PageTransition></RequireAuth>} />
         <Route path="/events" element={<RequireAuth><PageTransition><Events /></PageTransition></RequireAuth>} />
         <Route path="/events/create" element={<RequireAuth><PageTransition><CreateEvent /></PageTransition></RequireAuth>} />
-        <Route path="/events/:id" element={<RequireAuthOrPaymentReturn><PageTransition><EventDetail /></PageTransition></RequireAuthOrPaymentReturn>} />
+        <Route path="/events/:id" element={<RequireAuth><PageTransition><EventDetail /></PageTransition></RequireAuth>} />
         <Route path="/admin-events" element={<RequireAuth><PageTransition><AdminEvents /></PageTransition></RequireAuth>} />
         <Route path="/tracker" element={<RequireAuth><PageTransition><HobbyTracker /></PageTransition></RequireAuth>} />
         <Route path="/quiz" element={<RequireAuth><PageTransition><HobbyQuiz /></PageTransition></RequireAuth>} />

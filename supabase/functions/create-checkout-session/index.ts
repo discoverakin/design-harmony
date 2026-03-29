@@ -51,7 +51,10 @@ serve(async (req) => {
     console.log("[create-checkout-session] Authenticated user:", user.id);
 
     const { event_id } = await req.json();
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    const rawOrigin = req.headers.get("origin") || "http://localhost:3000";
+    const origin = rawOrigin.includes("vercel.app")
+      ? "https://design-harmony-git-dev-discoverakins-projects.vercel.app"
+      : rawOrigin;
 
     // Look up the event price from DB
     const { data: event, error: eventError } = await supabase

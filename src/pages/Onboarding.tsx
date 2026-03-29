@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/use-theme";
+import { useProfile } from "@/hooks/use-profile";
 import logoAkin from "@/assets/logo-akin.png";
 import logoAkinDark from "@/assets/logo-akin-dark.png";
 
@@ -64,6 +65,7 @@ const slideVariants = {
 const Onboarding = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { updateProfile } = useProfile();
   const [[page, direction], setPage] = useState([0, 0]);
 
   const paginate = (newDirection: number) => {
@@ -78,6 +80,7 @@ const Onboarding = () => {
 
   const completeOnboarding = () => {
     localStorage.setItem("akin-onboarding-complete", "true");
+    updateProfile({ hasCompletedOnboarding: true });
     navigate("/", { replace: true });
   };
 
@@ -92,14 +95,12 @@ const Onboarding = () => {
       {/* Header area with logo */}
       <div className="flex items-center justify-between px-5 pt-6">
         <img src={theme === "dark" ? logoAkinDark : logoAkin} alt="Akin" className="h-7" />
-        {page > 0 && (
-          <button
-            onClick={completeOnboarding}
-            className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Skip
-          </button>
-        )}
+        <button
+          onClick={completeOnboarding}
+          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Skip
+        </button>
       </div>
 
       {/* Slide content */}

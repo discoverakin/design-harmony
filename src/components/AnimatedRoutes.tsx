@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import PageTransition from "@/components/PageTransition";
 import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
@@ -20,14 +21,12 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import AdminEvents from "@/pages/AdminEvents";
 
-const hasCompletedOnboarding = () =>
-  localStorage.getItem("akin-onboarding-complete") === "true";
-
 /** Redirects unauthenticated visitors to /login */
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -37,6 +36,21 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
+};
+
+/** Checks onboarding from profile (Supabase) with localStorage fallback */
+const useHasCompletedOnboarding = () => {
+  const { profile } = useProfile();
+  return profile.hasCompletedOnboarding || localStorage.getItem("akin-onboarding-complete") === "true";
+};
+
+const HomeRoute = () => {
+  const onboarded = useHasCompletedOnboarding();
+  return onboarded ? (
+    <PageTransition><Index /></PageTransition>
+  ) : (
+    <Navigate to="/onboarding" replace />
+  );
 };
 
 const AnimatedRoutes = () => {
@@ -55,11 +69,7 @@ const AnimatedRoutes = () => {
           path="/"
           element={
             <RequireAuth>
-              {hasCompletedOnboarding() ? (
-                <PageTransition><Index /></PageTransition>
-              ) : (
-                <Navigate to="/onboarding" replace />
-              )}
+              <HomeRoute />
             </RequireAuth>
           }
         />

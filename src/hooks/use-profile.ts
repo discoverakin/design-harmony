@@ -7,6 +7,7 @@ export interface ProfileData {
   handle: string;
   avatarUrl: string | null;
   bio: string | null;
+  hasCompletedOnboarding: boolean;
 }
 
 export function useProfile(defaults?: { name: string; handle: string }) {
@@ -27,13 +28,14 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     handle: fallbackHandle,
     avatarUrl: null,
     bio: null,
+    hasCompletedOnboarding: false,
   });
   const [loading, setLoading] = useState(true);
 
   // Fetch profile from Supabase on mount / user change — auto-create if missing
   useEffect(() => {
     if (!user) {
-      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null });
+      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false });
       setLoading(false);
       return;
     }
@@ -43,7 +45,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     async function fetchProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, handle, avatar_url, bio")
+        .select("display_name, handle, avatar_url, bio, has_completed_onboarding")
         .eq("user_id", user!.id)
         .maybeSingle();
 
@@ -51,13 +53,14 @@ export function useProfile(defaults?: { name: string; handle: string }) {
 
       if (error) {
         console.error("Failed to fetch profile:", error.message);
-        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null });
+        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false });
       } else if (data) {
         setProfile({
           name: data.display_name,
           handle: data.handle,
           avatarUrl: data.avatar_url,
           bio: data.bio,
+          hasCompletedOnboarding: data.has_completed_onboarding ?? false,
         });
       } else {
         // No profile row yet — auto-create from user email / metadata
@@ -74,7 +77,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             display_name: autoName,
             handle: autoHandle,
           })
-          .select("display_name, handle, avatar_url, bio")
+          .select("display_name, handle, avatar_url, bio, has_completed_onboarding")
           .single();
 
         if (cancelled) return;
@@ -87,6 +90,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             handle: inserted.handle,
             avatarUrl: inserted.avatar_url,
             bio: inserted.bio,
+            hasCompletedOnboarding: inserted.has_completed_onboarding ?? false,
           });
         }
       }
@@ -110,6 +114,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
       if (patch.handle !== undefined) updates.handle = patch.handle;
       if (patch.avatarUrl !== undefined) updates.avatar_url = patch.avatarUrl;
       if (patch.bio !== undefined) updates.bio = patch.bio;
+      if (patch.hasCompletedOnboarding !== undefined) updates.has_completed_onboarding = patch.hasCompletedOnboarding;
 
       if (Object.keys(updates).length === 0) return;
 

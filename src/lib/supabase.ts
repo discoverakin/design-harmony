@@ -20,7 +20,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   supabase = new Proxy({} as SupabaseClient, handler);
 } else {
   supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { persistSession: true, storageKey: "akin-auth" },
+    auth: {
+      persistSession: true,
+      storageKey: "akin-auth",
+      detectSessionInUrl: true,
+      autoRefreshToken: true,
+    },
   });
 }
 

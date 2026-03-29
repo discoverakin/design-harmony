@@ -46,15 +46,22 @@ export function useEvents() {
 
     const enriched: CommunityEvent[] = (
       (eventsRes.data ?? []) as DbEvent[]
-    ).map((evt) => ({
-      ...evt,
-      rsvp_count: rsvpCounts.get(evt.id) ?? 0,
-      is_attending: myRsvpIds.has(evt.id),
-      is_saved: mySaveIds.has(evt.id),
-      has_attended: myAttMap.has(evt.id),
-      attendance_minutes: myAttMap.get(evt.id) ?? null,
-      has_paid: myPaidIds.has(evt.id),
-    }));
+    ).map((evt) => {
+      const rsvpCount = rsvpCounts.get(evt.id) ?? 0;
+      const isAttending = myRsvpIds.has(evt.id);
+      const hasPaid = myPaidIds.has(evt.id);
+      // If user paid but RSVP row hasn't been created yet (webhook delay), count them
+      const paidButNotCounted = hasPaid && !isAttending;
+      return {
+        ...evt,
+        rsvp_count: rsvpCount + (paidButNotCounted ? 1 : 0),
+        is_attending: isAttending || hasPaid,
+        is_saved: mySaveIds.has(evt.id),
+        has_attended: myAttMap.has(evt.id),
+        attendance_minutes: myAttMap.get(evt.id) ?? null,
+        has_paid: hasPaid,
+      };
+    });
 
     setEvents(enriched);
     setLoading(false);

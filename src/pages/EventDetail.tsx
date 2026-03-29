@@ -44,12 +44,14 @@ const EventDetail = () => {
   const [attendedHours, setAttendedHours] = useState("");
   const [attendedMinutes, setAttendedMinutes] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
   // Handle Stripe redirect return
   useEffectOnce(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "success") {
-      toast({ title: "Payment successful!", description: "You're all set." });
+      toast({ title: "You're booked! See you there 🎉", description: "Payment confirmed — you're all set." });
+      setShowPaymentSuccess(true);
       refresh();
       setSearchParams({}, { replace: true });
     } else if (paymentStatus === "cancel") {
@@ -360,10 +362,28 @@ const EventDetail = () => {
             </div>
           )}
 
+          {/* Payment success banner */}
+          {(showPaymentSuccess || event.has_paid) && event.price_cents > 0 && (
+            <div className="flex items-center gap-3 mb-4 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20">
+              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-green-700">You're booked! See you there 🎉</p>
+                <p className="text-xs text-green-600/80">Payment confirmed — you're registered for this event.</p>
+              </div>
+            </div>
+          )}
+
           {/* Action buttons */}
           <div className="space-y-3">
-            {/* Pay & RSVP or normal RSVP */}
-            {event.price_cents > 0 && !event.has_paid && !event.is_attending ? (
+            {/* Registered badge for paid users, Pay & RSVP, or normal RSVP */}
+            {event.price_cents > 0 && event.has_paid ? (
+              <div className="flex items-center justify-center w-full rounded-xl h-12 bg-green-500/15 border-2 border-green-500/30">
+                <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  You're Registered ✓
+                </span>
+              </div>
+            ) : event.price_cents > 0 && !event.is_attending ? (
               <Button
                 onClick={async () => {
                   setPaymentLoading(true);

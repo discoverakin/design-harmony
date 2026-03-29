@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { useEvents } from "@/hooks/use-events";
 import { useActivityLog } from "@/hooks/use-activity-log";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
@@ -38,6 +39,7 @@ const EventDetail = () => {
     initiatePayment, refresh, loading,
   } = useEvents();
   const { addLog, logs, deleteLog } = useActivityLog();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const [showAttendedSheet, setShowAttendedSheet] = useState(false);
@@ -50,9 +52,11 @@ const EventDetail = () => {
   useEffectOnce(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "success") {
-      toast({ title: "You're booked! See you there 🎉", description: "Payment confirmed — you're all set." });
       setShowPaymentSuccess(true);
-      refresh();
+      if (user) {
+        toast({ title: "You're booked! See you there 🎉", description: "Payment confirmed — you're all set." });
+        refresh();
+      }
       setSearchParams({}, { replace: true });
     } else if (paymentStatus === "cancel") {
       toast({
@@ -363,7 +367,21 @@ const EventDetail = () => {
           )}
 
           {/* Payment success banner */}
-          {(showPaymentSuccess || event.has_paid) && event.price_cents > 0 && (
+          {showPaymentSuccess && !user && (
+            <div className="flex flex-col gap-3 mb-4 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+                <p className="text-sm font-semibold text-green-700">Payment successful! Sign in to see your booking 🎉</p>
+              </div>
+              <Button
+                onClick={() => navigate("/login")}
+                className="w-full rounded-xl h-10 text-sm font-semibold"
+              >
+                Sign In
+              </Button>
+            </div>
+          )}
+          {(showPaymentSuccess || event.has_paid) && user && event.price_cents > 0 && (
             <div className="flex items-center gap-3 mb-4 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20">
               <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
               <div className="flex-1 min-w-0">

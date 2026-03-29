@@ -87,6 +87,7 @@ serve(async (req) => {
       body: new URLSearchParams({
         "payment_method_types[]": "card",
         mode: "payment",
+        client_reference_id: user.id,
         success_url: `${origin}/events/${event_id}?payment=success`,
         cancel_url: `${origin}/events/${event_id}?payment=cancel`,
         "line_items[0][price_data][currency]": "usd",

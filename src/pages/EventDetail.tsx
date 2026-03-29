@@ -399,12 +399,30 @@ const EventDetail = () => {
           <div className="space-y-3">
             {/* Registered badge for paid users or just-completed payment */}
             {event.price_cents > 0 && (event.has_paid || showPaymentSuccess) ? (
-              <div className="flex items-center justify-center w-full rounded-xl h-12 bg-green-500/15 border-2 border-green-500/30">
-                <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" />
-                  You're Registered ✓
-                </span>
-              </div>
+              <>
+                <div className="flex items-center justify-center w-full rounded-xl h-12 bg-green-500/15 border-2 border-green-500/30">
+                  <span className="text-sm font-semibold text-green-600 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    You're Registered ✓
+                  </span>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate("/")}
+                    className="flex-1 rounded-xl h-11 text-sm font-semibold"
+                  >
+                    Explore More Classes
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate("/profile")}
+                    className="flex-1 rounded-xl h-11 text-sm font-semibold"
+                  >
+                    View My Profile
+                  </Button>
+                </div>
+              </>
             ) : event.price_cents > 0 && !event.is_attending ? (
               <Button
                 onClick={async () => {

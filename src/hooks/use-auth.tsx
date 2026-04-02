@@ -29,13 +29,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth
       .getSession()
       .then(({ data }) => {
+        console.log("[auth] session on mount:", data?.session?.user?.email);
         setSession(data?.session ?? null);
         setLoading(false);
       })
       .catch(() => setLoading(false));
 
     try {
-      const result = supabase.auth.onAuthStateChange((_event, session) => {
+      const result = supabase.auth.onAuthStateChange((event, session) => {
+        console.log("[auth] state changed:", event, session?.user?.email);
         setSession(session);
       });
       subscription = result?.data?.subscription ?? null;

@@ -25,6 +25,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
       storageKey: "akin-auth",
       detectSessionInUrl: true,
       autoRefreshToken: true,
+      flowType: "pkce",
     },
   });
 }

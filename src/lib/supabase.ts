@@ -26,6 +26,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
       detectSessionInUrl: true,
       autoRefreshToken: true,
       flowType: "pkce",
+      storage: {
+        getItem: (key) => document.cookie.match(new RegExp('(^| )' + key + '=([^;]+)'))?.[2] ?? null,
+        setItem: (key, value) => { document.cookie = `${key}=${value}; path=/; max-age=3600; SameSite=Lax`; },
+        removeItem: (key) => { document.cookie = `${key}=; path=/; max-age=0`; },
+      },
     },
   });
 }

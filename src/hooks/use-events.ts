@@ -42,8 +42,6 @@ export function useEvents() {
     );
     const myPaidIds = new Set((myPaymentsRes.data ?? []).map((p) => p.event_id));
 
-    console.log("[useEvents] raw Supabase events:", eventsRes.data, "| error:", eventsRes.error);
-
     const enriched: CommunityEvent[] = (
       (eventsRes.data ?? []) as DbEvent[]
     ).map((evt) => {
@@ -83,18 +81,7 @@ export function useEvents() {
 
   const getEventsByHobby = useCallback(
     (hobbySlug: string) => {
-      const today = new Date().toISOString().split("T")[0];
-      if (approvedEvents.length > 0) {
-        console.log("[useEvents] first event full shape:", JSON.stringify(approvedEvents[0], null, 2));
-      }
-      const allSlugs = approvedEvents.map((e) => `${e.title}: hobby_slug=${JSON.stringify(e.hobby_slug)} (type=${typeof e.hobby_slug})`);
-      console.log("[useEvents] getEventsByHobby called with:", JSON.stringify(hobbySlug), "| today:", today, "| approvedEvents count:", approvedEvents.length);
-      console.log("[useEvents] all hobby_slugs:", allSlugs);
-      const filtered = approvedEvents.filter(
-        (e) => e.hobby_slug === hobbySlug
-      );
-      console.log("[useEvents] filtered result count:", filtered.length, filtered.map((e) => e.title));
-      return filtered;
+      return approvedEvents.filter((e) => e.hobby_slug === hobbySlug);
     },
     [approvedEvents]
   );
@@ -280,9 +267,6 @@ export function useEvents() {
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
-
-      console.log("[initiatePayment] full token:", token);
-      console.log("[initiatePayment] apikey:", supabaseAnonKey);
 
       const res = await fetch(
         `${supabaseUrl}/functions/v1/create-checkout-session`,

@@ -30,7 +30,6 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    console.log("[create-checkout-session] Auth header:", authHeader.slice(0, 30) + "...");
 
     const {
       data: { user },
@@ -77,7 +76,7 @@ serve(async (req) => {
       });
     }
 
-    // Create Stripe Checkout Session via REST API
+    // Create Stripe Checkout Session in embedded mode
     const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
       headers: {
@@ -87,9 +86,9 @@ serve(async (req) => {
       body: new URLSearchParams({
         "payment_method_types[]": "card",
         mode: "payment",
+        "ui_mode": "embedded",
         client_reference_id: user.id,
-        success_url: `${origin}/events/${event_id}?payment=success`,
-        cancel_url: `${origin}/events/${event_id}?payment=cancel`,
+        return_url: `${origin}/events/${event_id}?payment=success`,
         "line_items[0][price_data][currency]": "usd",
         "line_items[0][price_data][product_data][name]": event.title,
         "line_items[0][price_data][product_data][description]": `RSVP payment for ${event.title}`,
@@ -122,7 +121,7 @@ serve(async (req) => {
       status: "pending",
     });
 
-    return new Response(JSON.stringify({ url: session.url }), {
+    return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -299,11 +299,9 @@ export function useEvents() {
         }
       );
 
-      if (!res.ok) return;
-      const { url } = await res.json();
-      if (url) {
-        window.location.href = url;
-      }
+      if (!res.ok) return null;
+      const { clientSecret } = await res.json();
+      return clientSecret as string | null;
     },
     [user, events]
   );

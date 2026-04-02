@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
+import EmbeddedCheckout from "@/components/EmbeddedCheckout";
 
 
 const EventDetail = () => {
@@ -48,6 +49,7 @@ const EventDetail = () => {
   const [attendedMinutes, setAttendedMinutes] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
+  const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
 
   // Handle Stripe redirect return
   useEffectOnce(() => {
@@ -417,8 +419,9 @@ const EventDetail = () => {
               <Button
                 onClick={async () => {
                   setPaymentLoading(true);
-                  await initiatePayment(event.id);
+                  const secret = await initiatePayment(event.id);
                   setPaymentLoading(false);
+                  if (secret) setCheckoutClientSecret(secret);
                 }}
                 className="w-full rounded-xl h-12 text-sm font-semibold"
                 disabled={paymentLoading || (spotsLeft !== null && spotsLeft <= 0)}
@@ -541,6 +544,14 @@ const EventDetail = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Embedded Stripe Checkout modal */}
+      {checkoutClientSecret && (
+        <EmbeddedCheckout
+          clientSecret={checkoutClientSecret}
+          onClose={() => setCheckoutClientSecret(null)}
+        />
+      )}
     </div>
   );
 };

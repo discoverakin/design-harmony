@@ -27,9 +27,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
       autoRefreshToken: true,
       flowType: "pkce",
       storage: {
-        getItem: (key) => document.cookie.match(new RegExp('(^| )' + key + '=([^;]+)'))?.[2] ?? null,
-        setItem: (key, value) => { document.cookie = `${key}=${value}; path=/; max-age=3600; SameSite=Lax`; },
-        removeItem: (key) => { document.cookie = `${key}=; path=/; max-age=0`; },
+        getItem: (key) => {
+          const cookies = document.cookie.split(";");
+          const cookie = cookies.find((c) => c.trim().startsWith(key + "="));
+          return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : null;
+        },
+        setItem: (key, value) => {
+          document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=86400; SameSite=Lax; Secure`;
+        },
+        removeItem: (key) => {
+          document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax`;
+        },
       },
     },
   });

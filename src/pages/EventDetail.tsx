@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
+  Home,
   MapPin,
   Users,
   Bookmark,
@@ -190,12 +191,21 @@ const EventDetail = () => {
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
       {/* Top bar */}
       <header className="flex items-center gap-3 px-4 py-4 bg-secondary">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </button>
+        {event.has_paid || showPaymentSuccess ? (
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
+          >
+            <Home className="w-5 h-5 text-foreground" />
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </button>
+        )}
         <h2 className="text-sm font-semibold text-foreground flex-1 truncate">
           Event Details
         </h2>

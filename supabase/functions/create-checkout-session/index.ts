@@ -73,31 +73,30 @@ serve(async (req) => {
       });
     }
 
-    // Check for existing payment
-    const { data: existingPayment } = await supabase
+    // Check for existing completed payment
+    const { data: completedPayment } = await supabase
       .from("event_payments")
-      .select("id, status")
+      .select("id")
       .eq("event_id", event_id)
       .eq("user_id", user.id)
-      .in("status", ["completed", "pending"])
-      .order("created_at", { ascending: false })
+      .eq("status", "completed")
       .limit(1)
       .maybeSingle();
 
-    if (existingPayment?.status === "completed") {
+    if (completedPayment) {
       return new Response(JSON.stringify({ error: "Already booked" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Clear old pending payment if exists
-    if (existingPayment?.status === "pending") {
-      await supabase
-        .from("event_payments")
-        .delete()
-        .eq("id", existingPayment.id);
-    }
+    // Clear all old pending payments for this user + event
+    await supabase
+      .from("event_payments")
+      .delete()
+      .eq("event_id", event_id)
+      .eq("user_id", user.id)
+      .eq("status", "pending");
 
     // Create Stripe Checkout Session in embedded mode
     const stripeRes = await fetch("https://api.stripe.com/v1/checkout/sessions", {

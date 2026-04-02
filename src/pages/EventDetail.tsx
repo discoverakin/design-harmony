@@ -56,14 +56,16 @@ const EventDetail = () => {
       if (user) {
         refresh();
       }
-      setSearchParams({}, { replace: true });
+      window.history.replaceState({}, "", window.location.pathname);
+      navigate(`/events/${id}`, { replace: true });
     } else if (paymentStatus === "cancel") {
       toast({
         title: "Payment cancelled",
         description: "You can try again when you're ready.",
         variant: "destructive",
       });
-      setSearchParams({}, { replace: true });
+      window.history.replaceState({}, "", window.location.pathname);
+      navigate(`/events/${id}`, { replace: true });
     }
   }, [searchParams]);
 

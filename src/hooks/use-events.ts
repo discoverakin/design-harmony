@@ -27,7 +27,7 @@ export function useEvents() {
           .from("event_payments")
           .select("event_id")
           .eq("user_id", user.id)
-          .in("status", ["completed", "pending"]),
+          .eq("status", "completed"),
       ]);
 
     // Build lookup structures

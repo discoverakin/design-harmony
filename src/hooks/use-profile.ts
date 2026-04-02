@@ -72,11 +72,14 @@ export function useProfile(defaults?: { name: string; handle: string }) {
 
         const { data: inserted, error: insertError } = await supabase
           .from("profiles")
-          .insert({
-            user_id: user!.id,
-            display_name: autoName,
-            handle: autoHandle,
-          })
+          .upsert(
+            {
+              user_id: user!.id,
+              display_name: autoName,
+              handle: autoHandle,
+            },
+            { onConflict: "user_id" }
+          )
           .select("display_name, handle, avatar_url, bio, has_completed_onboarding")
           .single();
 

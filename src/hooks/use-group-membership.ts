@@ -76,6 +76,7 @@ export function useGroupMembership() {
   const joinGroup = useCallback(
     async (groupId: string) => {
       if (!user) return;
+      if (membership[groupId]) return;
 
       setMembership((prev) => ({ ...prev, [groupId]: true }));
 

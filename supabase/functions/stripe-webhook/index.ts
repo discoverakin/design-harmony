@@ -93,9 +93,12 @@ serve(async (req) => {
 
       if (paymentError) {
         console.error("[stripe-webhook] Payment update error:", paymentError.message);
-      } else {
-        console.log("[stripe-webhook] Payment marked completed for session:", session.id);
+        return new Response(JSON.stringify({ error: "Payment update failed" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
       }
+      console.log("[stripe-webhook] Payment marked completed for session:", session.id);
 
       // Auto-RSVP the user
       const { error: rsvpError } = await supabase
@@ -107,9 +110,12 @@ serve(async (req) => {
 
       if (rsvpError) {
         console.error("[stripe-webhook] RSVP upsert error:", rsvpError.message);
-      } else {
-        console.log("[stripe-webhook] RSVP created for user:", userId, "event:", eventId);
+        return new Response(JSON.stringify({ error: "RSVP upsert failed" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
       }
+      console.log("[stripe-webhook] RSVP created for user:", userId, "event:", eventId);
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -118,8 +124,8 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("[stripe-webhook] Unexpected error:", (err as Error).message);
-    return new Response(JSON.stringify({ received: true }), {
-      status: 200,
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
+      status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }

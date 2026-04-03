@@ -129,7 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let q = supabase
       .from("events")
       .select("*")
-
+      .eq("status", "approved")
       .order("date", { ascending: true })
       .limit(10);
 
@@ -180,6 +180,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { data, error } = await supabase
     .from("events")
     .select("*")
+    .eq("status", "approved")
     .eq("status", "active")
     .gte("date", today)
     .ilike("title", `%${query}%`)

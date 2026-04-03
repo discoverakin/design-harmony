@@ -46,7 +46,7 @@ const EventCard = ({
         </div>
       ) : (
         <div className="w-full h-24 bg-secondary/60 flex items-center justify-center">
-          <span className="text-3xl">{emoji}</span>
+          <span className="text-5xl">{emoji}</span>
         </div>
       )}
 

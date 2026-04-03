@@ -11,24 +11,35 @@ const HobbyQuizCTA = () => {
           ✨
         </span>
 
+        {/* AI badge */}
+        <span className="absolute top-4 right-4 text-[10px] font-semibold text-white/90 bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+          ✦ AI-powered
+        </span>
+
         <div className="relative z-10 flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🎯</span>
+            <span className="text-3xl">✨</span>
             <h3 className="text-xl font-bold text-primary-foreground">
-              Find Your Perfect Hobby
+              What's Your Creative Style?
             </h3>
           </div>
 
-          <p className="text-sm text-primary-foreground/90 max-w-[260px]">
-            Take our quick quiz to discover hobbies tailored to you
+          <p className="text-sm text-primary-foreground/90 max-w-[280px]">
+            Answer 5 questions and our AI will match you with the perfect classes in Ann Arbor
           </p>
 
           <button
             onClick={() => navigate("/quiz")}
-            className="mt-2 self-start bg-card text-primary font-medium text-sm px-4 py-2 rounded-full hover:bg-card/90 transition-colors"
+            className="mt-2 self-start bg-card text-primary font-semibold text-sm px-5 py-2.5 rounded-full hover:bg-card/90 transition-colors"
           >
-            Start Quiz →
+            Find My Hobbies →
           </button>
+
+          <div className="flex gap-2 mt-1 text-lg opacity-40">
+            <span>🏺</span>
+            <span>🎵</span>
+            <span>📷</span>
+          </div>
         </div>
       </div>
     </section>

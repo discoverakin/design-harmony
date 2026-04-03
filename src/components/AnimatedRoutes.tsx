@@ -20,6 +20,7 @@ import Onboarding from "@/pages/Onboarding";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import AdminEvents from "@/pages/AdminEvents";
+import Search from "@/pages/Search";
 
 /** Redirects unauthenticated visitors to /login, preserving payment return context */
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
@@ -91,6 +92,7 @@ const AnimatedRoutes = () => {
         <Route path="/events" element={<RequireAuth><PageTransition><Events /></PageTransition></RequireAuth>} />
         <Route path="/events/create" element={<RequireAuth><PageTransition><CreateEvent /></PageTransition></RequireAuth>} />
         <Route path="/events/:id" element={<RequireAuth><PageTransition><EventDetail /></PageTransition></RequireAuth>} />
+        <Route path="/search" element={<RequireAuth><PageTransition><Search /></PageTransition></RequireAuth>} />
         <Route path="/admin-events" element={<RequireAuth><PageTransition><AdminEvents /></PageTransition></RequireAuth>} />
         <Route path="/tracker" element={<RequireAuth><PageTransition><HobbyTracker /></PageTransition></RequireAuth>} />
         <Route path="/quiz" element={<RequireAuth><PageTransition><HobbyQuiz /></PageTransition></RequireAuth>} />

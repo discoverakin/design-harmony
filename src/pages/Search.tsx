@@ -13,6 +13,34 @@ interface ParsedSearch {
   time_of_day: string | null;
 }
 
+const HOBBY_EMOJI: Record<string, string> = {
+  "fitness": "🏃",
+  "yoga": "🧘",
+  "pottery": "🏺",
+  "cooking": "👨‍🍳",
+  "photography": "📷",
+  "hiking": "🥾",
+  "knitting": "🧶",
+  "dance": "💃",
+  "music": "🎵",
+  "reading": "📚",
+  "gaming": "🎮",
+  "gardening": "🌱",
+  "woodworking": "🪵",
+  "arts-crafts": "🎨",
+  "rock-climbing": "🧗",
+  "swimming": "🏊",
+  "coding": "💻",
+  "writing": "✍️",
+  "astronomy": "🔭",
+  "film-making": "🎬",
+  "board-sports": "🛹",
+  "martial-arts": "🥋",
+  "languages": "🌍",
+  "volunteering": "🤝",
+  "sports": "⚽",
+};
+
 interface SearchResult {
   id: string;
   title: string;
@@ -131,7 +159,7 @@ const Search = () => {
               {parsed?.hobby_slug && (
                 <div className="mb-4">
                   <Badge variant="secondary" className="text-xs">
-                    Showing results for: {parsed.hobby_slug.replace(/-/g, " ")} 🎨
+                    {HOBBY_EMOJI[parsed.hobby_slug] || "✨"} Showing results for: {parsed.hobby_slug.replace(/-/g, " ")}
                   </Badge>
                 </div>
               )}

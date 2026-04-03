@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
-import { Search, X, ChevronDown, ChevronUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, X, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
 import HobbyCategoryCard from "./HobbyCategoryCard";
 import { hobbies } from "@/data/hobbies";
 
 const INITIAL_COUNT = 6;
 
 const BrowseHobbiesSection = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(false);
 
@@ -33,24 +35,45 @@ const BrowseHobbiesSection = () => {
       <h2 className="text-lg font-bold text-foreground mb-3">Browse Hobbies</h2>
 
       {/* Search bar */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value.slice(0, 100))}
-          placeholder="Search hobbies…"
-          className="w-full h-10 pl-9 pr-9 rounded-xl border-2 border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
-        />
-        {query && (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (query.trim()) navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+        }}
+        className="mb-4"
+      >
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value.slice(0, 100))}
+            placeholder="Search hobbies or classes…"
+            className="w-full h-10 pl-9 pr-9 rounded-xl border-2 border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {query.trim() && (
           <button
-            onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            type="submit"
+            className="flex items-center gap-1.5 mt-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            <X className="w-4 h-4" />
+            Search classes
+            <ArrowRight className="w-3 h-3" />
           </button>
         )}
-      </div>
+        <p className="text-[10px] text-muted-foreground/70 mt-1.5">
+          Try "something relaxing this weekend" for AI-powered class search
+        </p>
+      </form>
 
       {isSearching && filtered.length > 0 && (
         <p className="text-xs text-muted-foreground mb-3">

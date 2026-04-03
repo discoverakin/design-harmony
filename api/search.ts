@@ -5,6 +5,16 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+const MOOD_TO_HOBBIES: Record<string, string[]> = {
+  relaxing: ["yoga", "meditation", "candle-making", "embroidery", "knitting"],
+  stressed: ["yoga", "meditation", "pottery", "painting"],
+  creative: ["pottery", "painting", "drawing", "photography", "ceramics"],
+  social: ["dancing", "cooking", "singing", "guitar"],
+  adventurous: ["photography", "woodworking", "leather-crafting"],
+  bored: ["drawing", "origami", "calligraphy", "flower-arranging"],
+  fun: ["dancing", "cooking", "painting", "ceramics"],
+};
+
 function buildSystemPrompt(): string {
   const todayFormatted = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -25,7 +35,14 @@ Extract search intent from the user's query and return ONLY a JSON object with t
                                 //  singing, guitar, piano, violin, woodworking, jewelry,
                                 //  weaving, embroidery, calligraphy, origami, candle-making,
                                 //  soap-making, leather-crafting, flower-arranging
-  "mood": string | null,     // e.g. "relaxing", "social", "creative", "active"
+  "mood": string | null,     // Map vague queries aggressively to moods:
+                            //   "relaxing", "chill", "calm", "peaceful" → "relaxing"
+                            //   "fun", "exciting", "something to do" → "fun"
+                            //   "creative", "artsy", "make something" → "creative"
+                            //   "meet people", "social", "with friends" → "social"
+                            //   "stressed", "need to unwind", "de-stress" → "stressed"
+                            //   "bored", "nothing to do" → "bored"
+                            //   "adventurous", "try something new" → "adventurous"
   "time_of_day": string | null, // "morning", "afternoon", "evening", or null
   "date_filter": {
     "type": "exact_date" | "day_of_week" | "date_range" | null,
@@ -117,6 +134,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (parsed.hobby_slug) {
       q = q.eq("hobby_slug", parsed.hobby_slug);
+    } else if (parsed.mood && MOOD_TO_HOBBIES[parsed.mood]) {
+      q = q.in("hobby_slug", MOOD_TO_HOBBIES[parsed.mood]);
+    } else if (parsed.keywords) {
+      q = q.ilike("title", `%${parsed.keywords}%`);
     }
 
     const df = parsed.date_filter;

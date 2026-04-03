@@ -64,14 +64,14 @@ const BrowseHobbiesSection = () => {
         {query.trim() && (
           <button
             type="submit"
-            className="flex items-center gap-1.5 mt-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+            className="flex items-center justify-center gap-2 w-full mt-3 h-10 rounded-full bg-[#E8604A] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             Search classes
-            <ArrowRight className="w-3 h-3" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         )}
         <p className="text-[10px] text-muted-foreground/70 mt-1.5">
-          Try "something relaxing this weekend" for AI-powered class search
+          AI-powered search — try "relaxing classes" or "meet people this weekend"
         </p>
       </form>
 
@@ -83,9 +83,12 @@ const BrowseHobbiesSection = () => {
 
       {isSearching && filtered.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-center">
-          <span className="text-3xl mb-2">🔍</span>
-          <p className="text-sm text-muted-foreground">
-            No hobbies found for "{query.trim().slice(0, 50)}"
+          <span className="text-3xl mb-2">✨</span>
+          <p className="text-sm font-semibold text-foreground mb-1">
+            Search classes with AI
+          </p>
+          <p className="text-xs text-muted-foreground mb-4">
+            Press "Search classes" above to find events matching your vibe
           </p>
         </div>
       ) : (

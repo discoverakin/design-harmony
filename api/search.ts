@@ -45,6 +45,7 @@ Extract search intent from the user's query and return ONLY a JSON object with t
                             //   "bored", "nothing to do" → "bored"
                             //   "adventurous", "try something new" → "adventurous"
   "time_of_day": string | null, // "morning", "afternoon", "evening", or null
+  "location_hint": string | null, // extracted location/area, or null
   "date_filter": {
     "type": "exact_date" | "day_of_week" | "date_range" | null,
     "value": string | null,     // ISO date "YYYY-MM-DD" for exact_date, day name for day_of_week, or null
@@ -61,6 +62,10 @@ Examples:
 - "yoga near me" → hobby_slug: "yoga"
 - "arts and crafts" → hobby_slug: "arts-crafts"
 - "rock climbing" → hobby_slug: "rock-climbing"
+
+If the user mentions a location or area, extract it as location_hint.
+Known Ann Arbor areas: downtown, north campus, central campus, kerrytown, burns park, old west side, south side, near east side, ypsilanti.
+If they say "near me" or "nearby", set location_hint to "downtown" as default.
 
 Date filter examples:
 - "this Saturday" → type: "exact_date", value: the next Saturday's ISO date
@@ -84,6 +89,7 @@ interface ParsedSearch {
   hobby_slug: string | null;
   mood: string | null;
   time_of_day: string | null;
+  location_hint: string | null;
   date_filter: DateFilter;
 }
 
@@ -148,6 +154,10 @@ export default async function handler(req: any, res: any) {
       q = q.in("hobby_slug", MOOD_TO_HOBBIES[parsed.mood]);
     } else if (parsed.keywords) {
       q = q.ilike("title", `%${parsed.keywords}%`);
+    }
+
+    if (parsed.location_hint) {
+      q = q.ilike("location", `%${parsed.location_hint}%`);
     }
 
     const df = parsed.date_filter;

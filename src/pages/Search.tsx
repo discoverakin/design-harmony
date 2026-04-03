@@ -36,6 +36,7 @@ const Search = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [fallback, setFallback] = useState<string | null>(null);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -61,10 +62,12 @@ const Search = () => {
       const data = await res.json();
       setResults(data.results ?? []);
       setParsed(data.parsed ?? null);
+      setFallback(data.fallback ?? null);
     } catch {
       setError(true);
       setResults([]);
       setParsed(null);
+      setFallback(null);
     } finally {
       setLoading(false);
     }
@@ -131,6 +134,12 @@ const Search = () => {
                     Showing results for: {parsed.hobby_slug.replace(/-/g, " ")} 🎨
                   </Badge>
                 </div>
+              )}
+
+              {fallback && results.length > 0 && (
+                <p className="text-sm text-muted-foreground mb-3">
+                  No classes found for that exact time — here are the closest matches:
+                </p>
               )}
 
               {results.length > 0 ? (

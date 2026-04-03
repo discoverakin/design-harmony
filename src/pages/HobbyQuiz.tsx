@@ -1,17 +1,27 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { quizQuestions, calculateResults } from "@/data/quiz";
 import { hobbies } from "@/data/hobbies";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/use-auth";
+
+interface AiResults {
+  personality_summary: string;
+  recommendations: Array<{ slug: string; reason: string }>;
+}
 
 const HobbyQuiz = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0); // 0…questions.length = questions, last+1 = results
+  const { user } = useAuth();
+  const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [animDir, setAnimDir] = useState<"left" | "right">("right");
   const [isAnimating, setIsAnimating] = useState(false);
+  const [aiResults, setAiResults] = useState<AiResults | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const totalSteps = quizQuestions.length;
   const isResults = step >= totalSteps;
@@ -22,7 +32,6 @@ const HobbyQuiz = () => {
     (dir: "left" | "right", cb: () => void) => {
       setAnimDir(dir);
       setIsAnimating(true);
-      // Wait for exit animation
       setTimeout(() => {
         cb();
         setIsAnimating(false);
@@ -34,7 +43,6 @@ const HobbyQuiz = () => {
   const selectOption = (optionIdx: number) => {
     if (isAnimating) return;
     setAnswers((prev) => ({ ...prev, [currentQ.id]: optionIdx }));
-    // Auto-advance after short delay
     setTimeout(() => {
       animateTransition("right", () => setStep((s) => s + 1));
     }, 300);
@@ -49,11 +57,56 @@ const HobbyQuiz = () => {
     animateTransition("left", () => {
       setAnswers({});
       setStep(0);
+      setAiResults(null);
     });
   };
 
+  // Fetch AI results when we reach the results screen
+  useEffect(() => {
+    if (!isResults || aiResults || aiLoading) return;
+
+    const answerTexts = quizQuestions.map((q) => {
+      const idx = answers[q.id];
+      return idx !== undefined ? q.options[idx].label : "";
+    });
+
+    setAiLoading(true);
+    fetch("/api/quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answers: answerTexts }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setAiResults(data);
+        // Save to Supabase
+        if (user) {
+          supabase
+            .from("profiles")
+            .update({
+              quiz_results: {
+                personality_summary: data.personality_summary,
+                recommendations: data.recommendations,
+                completed_at: new Date().toISOString(),
+              },
+            })
+            .eq("user_id", user.id)
+            .then(({ error }) => {
+              if (error) console.error("Failed to save quiz results:", error.message);
+            });
+        }
+      })
+      .catch(() => {
+        // AI failed silently — score-based results still show
+      })
+      .finally(() => setAiLoading(false));
+  }, [isResults]);
+
   const results = isResults ? calculateResults(answers) : [];
   const topResults = results.slice(0, 3);
+
+  const getAiReason = (slug: string) =>
+    aiResults?.recommendations.find((r) => r.slug === slug)?.reason;
 
   // Animation classes
   const enterClass = isAnimating
@@ -85,7 +138,7 @@ const HobbyQuiz = () => {
       <main className="flex-1 overflow-hidden px-5 py-6">
         <div key={step} className={enterClass}>
           {!isResults && currentQ ? (
-            /* ── Question ── */
+            /* Question */
             <div className="flex flex-col gap-6">
               <div className="text-center">
                 <span className="text-5xl mb-3 block">{currentQ.emoji}</span>
@@ -120,7 +173,7 @@ const HobbyQuiz = () => {
               </div>
             </div>
           ) : (
-            /* ── Results ── */
+            /* Results */
             <div className="flex flex-col gap-6">
               <div className="text-center">
                 <span className="text-5xl mb-3 block">🎉</span>
@@ -132,6 +185,25 @@ const HobbyQuiz = () => {
                 </p>
               </div>
 
+              {/* AI Personality Summary */}
+              {aiLoading && (
+                <div className="flex items-center justify-center gap-2 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <span className="text-xs text-muted-foreground">Generating your personality profile...</span>
+                </div>
+              )}
+              {aiResults && (
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-semibold text-primary">Your Creative Personality</span>
+                  </div>
+                  <p className="text-sm text-foreground/80 italic leading-relaxed">
+                    {aiResults.personality_summary}
+                  </p>
+                </div>
+              )}
+
               <div className="flex flex-col gap-3">
                 {topResults.map((result, rank) => {
                   const hobby = hobbies.find((h) => h.slug === result.slug);
@@ -142,6 +214,7 @@ const HobbyQuiz = () => {
                     Math.round((result.score / maxScore) * 100)
                   );
                   const medals = ["🥇", "🥈", "🥉"];
+                  const aiReason = getAiReason(result.slug);
 
                   return (
                     <Link
@@ -163,6 +236,11 @@ const HobbyQuiz = () => {
                         <p className="text-sm font-semibold text-foreground">
                           {hobby.label}
                         </p>
+                        {aiReason && (
+                          <p className="text-[11px] text-muted-foreground italic mt-0.5 leading-snug">
+                            {aiReason}
+                          </p>
+                        )}
                         <div className="flex items-center gap-2 mt-1">
                           <Progress
                             value={matchPct}

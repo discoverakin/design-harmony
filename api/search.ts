@@ -6,13 +6,14 @@ const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABA
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const MOOD_TO_HOBBIES: Record<string, string[]> = {
-  relaxing: ["yoga", "meditation", "candle-making", "embroidery", "knitting"],
-  stressed: ["yoga", "meditation", "pottery", "painting"],
-  creative: ["pottery", "painting", "drawing", "photography", "ceramics"],
-  social: ["dancing", "cooking", "singing", "guitar"],
-  adventurous: ["photography", "woodworking", "leather-crafting"],
-  bored: ["drawing", "origami", "calligraphy", "flower-arranging"],
-  fun: ["dancing", "cooking", "painting", "ceramics"],
+  relaxing: ["yoga", "fitness", "reading", "gardening", "knitting"],
+  stressed: ["yoga", "fitness", "pottery", "gardening"],
+  creative: ["pottery", "photography", "film-making", "arts-crafts", "writing"],
+  social: ["dance", "cooking", "board-sports", "gaming"],
+  adventurous: ["hiking", "rock-climbing", "board-sports", "martial-arts"],
+  bored: ["gaming", "coding", "reading", "board-sports", "astronomy"],
+  fun: ["dance", "cooking", "gaming", "board-sports"],
+  active: ["fitness", "hiking", "rock-climbing", "swimming", "martial-arts"],
 };
 
 function buildSystemPrompt(): string {
@@ -128,7 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let q = supabase
       .from("events")
       .select("*")
-      .eq("status", "active")
+
       .order("date", { ascending: true })
       .limit(10);
 

@@ -53,6 +53,9 @@ interface SearchResult {
   hobby_slug: string | null;
 }
 
+const formatSlug = (slug: string) =>
+  slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
 const Search = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -166,7 +169,13 @@ const Search = () => {
 
               {fallback && results.length > 0 && (
                 <p className="text-sm text-muted-foreground mb-3">
-                  No classes found for that exact time — here are the closest matches:
+                  {parsed?.location_hint
+                    ? `No classes found in ${formatSlug(parsed.location_hint)} — here are other great options nearby:`
+                    : parsed?.hobby_slug && parsed?.date_filter?.type
+                    ? `No ${formatSlug(parsed.hobby_slug)} classes found for that time — here are the next available:`
+                    : parsed?.mood
+                    ? "Nothing for that exact vibe right now — but these are pretty close:"
+                    : "Here are some classes you might love:"}
                 </p>
               )}
 

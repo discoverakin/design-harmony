@@ -102,8 +102,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     parsed = await parseQueryWithClaude(query);
-  } catch {
-    // Fall through to fallback search
+    console.log("Parsed intent:", JSON.stringify(parsed));
+  } catch (err) {
+    console.log("Claude parse error:", err);
   }
 
   if (parsed) {
@@ -132,6 +133,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const { data, error } = await q;
+    console.log("Supabase results count:", data?.length);
+    console.log("Supabase error:", error);
 
     if (error) {
       return res.status(500).json({ error: error.message });

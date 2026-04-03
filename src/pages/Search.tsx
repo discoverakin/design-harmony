@@ -143,7 +143,7 @@ const Search = () => {
               )}
 
               {results.length > 0 ? (
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   {results.map((event) => (
                     <EventCard
                       key={event.id}

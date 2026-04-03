@@ -34,10 +34,10 @@ const EventCard = ({
   });
 
   return (
-    <div className="rounded-xl border-2 border-border bg-card overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
       {/* Image or placeholder */}
       {flyer_url ? (
-        <div className="w-full aspect-[2/1] bg-secondary overflow-hidden">
+        <div className="w-full h-24 bg-secondary overflow-hidden">
           <img
             src={flyer_url}
             alt={title}
@@ -46,34 +46,33 @@ const EventCard = ({
         </div>
       ) : (
         <div className="w-full h-24 bg-secondary/60 flex items-center justify-center">
-          <span className="text-4xl">{emoji}</span>
+          <span className="text-3xl">{emoji}</span>
         </div>
       )}
 
       {/* Content */}
-      <div className="p-4 space-y-2">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-semibold text-foreground leading-tight">
-            {title}
-          </h3>
-          <span className="text-xs font-semibold text-primary flex-shrink-0">
-            {formatPrice(price_cents)}
-          </span>
-        </div>
+      <div className="p-3 space-y-1.5">
+        <h3 className="text-xs font-semibold text-foreground leading-tight line-clamp-2">
+          {title}
+        </h3>
 
-        <div className="space-y-1">
-          <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+        <span className="text-sm font-bold text-[#E8604A] block">
+          {formatPrice(price_cents)}
+        </span>
+
+        <div className="space-y-0.5">
+          <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+            <Calendar className="w-2.5 h-2.5 flex-shrink-0" />
             {formattedDate} · {time}
           </p>
-          <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
+          <p className="text-[10px] text-muted-foreground flex items-center gap-1 truncate">
+            <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
             {location}
           </p>
         </div>
 
         <Link to={hobby_slug ? `/hobby/${hobby_slug}` : `/events/${id}`}>
-          <Button className="w-full rounded-xl h-10 text-sm font-semibold mt-2">
+          <Button className="w-full rounded-lg h-8 text-xs font-semibold mt-1.5">
             Book Now
           </Button>
         </Link>

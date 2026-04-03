@@ -31,11 +31,11 @@ Today's date is ${todayFormatted} (${todayISO}).
 Extract search intent from the user's query and return ONLY a JSON object with these fields:
 {
   "keywords": string,        // key topic words (e.g. "pottery", "painting", "yoga")
-  "hobby_slug": string | null, // one of: pottery, painting, drawing, knitting, ceramics,
-                                //  photography, cooking, baking, yoga, meditation, dancing,
-                                //  singing, guitar, piano, violin, woodworking, jewelry,
-                                //  weaving, embroidery, calligraphy, origami, candle-making,
-                                //  soap-making, leather-crafting, flower-arranging
+  "hobby_slug": string | null, // one of: arts-crafts, astronomy, board-sports, coding, cooking,
+                                //  dance, film-making, fitness, gaming, gardening, hiking, knitting,
+                                //  languages, martial-arts, music, photography, pottery, reading,
+                                //  rock-climbing, sports, swimming, volunteering, woodworking,
+                                //  writing, yoga
   "mood": string | null,     // Map vague queries aggressively to moods:
                             //   "relaxing", "chill", "calm", "peaceful" → "relaxing"
                             //   "fun", "exciting", "something to do" → "fun"
@@ -52,6 +52,15 @@ Extract search intent from the user's query and return ONLY a JSON object with t
     "end": string | null        // ISO date for date_range end, null otherwise
   }
 }
+
+IMPORTANT: If the user mentions a specific activity by name that matches one of the hobby_slug values, always set hobby_slug to that slug — never leave it null.
+Examples:
+- "hiking next weekend" → hobby_slug: "hiking"
+- "pottery class" → hobby_slug: "pottery"
+- "cooking something fun" → hobby_slug: "cooking"
+- "yoga near me" → hobby_slug: "yoga"
+- "arts and crafts" → hobby_slug: "arts-crafts"
+- "rock climbing" → hobby_slug: "rock-climbing"
 
 Date filter examples:
 - "this Saturday" → type: "exact_date", value: the next Saturday's ISO date
@@ -171,6 +180,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const dayName = new Date(e.date + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
         return dayName === targetDay;
       });
+    }
+
+    // If date filter returned 0 results but we have a hobby_slug, retry without date filter
+    if (results.length === 0 && parsed.hobby_slug) {
+      const { data: fallbackData } = await supabase
+        .from("events")
+        .select("*")
+        .eq("status", "approved")
+        .eq("hobby_slug", parsed.hobby_slug)
+        .order("date", { ascending: true })
+        .limit(10);
+      return res.status(200).json({ results: fallbackData ?? [], parsed, fallback: true });
     }
 
     return res.status(200).json({ results, parsed });

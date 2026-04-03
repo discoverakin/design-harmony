@@ -182,16 +182,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // If date filter returned 0 results but we have a hobby_slug, retry without date filter
-    if (results.length === 0 && parsed.hobby_slug) {
-      const { data: fallbackData } = await supabase
-        .from("events")
-        .select("*")
+    if (results.length === 0) {
+      // Tier 2: try hobby_slug without date
+      if (parsed.hobby_slug) {
+        const { data: t2 } = await supabase
+          .from("events").select("*")
+          .eq("status", "approved")
+          .eq("hobby_slug", parsed.hobby_slug)
+          .gte("date", today).order("date").limit(10);
+        if (t2 && t2.length > 0)
+          return res.status(200).json({ results: t2, parsed, fallback: "hobby_only" });
+      }
+
+      // Tier 3: try mood slugs without date
+      if (parsed.mood && MOOD_TO_HOBBIES[parsed.mood]) {
+        const { data: t3 } = await supabase
+          .from("events").select("*")
+          .eq("status", "approved")
+          .in("hobby_slug", MOOD_TO_HOBBIES[parsed.mood])
+          .gte("date", today).order("date").limit(10);
+        if (t3 && t3.length > 0)
+          return res.status(200).json({ results: t3, parsed, fallback: "mood_only" });
+      }
+
+      // Tier 4: return any upcoming events
+      const { data: t4 } = await supabase
+        .from("events").select("*")
         .eq("status", "approved")
-        .eq("hobby_slug", parsed.hobby_slug)
-        .order("date", { ascending: true })
-        .limit(10);
-      return res.status(200).json({ results: fallbackData ?? [], parsed, fallback: true });
+        .gte("date", today).order("date").limit(10);
+      return res.status(200).json({ results: t4 ?? [], parsed, fallback: "all_events" });
     }
 
     return res.status(200).json({ results, parsed });

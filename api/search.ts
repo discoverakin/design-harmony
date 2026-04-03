@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { IncomingMessage, ServerResponse } from "http";
 import { createClient } from "@supabase/supabase-js";
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
@@ -112,7 +112,7 @@ async function parseQueryWithClaude(query: string): Promise<ParsedSearch | null>
   return JSON.parse(text) as ParsedSearch;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }

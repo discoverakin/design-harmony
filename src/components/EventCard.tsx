@@ -33,6 +33,17 @@ const EventCard = ({
     day: "numeric",
   });
 
+  const formattedTime = (() => {
+    const match = time?.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return time;
+    const dt = new Date(`${date}T${time}`);
+    return dt.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  })();
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
       {/* Image or placeholder */}
@@ -63,7 +74,7 @@ const EventCard = ({
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground flex items-center gap-1">
             <Calendar className="w-2.5 h-2.5 flex-shrink-0" />
-            {formattedDate} · {time}
+            {formattedDate} · {formattedTime}
           </p>
           <p className="text-[10px] text-muted-foreground flex items-center gap-1 truncate">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   APIProvider,
   Map,
@@ -6,83 +6,73 @@ import {
   InfoWindow,
   useMap,
 } from "@vis.gl/react-google-maps";
-import { MapPin, Navigation, Star } from "lucide-react";
-import { hobbies } from "@/data/hobbies";
+import { MapPin, Navigation } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { formatPrice } from "@/lib/format-price";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
 
-// Default center (NYC) used while geolocation loads or if denied
-const DEFAULT_CENTER = { lat: 40.7128, lng: -74.006 };
+// Ann Arbor downtown
+const DEFAULT_CENTER = { lat: 42.2808, lng: -83.743 };
 
-interface MapMarker {
+interface MapEvent {
   id: string;
+  title: string;
+  hobby_slug: string;
+  location: string;
+  date: string;
+  time: string;
+  price_cents: number;
   lat: number;
   lng: number;
   emoji: string;
-  name: string;
-  hobbyLabel: string;
-  hobbySlug: string;
-  rating: number;
-  price: string;
-  distance: string;
 }
 
-/** Deterministic pseudo-random offset from a seed string */
-function seededOffset(seed: string, range: number): number {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash << 5) - hash + seed.charCodeAt(i);
-    hash |= 0;
-  }
-  return ((hash % 1000) / 1000) * range;
+function formatHobbyLabel(slug: string): string {
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
-/** Build markers by distributing nearby classes around a center point */
-function buildMarkers(center: { lat: number; lng: number }): MapMarker[] {
-  const markers: MapMarker[] = [];
-  const featured = hobbies.slice(0, 10); // top 10 hobbies for the map
-
-  featured.forEach((hobby) => {
-    hobby.nearbyClasses.forEach((cls, i) => {
-      // Parse distance from "X.X mi away" string
-      const milesMatch = cls.location.match(/([\d.]+)/);
-      const miles = milesMatch ? parseFloat(milesMatch[1]) : 1;
-      // 1 mile ≈ 0.0145 degrees latitude
-      const degreeRadius = miles * 0.0145;
-
-      // Use seeded offsets for consistent but spread-out positions
-      const seed = `${hobby.slug}-${cls.name}-${i}`;
-      const angle = seededOffset(seed, Math.PI * 2);
-      const dist = degreeRadius * (0.5 + seededOffset(seed + "r", 0.5));
-
-      markers.push({
-        id: `${hobby.slug}-${i}`,
-        lat: center.lat + Math.cos(angle) * dist,
-        lng: center.lng + Math.sin(angle) * dist / Math.cos(center.lat * Math.PI / 180),
-        emoji: hobby.emoji,
-        name: cls.name,
-        hobbyLabel: hobby.label,
-        hobbySlug: hobby.slug,
-        rating: cls.rating,
-        price: cls.price,
-        distance: cls.location,
-      });
-    });
+function formatEventDate(date: string, time: string | null): string {
+  const dt = new Date(date + "T00:00:00");
+  const datePart = dt.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   });
 
-  return markers;
+  if (!time) return datePart;
+
+  const match = time.match(/^(\d{1,2}):(\d{2})$/);
+  if (match) {
+    const timeDt = new Date(`${date}T${time}`);
+    const timePart = timeDt.toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${datePart} · ${timePart}`;
+  }
+
+  return `${datePart} · ${time}`;
 }
 
-const MapContent = ({ center }: { center: { lat: number; lng: number } }) => {
+const MapContent = ({
+  center,
+  events,
+}: {
+  center: { lat: number; lng: number };
+  events: MapEvent[];
+}) => {
   const map = useMap();
-  const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
-
-  const markers = useMemo(() => buildMarkers(center), [center]);
+  const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
 
   const handleRecenter = useCallback(() => {
     map?.panTo(center);
-    map?.setZoom(14);
+    map?.setZoom(13);
   }, [map, center]);
 
   return (
@@ -95,53 +85,44 @@ const MapContent = ({ center }: { center: { lat: number; lng: number } }) => {
         <Navigation className="w-4 h-4 text-primary" />
       </button>
 
-      {/* User location dot */}
-      <AdvancedMarker position={center}>
-        <div className="relative">
-          <div className="w-4 h-4 rounded-full bg-blue-500 border-[3px] border-white shadow-lg" />
-          <div className="absolute -inset-2 rounded-full bg-blue-500/20 animate-ping" />
-        </div>
-      </AdvancedMarker>
-
-      {/* Hobby class markers */}
-      {markers.map((marker) => (
+      {/* Event markers */}
+      {events.map((evt) => (
         <AdvancedMarker
-          key={marker.id}
-          position={{ lat: marker.lat, lng: marker.lng }}
-          onClick={() => setSelectedMarker(marker)}
+          key={evt.id}
+          position={{ lat: evt.lat, lng: evt.lng }}
+          onClick={() => setSelectedEvent(evt)}
         >
           <div className="flex flex-col items-center cursor-pointer group">
             <div className="w-9 h-9 rounded-full bg-card border-2 border-primary/40 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-lg">{marker.emoji}</span>
+              <span className="text-lg">{evt.emoji}</span>
             </div>
           </div>
         </AdvancedMarker>
       ))}
 
       {/* Info window */}
-      {selectedMarker && (
+      {selectedEvent && (
         <InfoWindow
-          position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-          onCloseClick={() => setSelectedMarker(null)}
+          position={{ lat: selectedEvent.lat, lng: selectedEvent.lng }}
+          onCloseClick={() => setSelectedEvent(null)}
           pixelOffset={[0, -40]}
         >
           <Link
-            to={`/hobby/${selectedMarker.hobbySlug}`}
+            to={`/hobby/${selectedEvent.hobby_slug}`}
             className="block p-1 min-w-[160px]"
           >
             <p className="text-sm font-semibold text-gray-900">
-              {selectedMarker.emoji} {selectedMarker.name}
+              {selectedEvent.title}
             </p>
             <p className="text-xs text-gray-500 mt-0.5">
-              {selectedMarker.hobbyLabel} · {selectedMarker.distance}
+              {formatHobbyLabel(selectedEvent.hobby_slug)}
             </p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="flex items-center gap-0.5 text-xs text-amber-600">
-                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                {selectedMarker.rating}
-              </span>
-              <span className="text-xs text-gray-400">{selectedMarker.price}</span>
-            </div>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {formatEventDate(selectedEvent.date, selectedEvent.time)}
+            </p>
+            <p className="text-xs font-medium text-gray-700 mt-1">
+              {formatPrice(selectedEvent.price_cents)}
+            </p>
           </Link>
         </InfoWindow>
       )}
@@ -151,21 +132,34 @@ const MapContent = ({ center }: { center: { lat: number; lng: number } }) => {
 
 const NearYouMap = () => {
   const [center, setCenter] = useState(DEFAULT_CENTER);
-  const [locating, setLocating] = useState(true);
+  const [userLocated, setUserLocated] = useState(false);
+  const [events, setEvents] = useState<MapEvent[]>([]);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocating(false);
-      return;
+    async function fetchEvents() {
+      const { data } = await supabase
+        .from("events")
+        .select(
+          "id, title, hobby_slug, location, date, time, price_cents, lat, lng, emoji"
+        )
+        .eq("status", "approved")
+        .gte("date", new Date().toISOString().split("T")[0])
+        .not("lat", "is", null)
+        .not("lng", "is", null);
+
+      if (data) setEvents(data as MapEvent[]);
     }
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocating(false);
+        setUserLocated(true);
       },
-      () => {
-        setLocating(false);
-      },
+      () => {},
       { enableHighAccuracy: false, timeout: 8000 }
     );
   }, []);
@@ -176,35 +170,23 @@ const NearYouMap = () => {
         <h2 className="text-lg font-bold text-foreground">Near You</h2>
         <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
           <MapPin className="w-3 h-3" />
-          {locating ? "Locating..." : "Live"}
+          {userLocated ? "Live" : "Ann Arbor"}
         </span>
       </div>
       <div className="relative h-[300px] rounded-2xl border-2 border-border overflow-hidden">
         <APIProvider apiKey={API_KEY}>
           <Map
-            defaultCenter={center}
-            center={locating ? undefined : center}
-            defaultZoom={14}
+            defaultCenter={DEFAULT_CENTER}
+            center={center}
+            defaultZoom={13}
             mapId="akin-near-you"
             gestureHandling="greedy"
             disableDefaultUI
             style={{ width: "100%", height: "100%" }}
           >
-            {!locating && <MapContent center={center} />}
+            <MapContent center={center} events={events} />
           </Map>
         </APIProvider>
-
-        {/* Loading overlay */}
-        {locating && (
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
-            <div className="flex flex-col items-center gap-2">
-              <span className="w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
-              <span className="text-xs text-muted-foreground font-medium">
-                Finding your location...
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

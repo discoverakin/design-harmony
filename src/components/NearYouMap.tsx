@@ -181,6 +181,8 @@ const NearYouMap = () => {
             defaultZoom={13}
             mapId="akin-near-you"
             gestureHandling="greedy"
+            scrollwheel={true}
+            disableDoubleClickZoom={false}
             disableDefaultUI
             style={{ width: "100%", height: "100%" }}
           >

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   APIProvider,
   Map,
-  AdvancedMarker,
+  Marker,
   InfoWindow,
   useMap,
 } from "@vis.gl/react-google-maps";
@@ -87,17 +87,12 @@ const MapContent = ({
 
       {/* Event markers */}
       {events.map((evt) => (
-        <AdvancedMarker
+        <Marker
           key={evt.id}
           position={{ lat: evt.lat, lng: evt.lng }}
+          title={evt.title}
           onClick={() => setSelectedEvent(evt)}
-        >
-          <div className="flex flex-col items-center cursor-pointer group">
-            <div className="w-9 h-9 rounded-full bg-card border-2 border-primary/40 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span className="text-lg">{evt.emoji}</span>
-            </div>
-          </div>
-        </AdvancedMarker>
+        />
       ))}
 
       {/* Info window */}
@@ -179,7 +174,6 @@ const NearYouMap = () => {
             defaultCenter={DEFAULT_CENTER}
             center={center}
             defaultZoom={13}
-            mapId="4521372b044ebd8eb35561cc"
             gestureHandling="greedy"
             scrollwheel={true}
             disableDoubleClickZoom={false}

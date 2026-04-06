@@ -179,7 +179,7 @@ const NearYouMap = () => {
             defaultCenter={DEFAULT_CENTER}
             center={center}
             defaultZoom={13}
-            mapId="akin-near-you"
+            mapId="4521372b044ebd8eb35561cc"
             gestureHandling="greedy"
             scrollwheel={true}
             disableDoubleClickZoom={false}

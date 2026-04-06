@@ -68,6 +68,7 @@ const Search = () => {
   const [error, setError] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [fallback, setFallback] = useState<string | null>(null);
+  const [locationUsed, setLocationUsed] = useState<string | null>(null);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -94,11 +95,13 @@ const Search = () => {
       setResults(data.results ?? []);
       setParsed(data.parsed ?? null);
       setFallback(data.fallback ?? null);
+      setLocationUsed(data.location_used ?? null);
     } catch {
       setError(true);
       setResults([]);
       setParsed(null);
       setFallback(null);
+      setLocationUsed(null);
     } finally {
       setLoading(false);
     }
@@ -158,6 +161,15 @@ const Search = () => {
           {/* Results */}
           {!loading && !error && hasSearched && (
             <>
+              {/* Location proximity pill */}
+              {locationUsed && (
+                <div className="mb-3">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-[#E8604A]/10 text-[#E8604A] border border-[#E8604A]/20">
+                    📍 Showing classes near {formatSlug(locationUsed)}
+                  </span>
+                </div>
+              )}
+
               {/* Parsed intent tag */}
               {parsed?.hobby_slug && (
                 <div className="mb-4">

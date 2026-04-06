@@ -5,6 +5,29 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+const ANN_ARBOR_LANDMARKS: Record<string, { lat: number; lng: number }> = {
+  'downtown': { lat: 42.2808, lng: -83.7430 },
+  'main street': { lat: 42.2795, lng: -83.7480 },
+  'south main': { lat: 42.2750, lng: -83.7480 },
+  'north main': { lat: 42.2917, lng: -83.7489 },
+  'burns park': { lat: 42.2776, lng: -83.7409 },
+  'gallup park': { lat: 42.2766, lng: -83.7191 },
+  'kerrytown': { lat: 42.2866, lng: -83.7450 },
+  'central campus': { lat: 42.2780, lng: -83.7382 },
+  'north campus': { lat: 42.2942, lng: -83.7102 },
+  'state street': { lat: 42.2739, lng: -83.7408 },
+  'liberty street': { lat: 42.2794, lng: -83.7483 },
+  'michigan theater': { lat: 42.2794, lng: -83.7468 },
+  'argus farm': { lat: 42.2794, lng: -83.7501 },
+  'planet rock': { lat: 42.2697, lng: -83.6989 },
+  'nichols arboretum': { lat: 42.2808, lng: -83.7280 },
+  'fuller park': { lat: 42.2985, lng: -83.7191 },
+  'eberwhite': { lat: 42.2700, lng: -83.7600 },
+  'old west side': { lat: 42.2794, lng: -83.7600 },
+};
+
+const PROXIMITY_RADIUS = 0.012; // ~0.8 miles in degrees
+
 const MOOD_TO_HOBBIES: Record<string, string[]> = {
   relaxing: ["yoga", "fitness", "reading", "gardening", "knitting"],
   stressed: ["yoga", "fitness", "pottery", "gardening"],
@@ -63,8 +86,18 @@ Examples:
 - "arts and crafts" → hobby_slug: "arts-crafts"
 - "rock climbing" → hobby_slug: "rock-climbing"
 
-If the user mentions a location or area, extract it as location_hint.
-Known Ann Arbor areas: downtown, north campus, central campus, kerrytown, burns park, old west side, south side, near east side, ypsilanti.
+If the user mentions a specific Ann Arbor location, neighborhood, street or landmark, extract it as location_hint (lowercase text). Examples:
+- "near Burns Park" → location_hint: "burns park"
+- "classes on State Street" → location_hint: "state street"
+- "something downtown" → location_hint: "downtown"
+- "near campus" → location_hint: "central campus"
+- "on Liberty" → location_hint: "liberty street"
+- "near the arb" → location_hint: "nichols arboretum"
+- "near Kerrytown" → location_hint: "kerrytown"
+- "north campus area" → location_hint: "north campus"
+- "near Gallup" → location_hint: "gallup park"
+- "by Michigan Theater" → location_hint: "michigan theater"
+Known areas: downtown, main street, south main, north main, burns park, gallup park, kerrytown, central campus, north campus, state street, liberty street, michigan theater, argus farm, planet rock, nichols arboretum, fuller park, eberwhite, old west side.
 If they say "near me" or "nearby", set location_hint to "downtown" as default.
 
 Date filter examples:
@@ -135,9 +168,8 @@ export default async function handler(req: any, res: any) {
 
   try {
     parsed = await parseQueryWithClaude(query);
-    console.log("Parsed intent:", JSON.stringify(parsed));
   } catch (err) {
-    console.log("Claude parse error:", err);
+    // parse failed — fall through to keyword search
   }
 
   if (parsed) {
@@ -156,6 +188,44 @@ export default async function handler(req: any, res: any) {
       q = q.ilike("title", `%${parsed.keywords}%`);
     }
 
+    // Proximity-based location search
+    const searchCoords = parsed.location_hint
+      ? ANN_ARBOR_LANDMARKS[parsed.location_hint.toLowerCase()]
+      : null;
+
+    if (searchCoords) {
+      // Fetch all upcoming approved events with coordinates, then filter by proximity
+      const { data: allEvents } = await supabase
+        .from("events")
+        .select("*")
+        .eq("status", "approved")
+        .gte("date", today)
+        .not("lat", "is", null)
+        .not("lng", "is", null);
+
+      let nearbyEvents = (allEvents ?? []).filter((event) => {
+        const latDiff = Math.abs(event.lat - searchCoords.lat);
+        const lngDiff = Math.abs(event.lng - searchCoords.lng);
+        return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff) < PROXIMITY_RADIUS;
+      });
+
+      // Apply hobby/mood/keyword filter on nearby results
+      if (parsed.hobby_slug) {
+        nearbyEvents = nearbyEvents.filter((e) => e.hobby_slug === parsed!.hobby_slug);
+      } else if (parsed.mood && MOOD_TO_HOBBIES[parsed.mood]) {
+        nearbyEvents = nearbyEvents.filter((e) => MOOD_TO_HOBBIES[parsed!.mood!].includes(e.hobby_slug));
+      }
+
+      nearbyEvents.sort((a, b) => a.date.localeCompare(b.date));
+
+      return res.status(200).json({
+        results: nearbyEvents.slice(0, 10),
+        parsed,
+        location_used: parsed.location_hint,
+      });
+    }
+
+    // No coordinates — fall back to text-based location filter
     if (parsed.location_hint) {
       q = q.ilike("location", `%${parsed.location_hint}%`);
     }
@@ -174,8 +244,6 @@ export default async function handler(req: any, res: any) {
     }
 
     const { data, error } = await q;
-    console.log("Supabase results count:", data?.length);
-    console.log("Supabase error:", error);
 
     if (error) {
       return res.status(500).json({ error: error.message });

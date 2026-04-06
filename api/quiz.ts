@@ -63,7 +63,6 @@ export default async function handler(req: any, res: any) {
     });
 
     if (!apiRes.ok) {
-      console.log("Claude API error:", apiRes.status, await apiRes.text());
       return res.status(200).json(DEFAULT_RESPONSE);
     }
 
@@ -79,7 +78,6 @@ export default async function handler(req: any, res: any) {
       recommendations: parsed.recommendations,
     });
   } catch (err) {
-    console.log("Quiz API error:", err);
     return res.status(200).json(DEFAULT_RESPONSE);
   }
 }

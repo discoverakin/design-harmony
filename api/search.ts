@@ -188,10 +188,30 @@ export default async function handler(req: any, res: any) {
       q = q.ilike("title", `%${parsed.keywords}%`);
     }
 
-    // Proximity-based location search
-    const searchCoords = parsed.location_hint
-      ? ANN_ARBOR_LANDMARKS[parsed.location_hint.toLowerCase()]
-      : null;
+    // Proximity-based location search with fuzzy matching
+    const findLandmarkCoords = (hint: string | null) => {
+      if (!hint) return null;
+      const normalized = hint.toLowerCase().trim();
+
+      // Try exact match first
+      if (ANN_ARBOR_LANDMARKS[normalized]) {
+        return { coords: ANN_ARBOR_LANDMARKS[normalized], key: normalized };
+      }
+
+      // Try partial match — check if any landmark key is contained in the hint
+      // or if the hint is contained in any landmark key
+      for (const [key, coords] of Object.entries(ANN_ARBOR_LANDMARKS)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          return { coords, key };
+        }
+      }
+
+      return null;
+    };
+
+    const landmarkMatch = findLandmarkCoords(parsed.location_hint);
+    const searchCoords = landmarkMatch?.coords || null;
+    const locationKey = landmarkMatch?.key || null;
 
     if (searchCoords) {
       // Fetch all upcoming approved events with coordinates, then filter by proximity
@@ -221,7 +241,7 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({
         results: nearbyEvents.slice(0, 10),
         parsed,
-        location_used: parsed.location_hint,
+        location_used: locationKey,
       });
     }
 

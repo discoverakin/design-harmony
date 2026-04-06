@@ -8,6 +8,11 @@ export interface ProfileData {
   avatarUrl: string | null;
   bio: string | null;
   hasCompletedOnboarding: boolean;
+  quizResults?: {
+    recommendations: Array<{ slug: string; reason: string }>;
+    personality_summary: string;
+    completed_at: string;
+  } | null;
 }
 
 export function useProfile(defaults?: { name: string; handle: string }) {
@@ -29,13 +34,14 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     avatarUrl: null,
     bio: null,
     hasCompletedOnboarding: false,
+    quizResults: null,
   });
   const [loading, setLoading] = useState(true);
 
   // Fetch profile from Supabase on mount / user change — auto-create if missing
   useEffect(() => {
     if (!user) {
-      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false });
+      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, quizResults: null });
       setLoading(false);
       return;
     }
@@ -45,7 +51,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     async function fetchProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, handle, avatar_url, bio, has_completed_onboarding")
+        .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results")
         .eq("user_id", user!.id)
         .maybeSingle();
 
@@ -53,7 +59,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
 
       if (error) {
         console.error("Failed to fetch profile:", error.message);
-        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false });
+        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, quizResults: null });
       } else if (data) {
         setProfile({
           name: data.display_name,
@@ -61,6 +67,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
           avatarUrl: data.avatar_url,
           bio: data.bio,
           hasCompletedOnboarding: data.has_completed_onboarding ?? false,
+          quizResults: data.quiz_results ?? null,
         });
       } else {
         // No profile row yet — auto-create from user email / metadata
@@ -80,7 +87,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             },
             { onConflict: "user_id" }
           )
-          .select("display_name, handle, avatar_url, bio, has_completed_onboarding")
+          .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results")
           .single();
 
         if (cancelled) return;
@@ -94,6 +101,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             avatarUrl: inserted.avatar_url,
             bio: inserted.bio,
             hasCompletedOnboarding: inserted.has_completed_onboarding ?? false,
+            quizResults: inserted.quiz_results ?? null,
           });
         }
       }

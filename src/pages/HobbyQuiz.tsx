@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { quizQuestions, calculateResults } from "@/data/quiz";
+import { getRandomizedQuestions, calculateResults } from "@/data/quiz";
 import { hobbies } from "@/data/hobbies";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,10 +22,11 @@ const HobbyQuiz = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [aiResults, setAiResults] = useState<AiResults | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [questions, setQuestions] = useState(() => getRandomizedQuestions());
 
-  const totalSteps = quizQuestions.length;
+  const totalSteps = questions.length;
   const isResults = step >= totalSteps;
-  const currentQ = quizQuestions[step];
+  const currentQ = questions[step];
   const progress = isResults ? 100 : Math.round((step / totalSteps) * 100);
 
   const animateTransition = useCallback(
@@ -58,6 +59,7 @@ const HobbyQuiz = () => {
       setAnswers({});
       setStep(0);
       setAiResults(null);
+      setQuestions(getRandomizedQuestions());
     });
   };
 
@@ -65,7 +67,7 @@ const HobbyQuiz = () => {
   useEffect(() => {
     if (!isResults || aiResults || aiLoading) return;
 
-    const answerTexts = quizQuestions.map((q) => {
+    const answerTexts = questions.map((q) => {
       const idx = answers[q.id];
       return idx !== undefined ? q.options[idx].label : "";
     });
@@ -102,7 +104,7 @@ const HobbyQuiz = () => {
       .finally(() => setAiLoading(false));
   }, [isResults]);
 
-  const results = isResults ? calculateResults(answers) : [];
+  const results = isResults ? calculateResults(questions, answers) : [];
   const topResults = results.slice(0, 3);
 
   const getAiReason = (slug: string) =>

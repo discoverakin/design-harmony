@@ -153,8 +153,28 @@ const NearYouMap = () => {
 
     events.forEach((evt) => {
       const pin = document.createElement("div");
-      pin.style.cssText = "font-size:28px;cursor:pointer;";
+      pin.style.cssText = `
+        background: white;
+        border: 2px solid #E8604A;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        transition: transform 0.15s ease;
+      `;
       pin.textContent = HOBBY_EMOJI[evt.hobby_slug] || evt.emoji || "📍";
+
+      pin.addEventListener("mouseenter", () => {
+        pin.style.transform = "scale(1.2)";
+      });
+      pin.addEventListener("mouseleave", () => {
+        pin.style.transform = "scale(1)";
+      });
 
       const marker = new google.maps.marker.AdvancedMarkerElement({
         map,

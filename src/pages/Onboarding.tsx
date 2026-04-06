@@ -78,9 +78,9 @@ const Onboarding = () => {
     setPage([next, newDirection]);
   };
 
-  const completeOnboarding = () => {
+  const completeOnboarding = async () => {
     localStorage.setItem("akin-onboarding-complete", "true");
-    updateProfile({ hasCompletedOnboarding: true });
+    await updateProfile({ hasCompletedOnboarding: true });
     navigate("/", { replace: true });
   };
 

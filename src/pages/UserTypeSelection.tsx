@@ -12,7 +12,7 @@ const UserTypeSelection = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#FDF6F0" }}>
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#F9E9E4" }}>
         <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
@@ -34,30 +34,36 @@ const UserTypeSelection = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
       className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden relative"
-      style={{ backgroundColor: "#FDF6F0" }}
+      style={{ backgroundColor: "#F9E9E4" }}
     >
-      {/* Decorative background shapes */}
+      {/* Decorative circles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute -top-24 -right-24 w-80 h-80 rounded-full"
-          style={{ backgroundColor: "#F0E8E0" }}
+          className="absolute rounded-full"
+          style={{
+            width: 280,
+            height: 280,
+            top: -80,
+            right: -80,
+            backgroundColor: "#FF5C3B",
+            opacity: 0.15,
+          }}
         />
         <div
-          className="absolute top-1/3 -left-20 w-56 h-56 rounded-full"
-          style={{ backgroundColor: "#F0E8E0" }}
-        />
-        <div
-          className="absolute -bottom-16 right-4 w-48 h-48 rounded-full"
-          style={{ backgroundColor: "#F0E8E0" }}
-        />
-        <div
-          className="absolute bottom-1/4 -left-8 w-32 h-32 rounded-full"
-          style={{ backgroundColor: "#EDE4DC" }}
+          className="absolute rounded-full"
+          style={{
+            width: 220,
+            height: 220,
+            bottom: -60,
+            left: -60,
+            backgroundColor: "#FF5C3B",
+            opacity: 0.1,
+          }}
         />
       </div>
 
       {/* Logo — centered */}
-      <div className="flex justify-center pt-12 relative z-10">
+      <div className="flex justify-center relative z-10" style={{ paddingTop: 48 }}>
         <motion.img
           src={logoAkin}
           alt="Akin"
@@ -68,116 +74,196 @@ const UserTypeSelection = () => {
         />
       </div>
 
-      {/* Content — vertically centered */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-        <motion.h1
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-2xl font-semibold mb-8 text-center"
-          style={{ color: "#2D2D2D" }}
+      {/* Heading */}
+      <motion.h1
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="text-center relative z-10"
+        style={{
+          fontSize: 26,
+          fontWeight: 800,
+          color: "#2D1810",
+          marginTop: 48,
+        }}
+      >
+        I am a...
+      </motion.h1>
+
+      {/* Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="flex relative z-10"
+        style={{ gap: 12, marginLeft: 16, marginRight: 16, marginTop: 32 }}
+      >
+        {/* Hobby Seeker */}
+        <button
+          onClick={() => setUserType("seeker")}
+          className="flex-1 flex flex-col items-center text-center"
+          style={{
+            minHeight: 200,
+            borderRadius: 24,
+            padding: 24,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            backgroundColor: userType === "seeker" ? "#FF5C3B" : "#FFFFFF",
+            border: userType === "seeker" ? "2px solid #FF5C3B" : "2px solid #F0D0C8",
+            boxShadow: userType === "seeker" ? "0 8px 20px rgba(255, 92, 59, 0.3)" : "none",
+            transform: userType === "seeker" ? "scale(1.03)" : "scale(1)",
+          }}
         >
-          I am a...
-        </motion.h1>
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 60,
+              height: 60,
+              backgroundColor: userType === "seeker" ? "rgba(255,255,255,0.3)" : "#F9E9E4",
+            }}
+          >
+            <Search
+              style={{
+                width: 26,
+                height: 26,
+                color: userType === "seeker" ? "#FFFFFF" : "#FF5C3B",
+              }}
+            />
+          </div>
+          <span
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              marginTop: 12,
+              color: userType === "seeker" ? "#FFFFFF" : "#2D1810",
+            }}
+          >
+            Hobby Seeker
+          </span>
+          <span
+            style={{
+              fontSize: 13,
+              marginTop: 8,
+              lineHeight: 1.4,
+              color: userType === "seeker" ? "rgba(255,255,255,0.85)" : "#8B6B61",
+            }}
+          >
+            Explore and discover new hobbies
+          </span>
+        </button>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex gap-4 w-full"
+        {/* Business Owner */}
+        <button
+          onClick={() => setUserType("owner")}
+          className="flex-1 flex flex-col items-center text-center"
+          style={{
+            minHeight: 200,
+            borderRadius: 24,
+            padding: 24,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            backgroundColor: userType === "owner" ? "#FF5C3B" : "#FFFFFF",
+            border: userType === "owner" ? "2px solid #FF5C3B" : "2px solid #F0D0C8",
+            boxShadow: userType === "owner" ? "0 8px 20px rgba(255, 92, 59, 0.3)" : "none",
+            transform: userType === "owner" ? "scale(1.03)" : "scale(1)",
+          }}
         >
-          {/* Hobby Seeker */}
-          <button
-            onClick={() => setUserType("seeker")}
-            className={`flex-1 flex flex-col items-center justify-center gap-3 p-6 rounded-2xl min-h-[180px] transition-all duration-200 ${
-              userType === "seeker"
-                ? "shadow-lg scale-[1.02]"
-                : "bg-white shadow-sm hover:shadow-md"
-            }`}
-            style={
-              userType === "seeker"
-                ? { backgroundColor: "#E8604A" }
-                : undefined
-            }
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 60,
+              height: 60,
+              backgroundColor: userType === "owner" ? "rgba(255,255,255,0.3)" : "#F9E9E4",
+            }}
           >
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center"
+            <Store
               style={{
-                backgroundColor: userType === "seeker" ? "#FFFFFF" : "#FEE8E0",
+                width: 26,
+                height: 26,
+                color: userType === "owner" ? "#FFFFFF" : "#FF5C3B",
               }}
-            >
-              <Search className="w-6 h-6" style={{ color: "#E8604A" }} />
-            </div>
-            <span
-              className="text-sm font-bold"
-              style={{ color: userType === "seeker" ? "#FFFFFF" : "#2D2D2D" }}
-            >
-              Hobby Seeker
-            </span>
-            <span
-              className="text-xs leading-snug text-center"
-              style={{
-                color: userType === "seeker" ? "rgba(255,255,255,0.9)" : "#666666",
-              }}
-            >
-              Explore and discover new hobbies
-            </span>
-          </button>
-
-          {/* Business Owner */}
-          <button
-            onClick={() => setUserType("owner")}
-            className={`flex-1 flex flex-col items-center justify-center gap-3 p-6 rounded-2xl min-h-[180px] transition-all duration-200 ${
-              userType === "owner"
-                ? "shadow-lg scale-[1.02]"
-                : "bg-white shadow-sm hover:shadow-md"
-            }`}
-            style={
-              userType === "owner"
-                ? { backgroundColor: "#E8604A" }
-                : undefined
-            }
+            />
+          </div>
+          <span
+            style={{
+              fontSize: 17,
+              fontWeight: 700,
+              marginTop: 12,
+              color: userType === "owner" ? "#FFFFFF" : "#2D1810",
+            }}
           >
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{
-                backgroundColor: userType === "owner" ? "#FFFFFF" : "#FEE8E0",
-              }}
-            >
-              <Store className="w-6 h-6" style={{ color: "#E8604A" }} />
-            </div>
-            <span
-              className="text-sm font-bold"
-              style={{ color: userType === "owner" ? "#FFFFFF" : "#2D2D2D" }}
-            >
-              Business Owner
-            </span>
-            <span
-              className="text-xs leading-snug text-center"
-              style={{
-                color: userType === "owner" ? "rgba(255,255,255,0.9)" : "#666666",
-              }}
-            >
-              Manage your listings and analytics
-            </span>
-          </button>
-        </motion.div>
-      </div>
+            Business Owner
+          </span>
+          <span
+            style={{
+              fontSize: 13,
+              marginTop: 8,
+              lineHeight: 1.4,
+              color: userType === "owner" ? "rgba(255,255,255,0.85)" : "#8B6B61",
+            }}
+          >
+            Manage your listings and analytics
+          </span>
+        </button>
+      </motion.div>
 
-      {/* Bottom — compact "Next >" pill */}
-      <div className="flex justify-center pb-12 relative z-10">
-        {userType && (
+      {/* Bottom */}
+      <div className="flex-1" />
+      <div className="flex flex-col items-center relative z-10 pb-10">
+        {userType ? (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={handleSubmit}
-            className="px-6 py-2 rounded-full font-semibold text-sm text-white shadow-md hover:opacity-90 transition-opacity"
-            style={{ backgroundColor: "#E8604A" }}
             whileTap={{ scale: 0.95 }}
+            style={{
+              backgroundColor: "#FF5C3B",
+              color: "#FFFFFF",
+              fontWeight: 700,
+              fontSize: 16,
+              padding: "14px 48px",
+              borderRadius: 50,
+              border: "none",
+              boxShadow: "0 4px 14px rgba(255, 92, 59, 0.35)",
+              cursor: "pointer",
+              marginTop: 32,
+            }}
           >
-            Next &gt;
+            Get Started →
           </motion.button>
+        ) : (
+          <div
+            style={{
+              color: "#C4A79E",
+              fontWeight: 700,
+              fontSize: 16,
+              padding: "14px 48px",
+              borderRadius: 50,
+              backgroundColor: "rgba(255, 92, 59, 0.15)",
+              marginTop: 32,
+              cursor: "not-allowed",
+            }}
+          >
+            Get Started →
+          </div>
         )}
+
+        <p style={{ marginTop: 16, fontSize: 14, color: "#8B6B61" }}>
+          Already have an account?{" "}
+          <button
+            onClick={() => navigate("/login")}
+            style={{
+              color: "#FF5C3B",
+              fontWeight: 700,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 14,
+            }}
+          >
+            Sign In
+          </button>
+        </p>
       </div>
     </motion.div>
   );

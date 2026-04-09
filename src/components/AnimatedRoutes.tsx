@@ -3,6 +3,8 @@ import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import PageTransition from "@/components/PageTransition";
+import UserTypeSelection from "@/pages/UserTypeSelection";
+import ComingSoon from "@/pages/ComingSoon";
 import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
@@ -66,6 +68,10 @@ const HomeRoute = () => {
   );
 };
 
+const AuthHomeRoute = () => (
+  <RequireAuth><HomeRoute /></RequireAuth>
+);
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 
@@ -73,20 +79,14 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public routes */}
+        <Route path="/" element={<UserTypeSelection />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/coming-soon" element={<RequireAuth><PageTransition><ComingSoon /></PageTransition></RequireAuth>} />
 
         {/* Protected routes */}
-        <Route
-          path="/"
-          element={
-            <RequireAuth>
-              <HomeRoute />
-            </RequireAuth>
-          }
-        />
-        <Route path="/home" element={<RequireAuth><PageTransition><Homepage /></PageTransition></RequireAuth>} />
+        <Route path="/home" element={<AuthHomeRoute />} />
         <Route path="/community" element={<RequireAuth><PageTransition><Community /></PageTransition></RequireAuth>} />
         <Route path="/community/:slug" element={<RequireAuth><PageTransition><GroupDetail /></PageTransition></RequireAuth>} />
         <Route path="/events" element={<RequireAuth><PageTransition><Events /></PageTransition></RequireAuth>} />

@@ -22,13 +22,17 @@ const Login = () => {
   const paymentStatus = searchParams.get("payment");
   const redirectPath = searchParams.get("redirect") || sessionStorage.getItem("redirectAfterLogin");
   const isPaymentReturn = paymentStatus === "success";
+  const userType = searchParams.get("type");
 
   if (user) {
     if (redirectPath) {
       sessionStorage.removeItem("redirectAfterLogin");
       return <Navigate to={`${redirectPath}?payment=${paymentStatus}`} replace />;
     }
-    return <Navigate to="/" replace />;
+    if (userType === "owner") {
+      return <Navigate to="/coming-soon" replace />;
+    }
+    return <Navigate to="/home" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +47,10 @@ const Login = () => {
     } else if (redirectPath) {
       sessionStorage.removeItem("redirectAfterLogin");
       navigate(`${redirectPath}?payment=${paymentStatus}`, { replace: true });
+    } else if (userType === "owner") {
+      navigate("/coming-soon", { replace: true });
+    } else {
+      navigate("/home", { replace: true });
     }
   };
 
@@ -78,7 +86,11 @@ const Login = () => {
           </div>
 
           <h1 className="text-2xl font-bold text-foreground font-heading mb-1">
-            Welcome back
+            {userType === "seeker"
+              ? <span>Welcome, hobby seeker! <span className="text-[#E8604A]">🎨</span></span>
+              : userType === "owner"
+              ? <span>Welcome, studio owner! <span className="text-[#E8604A]">🏢</span></span>
+              : "Welcome back"}
           </h1>
           <p className="text-muted-foreground mb-8">
             {isPaymentReturn

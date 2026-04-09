@@ -19,7 +19,7 @@ const Signup = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/home" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

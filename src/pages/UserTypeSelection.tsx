@@ -33,78 +33,68 @@ const UserTypeSelection = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden relative"
-      style={{ background: "linear-gradient(160deg, #E8604A 0%, #FF8C69 100%)" }}
+      className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #F4A896 0%, #F08070 100%)" }}
     >
-      {/* Decorative background shapes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/8" />
-        <div className="absolute top-1/4 -left-16 w-48 h-48 rounded-full bg-white/6" />
-        <div className="absolute bottom-1/4 right-8 w-32 h-32 rounded-full bg-white/5" />
-        <div className="absolute -bottom-10 -left-10 w-56 h-56 rounded-full bg-white/7" />
-      </div>
-
-      {/* Logo */}
-      <div className="px-5 pt-8 relative z-10">
+      {/* Logo — top left */}
+      <div className="px-6 pt-8">
         <motion.img
           src={logoAkin}
           alt="Akin"
-          className="h-10 brightness-0 invert"
+          className="h-8 brightness-0 invert"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col justify-center px-8 relative z-10">
+      {/* Content — vertically centered */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-3xl font-bold text-white font-heading mb-2"
+          className="text-3xl font-bold text-white font-heading mb-2 text-center"
         >
-          Welcome to Akin
+          Welcome to Akin!
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-base text-white/70 mb-10"
+          className="text-base text-white/80 mb-10 text-center"
         >
-          Tell us who you are to get started
+          Discover your next passion or grow your business
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex gap-4"
+          className="flex gap-4 w-full"
         >
           {/* Hobby Seeker */}
           <button
             onClick={() => setUserType("seeker")}
-            className={`flex-1 flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 ${
+            className={`flex-1 flex flex-col items-center justify-center gap-4 p-6 rounded-2xl min-h-[200px] transition-all duration-200 ${
               userType === "seeker"
-                ? "bg-white border-white text-[#E8604A] shadow-lg scale-[1.02]"
-                : "bg-white/15 border-white/20 text-white hover:bg-white/25"
+                ? "bg-white shadow-xl scale-[1.02]"
+                : "bg-white/25 border border-white/30 hover:bg-white/35"
             }`}
           >
-            <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center ${
-                userType === "seeker" ? "bg-[#E8604A]/10" : "bg-white/15"
+            <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+              <Search className="w-6 h-6 text-[#E8604A]" />
+            </div>
+            <span
+              className={`text-base font-bold ${
+                userType === "seeker" ? "text-[#E8604A]" : "text-white"
               }`}
             >
-              <Search
-                className={`w-7 h-7 ${
-                  userType === "seeker" ? "text-[#E8604A]" : "text-white"
-                }`}
-              />
-            </div>
-            <span className="text-base font-semibold">Hobby Seeker</span>
+              Hobby Seeker
+            </span>
             <span
               className={`text-xs leading-snug text-center ${
-                userType === "seeker" ? "text-[#E8604A]/70" : "text-white/60"
+                userType === "seeker" ? "text-[#E8604A]/60" : "text-white/70"
               }`}
             >
               Explore and discover new hobbies
@@ -114,27 +104,25 @@ const UserTypeSelection = () => {
           {/* Business Owner */}
           <button
             onClick={() => setUserType("owner")}
-            className={`flex-1 flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 ${
+            className={`flex-1 flex flex-col items-center justify-center gap-4 p-6 rounded-2xl min-h-[200px] transition-all duration-200 ${
               userType === "owner"
-                ? "bg-white border-white text-[#E8604A] shadow-lg scale-[1.02]"
-                : "bg-white/15 border-white/20 text-white hover:bg-white/25"
+                ? "bg-white shadow-xl scale-[1.02]"
+                : "bg-white/25 border border-white/30 hover:bg-white/35"
             }`}
           >
-            <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center ${
-                userType === "owner" ? "bg-[#E8604A]/10" : "bg-white/15"
+            <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+              <Store className="w-6 h-6 text-[#E8604A]" />
+            </div>
+            <span
+              className={`text-base font-bold ${
+                userType === "owner" ? "text-[#E8604A]" : "text-white"
               }`}
             >
-              <Store
-                className={`w-7 h-7 ${
-                  userType === "owner" ? "text-[#E8604A]" : "text-white"
-                }`}
-              />
-            </div>
-            <span className="text-base font-semibold">Business Owner</span>
+              Business Owner
+            </span>
             <span
               className={`text-xs leading-snug text-center ${
-                userType === "owner" ? "text-[#E8604A]/70" : "text-white/60"
+                userType === "owner" ? "text-[#E8604A]/60" : "text-white/70"
               }`}
             >
               Manage your listings and analytics
@@ -144,24 +132,28 @@ const UserTypeSelection = () => {
       </div>
 
       {/* Bottom */}
-      <div className="px-8 pb-10 relative z-10">
-        {userType && (
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            onClick={handleSubmit}
-            className="w-full h-14 rounded-full bg-white text-[#E8604A] font-semibold text-base shadow-lg hover:opacity-90 transition-opacity"
-            whileTap={{ scale: 0.97 }}
-          >
-            Get Started →
-          </motion.button>
-        )}
+      <div className="px-6 pb-10">
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          onClick={handleSubmit}
+          disabled={!userType}
+          className={`w-full h-14 rounded-full font-semibold text-base shadow-lg transition-all duration-200 ${
+            userType
+              ? "bg-white text-[#E8604A] hover:opacity-90"
+              : "bg-white/40 text-white/60 cursor-not-allowed"
+          }`}
+          whileTap={userType ? { scale: 0.97 } : undefined}
+        >
+          Get Started →
+        </motion.button>
 
-        <p className="text-center text-sm text-white/50 mt-4">
+        <p className="text-center text-sm text-white/50 mt-5">
           Already have an account?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="text-white font-semibold hover:underline"
+            className="text-white font-bold hover:underline"
           >
             Sign In
           </button>

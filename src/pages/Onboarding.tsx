@@ -15,10 +15,9 @@ interface OnboardingSlide {
 
 const slides: OnboardingSlide[] = [
   {
-    emoji: "🌟",
+    emoji: "",
     title: "Welcome to Akin",
-    description:
-      "Discover hobbies you'll love, connect with people who share your passions, and make every free moment count.",
+    description: "Discover your next passion in Ann Arbor",
     bgToken: "var(--brand-cream)",
   },
   {
@@ -86,6 +85,97 @@ const Onboarding = () => {
 
   const slide = slides[page];
   const isLast = page === slides.length - 1;
+  const isWelcome = page === 0;
+
+  if (isWelcome) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden relative"
+        style={{ background: "linear-gradient(160deg, #E8604A 0%, #FF8C69 100%)" }}
+      >
+        {/* Decorative background shapes */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/8" />
+          <div className="absolute top-1/4 -left-16 w-48 h-48 rounded-full bg-white/6" />
+          <div className="absolute bottom-1/4 right-8 w-32 h-32 rounded-full bg-white/5" />
+          <div className="absolute -bottom-10 -left-10 w-56 h-56 rounded-full bg-white/7" />
+          <div className="absolute top-1/2 right-1/3 w-20 h-20 rounded-full bg-white/4" />
+        </div>
+
+        {/* Skip button */}
+        <div className="flex justify-end px-5 pt-6 relative z-10">
+          <button
+            onClick={completeOnboarding}
+            className="text-xs font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-colors"
+          >
+            Skip
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10">
+          <motion.img
+            src={logoAkin}
+            alt="Akin"
+            className="h-12 mb-10 brightness-0 invert"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          />
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="text-3xl font-bold text-white font-heading mb-4 text-center"
+          >
+            Welcome to Akin
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="text-lg text-white/75 leading-relaxed max-w-xs text-center"
+          >
+            Discover your next passion in Ann Arbor
+          </motion.p>
+        </div>
+
+        {/* Bottom */}
+        <div className="px-8 pb-10 relative z-10">
+          {/* Progress dots */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            {slides.map((_, i) => (
+              <motion.button
+                key={i}
+                onClick={() => setPage([i, i > page ? 1 : -1])}
+                className="rounded-full transition-colors"
+                animate={{
+                  width: i === page ? 28 : 8,
+                  backgroundColor: i === page ? "#ffffff" : "rgba(255,255,255,0.3)",
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                style={{ height: 8 }}
+              />
+            ))}
+          </div>
+
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            onClick={() => paginate(1)}
+            className="w-full h-14 rounded-full bg-white text-[#E8604A] font-semibold text-base shadow-lg hover:opacity-90 transition-opacity"
+            whileTap={{ scale: 0.97 }}
+          >
+            Get Started
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

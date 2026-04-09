@@ -12,7 +12,7 @@ const UserTypeSelection = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: "#FDF6F0" }}>
         <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
@@ -32,16 +32,36 @@ const UserTypeSelection = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #F4A896 0%, #F08070 100%)" }}
+      transition={{ duration: 0.5 }}
+      className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden relative"
+      style={{ backgroundColor: "#FDF6F0" }}
     >
-      {/* Logo — top left */}
-      <div className="px-6 pt-8">
+      {/* Decorative background shapes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute -top-24 -right-24 w-80 h-80 rounded-full"
+          style={{ backgroundColor: "#F0E8E0" }}
+        />
+        <div
+          className="absolute top-1/3 -left-20 w-56 h-56 rounded-full"
+          style={{ backgroundColor: "#F0E8E0" }}
+        />
+        <div
+          className="absolute -bottom-16 right-4 w-48 h-48 rounded-full"
+          style={{ backgroundColor: "#F0E8E0" }}
+        />
+        <div
+          className="absolute bottom-1/4 -left-8 w-32 h-32 rounded-full"
+          style={{ backgroundColor: "#EDE4DC" }}
+        />
+      </div>
+
+      {/* Logo — centered */}
+      <div className="flex justify-center pt-12 relative z-10">
         <motion.img
           src={logoAkin}
           alt="Akin"
-          className="h-8 brightness-0 invert"
+          className="h-8"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -49,53 +69,56 @@ const UserTypeSelection = () => {
       </div>
 
       {/* Content — vertically centered */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-3xl font-bold text-white font-heading mb-2 text-center"
+          className="text-2xl font-semibold mb-8 text-center"
+          style={{ color: "#2D2D2D" }}
         >
-          Welcome to Akin!
+          I am a...
         </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-base text-white/80 mb-10 text-center"
-        >
-          Discover your next passion or grow your business
-        </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
           className="flex gap-4 w-full"
         >
           {/* Hobby Seeker */}
           <button
             onClick={() => setUserType("seeker")}
-            className={`flex-1 flex flex-col items-center justify-center gap-4 p-6 rounded-2xl min-h-[200px] transition-all duration-200 ${
+            className={`flex-1 flex flex-col items-center justify-center gap-3 p-6 rounded-2xl min-h-[180px] transition-all duration-200 ${
               userType === "seeker"
-                ? "bg-white shadow-xl scale-[1.02]"
-                : "bg-white/25 border border-white/30 hover:bg-white/35"
+                ? "shadow-lg scale-[1.02]"
+                : "bg-white shadow-sm hover:shadow-md"
             }`}
+            style={
+              userType === "seeker"
+                ? { backgroundColor: "#E8604A" }
+                : undefined
+            }
           >
-            <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
-              <Search className="w-6 h-6 text-[#E8604A]" />
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: userType === "seeker" ? "#FFFFFF" : "#FEE8E0",
+              }}
+            >
+              <Search className="w-6 h-6" style={{ color: "#E8604A" }} />
             </div>
             <span
-              className={`text-base font-bold ${
-                userType === "seeker" ? "text-[#E8604A]" : "text-white"
-              }`}
+              className="text-sm font-bold"
+              style={{ color: userType === "seeker" ? "#FFFFFF" : "#2D2D2D" }}
             >
               Hobby Seeker
             </span>
             <span
-              className={`text-xs leading-snug text-center ${
-                userType === "seeker" ? "text-[#E8604A]/60" : "text-white/70"
-              }`}
+              className="text-xs leading-snug text-center"
+              style={{
+                color: userType === "seeker" ? "rgba(255,255,255,0.9)" : "#666666",
+              }}
             >
               Explore and discover new hobbies
             </span>
@@ -104,26 +127,36 @@ const UserTypeSelection = () => {
           {/* Business Owner */}
           <button
             onClick={() => setUserType("owner")}
-            className={`flex-1 flex flex-col items-center justify-center gap-4 p-6 rounded-2xl min-h-[200px] transition-all duration-200 ${
+            className={`flex-1 flex flex-col items-center justify-center gap-3 p-6 rounded-2xl min-h-[180px] transition-all duration-200 ${
               userType === "owner"
-                ? "bg-white shadow-xl scale-[1.02]"
-                : "bg-white/25 border border-white/30 hover:bg-white/35"
+                ? "shadow-lg scale-[1.02]"
+                : "bg-white shadow-sm hover:shadow-md"
             }`}
+            style={
+              userType === "owner"
+                ? { backgroundColor: "#E8604A" }
+                : undefined
+            }
           >
-            <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
-              <Store className="w-6 h-6 text-[#E8604A]" />
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: userType === "owner" ? "#FFFFFF" : "#FEE8E0",
+              }}
+            >
+              <Store className="w-6 h-6" style={{ color: "#E8604A" }} />
             </div>
             <span
-              className={`text-base font-bold ${
-                userType === "owner" ? "text-[#E8604A]" : "text-white"
-              }`}
+              className="text-sm font-bold"
+              style={{ color: userType === "owner" ? "#FFFFFF" : "#2D2D2D" }}
             >
               Business Owner
             </span>
             <span
-              className={`text-xs leading-snug text-center ${
-                userType === "owner" ? "text-[#E8604A]/60" : "text-white/70"
-              }`}
+              className="text-xs leading-snug text-center"
+              style={{
+                color: userType === "owner" ? "rgba(255,255,255,0.9)" : "#666666",
+              }}
             >
               Manage your listings and analytics
             </span>
@@ -131,33 +164,20 @@ const UserTypeSelection = () => {
         </motion.div>
       </div>
 
-      {/* Bottom */}
-      <div className="px-6 pb-10">
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          onClick={handleSubmit}
-          disabled={!userType}
-          className={`w-full h-14 rounded-full font-semibold text-base shadow-lg transition-all duration-200 ${
-            userType
-              ? "bg-white text-[#E8604A] hover:opacity-90"
-              : "bg-white/40 text-white/60 cursor-not-allowed"
-          }`}
-          whileTap={userType ? { scale: 0.97 } : undefined}
-        >
-          Get Started →
-        </motion.button>
-
-        <p className="text-center text-sm text-white/50 mt-5">
-          Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            className="text-white font-bold hover:underline"
+      {/* Bottom — compact "Next >" pill */}
+      <div className="flex justify-center pb-12 relative z-10">
+        {userType && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={handleSubmit}
+            className="px-6 py-2 rounded-full font-semibold text-sm text-white shadow-md hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "#E8604A" }}
+            whileTap={{ scale: 0.95 }}
           >
-            Sign In
-          </button>
-        </p>
+            Next &gt;
+          </motion.button>
+        )}
       </div>
     </motion.div>
   );

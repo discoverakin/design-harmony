@@ -8,6 +8,7 @@ export interface ProfileData {
   avatarUrl: string | null;
   bio: string | null;
   hasCompletedOnboarding: boolean;
+  userType?: "seeker" | "owner";
   quizResults?: {
     recommendations: Array<{ slug: string; reason: string }>;
     personality_summary: string;
@@ -34,6 +35,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     avatarUrl: null,
     bio: null,
     hasCompletedOnboarding: false,
+    userType: undefined,
     quizResults: null,
   });
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
   // Fetch profile from Supabase on mount / user change — auto-create if missing
   useEffect(() => {
     if (!user) {
-      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, quizResults: null });
+      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, userType: undefined, quizResults: null });
       setLoading(false);
       return;
     }
@@ -51,7 +53,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     async function fetchProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results")
+        .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results, user_type")
         .eq("user_id", user!.id)
         .maybeSingle();
 
@@ -59,7 +61,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
 
       if (error) {
         console.error("Failed to fetch profile:", error.message);
-        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, quizResults: null });
+        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, userType: undefined, quizResults: null });
       } else if (data) {
         setProfile({
           name: data.display_name,
@@ -67,6 +69,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
           avatarUrl: data.avatar_url,
           bio: data.bio,
           hasCompletedOnboarding: data.has_completed_onboarding ?? false,
+          userType: data.user_type ?? undefined,
           quizResults: data.quiz_results ?? null,
         });
       } else {
@@ -87,7 +90,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             },
             { onConflict: "user_id" }
           )
-          .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results")
+          .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results, user_type")
           .single();
 
         if (cancelled) return;
@@ -101,6 +104,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             avatarUrl: inserted.avatar_url,
             bio: inserted.bio,
             hasCompletedOnboarding: inserted.has_completed_onboarding ?? false,
+            userType: inserted.user_type ?? undefined,
             quizResults: inserted.quiz_results ?? null,
           });
         }
@@ -126,6 +130,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
       if (patch.avatarUrl !== undefined) updates.avatar_url = patch.avatarUrl;
       if (patch.bio !== undefined) updates.bio = patch.bio;
       if (patch.hasCompletedOnboarding !== undefined) updates.has_completed_onboarding = patch.hasCompletedOnboarding;
+      if (patch.userType !== undefined) updates.user_type = patch.userType;
 
       if (Object.keys(updates).length === 0) return;
 

@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Store } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/lib/supabase";
 import logoAkin from "@/assets/logo-akin.png";
 
 const UserTypeSelection = () => {
@@ -22,9 +23,15 @@ const UserTypeSelection = () => {
     return <Navigate to="/home" replace />;
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!userType) return;
     localStorage.setItem("akin-user-type", userType);
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ user_type: userType })
+        .eq("user_id", user.id);
+    }
     navigate(`/login?type=${userType}`);
   };
 

@@ -79,7 +79,8 @@ const Onboarding = () => {
 
   const completeOnboarding = async () => {
     localStorage.setItem("akin-onboarding-complete", "true");
-    await updateProfile({ hasCompletedOnboarding: true });
+    const userType = (localStorage.getItem("akin-user-type") || "seeker") as "seeker" | "owner";
+    await updateProfile({ hasCompletedOnboarding: true, userType });
     navigate("/home", { replace: true });
   };
 

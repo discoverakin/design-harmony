@@ -136,7 +136,45 @@ const HobbyQuiz = () => {
         </span>
       </header>
 
+      {/* AI Loading Screen */}
+      {isResults && aiLoading && (
+        <main className="flex-1 flex flex-col items-center justify-center px-8">
+          <div className="flex flex-col items-center text-center gap-5 animate-fade-in">
+            <div className="relative">
+              <span className="text-6xl block animate-pulse">✨</span>
+              <span className="absolute -top-2 -right-4 text-2xl animate-bounce" style={{ animationDelay: "0.3s" }}>⭐</span>
+              <span className="absolute -bottom-1 -left-4 text-xl animate-bounce" style={{ animationDelay: "0.6s" }}>🌟</span>
+            </div>
+            <h1 className="text-xl font-bold text-foreground">
+              Generating your personalized hobbies...
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Our AI is finding the perfect matches for you
+            </p>
+            <div className="w-full max-w-xs h-2 rounded-full bg-secondary overflow-hidden mt-2">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  backgroundColor: "#E8604A",
+                  animation: "ai-progress 3s ease-in-out forwards",
+                }}
+              />
+            </div>
+          </div>
+          <style>{`
+            @keyframes ai-progress {
+              0% { width: 0%; }
+              30% { width: 45%; }
+              60% { width: 70%; }
+              80% { width: 85%; }
+              100% { width: 95%; }
+            }
+          `}</style>
+        </main>
+      )}
+
       {/* Content */}
+      {!(isResults && aiLoading) && (
       <main className="flex-1 overflow-hidden px-5 py-6">
         <div key={step} className={enterClass}>
           {!isResults && currentQ ? (
@@ -188,12 +226,6 @@ const HobbyQuiz = () => {
               </div>
 
               {/* AI Personality Summary */}
-              {aiLoading && (
-                <div className="flex items-center justify-center gap-2 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                  <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                  <span className="text-xs text-muted-foreground">Generating your personality profile...</span>
-                </div>
-              )}
               {aiResults && (
                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
                   <div className="flex items-center gap-1.5 mb-2">
@@ -284,6 +316,7 @@ const HobbyQuiz = () => {
           )}
         </div>
       </main>
+      )}
     </div>
   );
 };

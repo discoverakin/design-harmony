@@ -33,11 +33,11 @@ const UserTypeSelection = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden relative"
+      className="flex flex-col items-center min-h-screen max-w-lg mx-auto relative overflow-hidden px-4 pt-12 pb-8"
       style={{ backgroundColor: "#F9E9E4" }}
     >
-      {/* Decorative circles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Decorative circles — z-0, pointer-events none */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
         <div
           className="absolute rounded-full"
           style={{
@@ -62,30 +62,24 @@ const UserTypeSelection = () => {
         />
       </div>
 
-      {/* Logo — centered */}
-      <div className="flex justify-center relative z-10" style={{ paddingTop: 48 }}>
-        <motion.img
-          src={logoAkin}
-          alt="Akin"
-          className="h-8"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        />
-      </div>
+      {/* Logo */}
+      <motion.img
+        src={logoAkin}
+        alt="Akin"
+        className="h-8 mb-8 relative"
+        style={{ zIndex: 1 }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      />
 
       {/* Heading */}
       <motion.h1
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="text-center relative z-10"
-        style={{
-          fontSize: 26,
-          fontWeight: 800,
-          color: "#2D1810",
-          marginTop: 48,
-        }}
+        className="text-center mb-8 relative"
+        style={{ fontSize: 26, fontWeight: 800, color: "#2D1810", zIndex: 1 }}
       >
         I am a...
       </motion.h1>
@@ -95,17 +89,16 @@ const UserTypeSelection = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="flex relative z-10"
-        style={{ gap: 12, marginLeft: 16, marginRight: 16, marginTop: 32 }}
+        className="flex w-full mb-8 relative"
+        style={{ gap: 12, zIndex: 1 }}
       >
         {/* Hobby Seeker */}
         <button
           onClick={() => setUserType("seeker")}
           className="flex-1 flex flex-col items-center text-center"
           style={{
-            minHeight: 200,
             borderRadius: 24,
-            padding: 24,
+            padding: 20,
             cursor: "pointer",
             transition: "all 0.2s ease",
             backgroundColor: userType === "seeker" ? "#FF5C3B" : "#FFFFFF",
@@ -157,9 +150,8 @@ const UserTypeSelection = () => {
           onClick={() => setUserType("owner")}
           className="flex-1 flex flex-col items-center text-center"
           style={{
-            minHeight: 200,
             borderRadius: 24,
-            padding: 24,
+            padding: 20,
             cursor: "pointer",
             transition: "all 0.2s ease",
             backgroundColor: userType === "owner" ? "#FF5C3B" : "#FFFFFF",
@@ -207,15 +199,18 @@ const UserTypeSelection = () => {
         </button>
       </motion.div>
 
-      {/* Bottom */}
+      {/* Spacer — pushes button to bottom */}
       <div className="flex-1" />
-      <div className="flex flex-col items-center relative z-10 pb-10">
+
+      {/* Button */}
+      <div className="relative flex flex-col items-center" style={{ zIndex: 1 }}>
         {userType ? (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={handleSubmit}
             whileTap={{ scale: 0.95 }}
+            className="mb-4"
             style={{
               backgroundColor: "#FF5C3B",
               color: "#FFFFFF",
@@ -226,13 +221,13 @@ const UserTypeSelection = () => {
               border: "none",
               boxShadow: "0 4px 14px rgba(255, 92, 59, 0.35)",
               cursor: "pointer",
-              marginTop: 32,
             }}
           >
             Get Started →
           </motion.button>
         ) : (
           <div
+            className="mb-4"
             style={{
               color: "#C4A79E",
               fontWeight: 700,
@@ -240,7 +235,6 @@ const UserTypeSelection = () => {
               padding: "14px 48px",
               borderRadius: 50,
               backgroundColor: "rgba(255, 92, 59, 0.15)",
-              marginTop: 32,
               cursor: "not-allowed",
             }}
           >
@@ -248,7 +242,7 @@ const UserTypeSelection = () => {
           </div>
         )}
 
-        <p style={{ marginTop: 16, fontSize: 14, color: "#8B6B61" }}>
+        <p style={{ fontSize: 14, color: "#8B6B61" }}>
           Already have an account?{" "}
           <button
             onClick={() => navigate("/login")}

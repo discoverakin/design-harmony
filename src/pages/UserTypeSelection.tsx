@@ -19,7 +19,10 @@ const UserTypeSelection = () => {
     );
   }
 
+  // Already-logged-in users: route them based on their stored type
   if (user) {
+    const stored = localStorage.getItem("akin-user-type");
+    if (stored === "owner") return <Navigate to="/dashboard" replace />;
     return <Navigate to="/home" replace />;
   }
 
@@ -31,6 +34,8 @@ const UserTypeSelection = () => {
         .from("profiles")
         .update({ user_type: userType })
         .eq("user_id", user.id);
+      navigate(userType === "owner" ? "/dashboard" : "/home");
+      return;
     }
     navigate(`/login?type=${userType}`);
   };

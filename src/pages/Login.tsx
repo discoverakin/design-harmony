@@ -30,7 +30,7 @@ const Login = () => {
       return <Navigate to={`${redirectPath}?payment=${paymentStatus}`} replace />;
     }
     if (userType === "owner") {
-      return <Navigate to="/coming-soon" replace />;
+      return <Navigate to="/dashboard" replace />;
     }
     return <Navigate to="/home" replace />;
   }
@@ -48,7 +48,7 @@ const Login = () => {
       sessionStorage.removeItem("redirectAfterLogin");
       navigate(`${redirectPath}?payment=${paymentStatus}`, { replace: true });
     } else if (userType === "owner") {
-      navigate("/coming-soon", { replace: true });
+      navigate("/dashboard", { replace: true });
     } else {
       navigate("/home", { replace: true });
     }

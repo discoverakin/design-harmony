@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import PageTransition from "@/components/PageTransition";
 import UserTypeSelection from "@/pages/UserTypeSelection";
-import ComingSoon from "@/pages/ComingSoon";
 import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
@@ -23,6 +22,16 @@ import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import AdminEvents from "@/pages/AdminEvents";
 import Search from "@/pages/Search";
+import Dashboard from "@/pages/dashboard/Dashboard";
+import DashboardExperiences from "@/pages/dashboard/DashboardExperiences";
+import DashboardExperienceNew from "@/pages/dashboard/DashboardExperienceNew";
+import DashboardExperienceEdit from "@/pages/dashboard/DashboardExperienceEdit";
+import DashboardPayments from "@/pages/dashboard/DashboardPayments";
+import DashboardAnalytics from "@/pages/dashboard/DashboardAnalytics";
+import DashboardGroups from "@/pages/dashboard/DashboardGroups";
+import DashboardGroupDetail from "@/pages/dashboard/DashboardGroupDetail";
+import DashboardMarketing from "@/pages/dashboard/DashboardMarketing";
+import DashboardSettings from "@/pages/dashboard/DashboardSettings";
 
 /** Redirects unauthenticated visitors to /login, preserving payment return context */
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
@@ -83,7 +92,6 @@ const AnimatedRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/coming-soon" element={<RequireAuth><PageTransition><ComingSoon /></PageTransition></RequireAuth>} />
 
         {/* Protected routes */}
         <Route path="/home" element={<AuthHomeRoute />} />
@@ -99,6 +107,19 @@ const AnimatedRoutes = () => {
         <Route path="/profile" element={<RequireAuth><PageTransition><Profile /></PageTransition></RequireAuth>} />
         <Route path="/settings" element={<RequireAuth><PageTransition><Settings /></PageTransition></RequireAuth>} />
         <Route path="/hobby/:slug" element={<RequireAuth><PageTransition><HobbyDetail /></PageTransition></RequireAuth>} />
+
+        {/* Host Dashboard routes */}
+        <Route path="/dashboard" element={<RequireAuth><PageTransition><Dashboard /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/experiences" element={<RequireAuth><PageTransition><DashboardExperiences /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/experiences/new" element={<RequireAuth><PageTransition><DashboardExperienceNew /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/experiences/:id" element={<RequireAuth><PageTransition><DashboardExperienceEdit /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/payments" element={<RequireAuth><PageTransition><DashboardPayments /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/analytics" element={<RequireAuth><PageTransition><DashboardAnalytics /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/groups" element={<RequireAuth><PageTransition><DashboardGroups /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/groups/:id" element={<RequireAuth><PageTransition><DashboardGroupDetail /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/marketing" element={<RequireAuth><PageTransition><DashboardMarketing /></PageTransition></RequireAuth>} />
+        <Route path="/dashboard/settings" element={<RequireAuth><PageTransition><DashboardSettings /></PageTransition></RequireAuth>} />
+
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

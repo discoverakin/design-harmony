@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -36,7 +38,9 @@ export default function Dashboard() {
   const greeting = getGreeting();
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-6">
       {/* Greeting */}
       <div>
         <p className="text-sm text-muted-foreground">{greeting},</p>
@@ -122,6 +126,8 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

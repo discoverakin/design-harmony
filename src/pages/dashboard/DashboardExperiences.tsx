@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronRight, Star, Clock, MapPin, DollarSign, Pencil, Trash2 } from "lucide-react";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 export default function DashboardExperiences() {
   const { user } = useAuth();
@@ -26,7 +28,9 @@ export default function DashboardExperiences() {
   const activeCount = experiences.filter((e) => e.status === "published").length;
 
   return (
-    <div className="space-y-5">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-5">
       <div>
         <h2 className="text-2xl font-bold text-foreground">Your Listings</h2>
         <p className="text-sm text-muted-foreground">Manage your hobby experiences and workshops</p>
@@ -126,6 +130,8 @@ export default function DashboardExperiences() {
           </p>
         </CardContent>
       </Card>
+      </main>
+      <BottomNav />
     </div>
   );
 }

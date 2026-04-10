@@ -10,6 +10,8 @@ import {
   LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 type TimeRange = "7" | "30" | "90" | "all";
 
@@ -73,7 +75,9 @@ export default function DashboardAnalytics() {
   const conversionRate = totalViews > 0 ? ((bookings.length / totalViews) * 100).toFixed(1) : "0.0";
 
   return (
-    <div className="space-y-5">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Business Metrics</h2>
@@ -132,6 +136,8 @@ export default function DashboardAnalytics() {
           <MetricCard label="Engagement" value="8.4/10" change="+0.6" />
         </div>
       </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { toast } from "@/hooks/use-toast";
 import { Copy, Code, Eye, MousePointerClick, Globe } from "lucide-react";
 import { format } from "date-fns";
 import { useMemo } from "react";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 const BASE_URL = "https://discoverakin.com";
 
@@ -94,7 +96,9 @@ export default function DashboardMarketing() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-8">
       <h1 className="text-2xl font-bold text-foreground">Marketing & Sponsorships</h1>
 
       {/* Section 1 — Listing Performance */}
@@ -196,6 +200,8 @@ export default function DashboardMarketing() {
           )}
         </CardContent>
       </Card>
+      </main>
+      <BottomNav />
     </div>
   );
 }

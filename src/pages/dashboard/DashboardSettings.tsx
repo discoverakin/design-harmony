@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Camera, Save, Shield, CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 const hostTypeLabels: Record<string, string> = {
   studio_owner: "Studio Owner",
@@ -78,7 +80,9 @@ export default function DashboardSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-6">
       <div>
         <h1 className="text-xl font-bold text-foreground">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your profile & account</p>
@@ -183,18 +187,14 @@ export default function DashboardSettings() {
               <p className="text-sm font-medium text-foreground">Stripe Connect</p>
               <p className="text-xs text-muted-foreground">Receive payouts for your experiences</p>
             </div>
-            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-primary/10 text-primary">
-              Connected
+            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground">
+              Not Connected
             </span>
-          </div>
-          <Separator />
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p><span className="font-medium text-foreground">Account ID:</span> acct_demo_maya</p>
-            <p><span className="font-medium text-foreground">Payout schedule:</span> Weekly (Friday)</p>
-            <p><span className="font-medium text-foreground">Currency:</span> USD</p>
           </div>
         </CardContent>
       </Card>
+      </main>
+      <BottomNav />
     </div>
   );
 }

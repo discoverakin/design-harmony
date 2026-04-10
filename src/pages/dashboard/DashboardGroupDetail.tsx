@@ -13,6 +13,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Trash2, Send, Link } from "lucide-react";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 export default function DashboardGroupDetail() {
   const { id: groupId } = useParams<{ id: string }>();
@@ -143,7 +145,9 @@ export default function DashboardGroupDetail() {
   if (!group) return <p className="text-muted-foreground p-6">Loading…</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">{(group as any).name}</h1>
 
       {/* Members */}
@@ -257,6 +261,8 @@ export default function DashboardGroupDetail() {
           </form>
         </CardContent>
       </Card>
+      </main>
+      <BottomNav />
     </div>
   );
 }

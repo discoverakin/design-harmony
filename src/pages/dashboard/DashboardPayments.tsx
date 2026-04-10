@@ -13,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { DollarSign, CreditCard, TrendingUp, AlertCircle, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 export default function DashboardPayments() {
   const { user } = useAuth();
@@ -104,7 +106,9 @@ export default function DashboardPayments() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Payments</h1>
 
       {!hasStripe && (
@@ -226,6 +230,8 @@ export default function DashboardPayments() {
 
       {/* Sponsorship Request Panel */}
       <SponsorshipRequestForm hostId={user?.id} />
+      </main>
+      <BottomNav />
     </div>
   );
 }

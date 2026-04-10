@@ -13,6 +13,8 @@ import StepPricing from "@/components/dashboard/wizard/StepPricing";
 import StepReview from "@/components/dashboard/wizard/StepReview";
 import { WizardData, defaultWizardData } from "@/components/dashboard/wizard/types";
 import { ChevronLeft, ChevronRight, Save, Rocket } from "lucide-react";
+import { AkinHeader } from "@/components/dashboard/AkinHeader";
+import { BottomNav } from "@/components/dashboard/BottomNav";
 
 export default function DashboardExperienceNew() {
   const [step, setStep] = useState(0);
@@ -157,7 +159,9 @@ export default function DashboardExperienceNew() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
+      <AkinHeader />
+      <main className="flex-1 overflow-y-auto p-4 pb-20 space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Create Experience</h1>
       <WizardProgress currentStep={step} onStepClick={setStep} />
 
@@ -183,6 +187,8 @@ export default function DashboardExperienceNew() {
           </div>
         )}
       </div>
+      </main>
+      <BottomNav />
     </div>
   );
 }

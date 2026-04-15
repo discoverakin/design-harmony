@@ -8,13 +8,13 @@ import { AkinHeader } from "@/components/dashboard/AkinHeader";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 
 const weeklyData = [
-  { day: 'Mon', revenue: 85 },
-  { day: 'Tue', revenue: 120 },
-  { day: 'Wed', revenue: 95 },
-  { day: 'Thu', revenue: 140 },
-  { day: 'Fri', revenue: 220 },
-  { day: 'Sat', revenue: 310 },
-  { day: 'Sun', revenue: 270 },
+  { day: 'Mon', revenue: 0 },
+  { day: 'Tue', revenue: 180 },
+  { day: 'Wed', revenue: 240 },
+  { day: 'Thu', revenue: 65 },
+  { day: 'Fri', revenue: 310 },
+  { day: 'Sat', revenue: 445 },
+  { day: 'Sun', revenue: 0 },
 ];
 
 export default function DashboardAnalytics() {
@@ -32,8 +32,8 @@ export default function DashboardAnalytics() {
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">My Business</h3>
         <div className="grid grid-cols-3 gap-3">
           <MetricCard label="Total Revenue" value="$1,240" />
-          <MetricCard label="Avg. Booking" value="$42" />
-          <MetricCard label="Return Rate" value="28%" />
+          <MetricCard label="Avg. Booking" value="$52" />
+          <MetricCard label="Return Rate" value="34%" />
         </div>
       </div>
 

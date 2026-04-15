@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
+import { Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -162,16 +162,6 @@ const Login = () => {
               )}
             </motion.button>
           </form>
-
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-primary font-semibold hover:underline"
-            >
-              Sign Up
-            </Link>
-          </p>
 
         </motion.div>
       </div>

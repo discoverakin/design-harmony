@@ -3,7 +3,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DollarSign } from "lucide-react";
 import { subDays, format, startOfDay } from "date-fns";
 import {
@@ -72,7 +71,9 @@ export default function DashboardAnalytics() {
     return days.map((d) => ({ day: d, revenue: map[d] || 0 }));
   }, [bookings]);
 
-  const conversionRate = totalViews > 0 ? ((bookings.length / totalViews) * 100).toFixed(1) : "0.0";
+  const hasData = bookings.length > 0 || totalViews > 0;
+
+  const rangeLabels: Record<TimeRange, string> = { "7": "7 days", "30": "30 days", "90": "90 days", "all": "All time" };
 
   return (
     <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl bg-background">
@@ -83,24 +84,30 @@ export default function DashboardAnalytics() {
           <h2 className="text-2xl font-bold text-foreground">Business Metrics</h2>
           <p className="text-sm text-muted-foreground">Track your performance and industry trends</p>
         </div>
-        <Select value={range} onValueChange={(v) => setRange(v as TimeRange)}>
-          <SelectTrigger className="w-24 h-8 text-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">7 days</SelectItem>
-            <SelectItem value="30">30 days</SelectItem>
-            <SelectItem value="90">90 days</SelectItem>
-            <SelectItem value="all">All time</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-1 bg-[#F9E9E4] rounded-full p-0.5">
+          {(["7", "30", "90", "all"] as TimeRange[]).map((r) => (
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className="px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors"
+              style={{
+                backgroundColor: range === r ? "#FF5C3B" : "transparent",
+                color: range === r ? "#FFFFFF" : "#8B6B61",
+              }}
+            >
+              {rangeLabels[r]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* My Business section */}
       <div>
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">📊 My Business</h3>
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">My Business</h3>
         <div className="grid grid-cols-3 gap-3">
-          <MetricCard label="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} change="+22%" />
-          <MetricCard label="Avg. Booking" value={`$${avgBooking.toFixed(0)}`} change="+5%" />
-          <MetricCard label="Return Rate" value={`${returnRate}%`} change="+12%" />
+          <MetricCard label="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} />
+          <MetricCard label="Avg. Booking" value={`$${avgBooking.toFixed(0)}`} />
+          <MetricCard label="Return Rate" value={`${returnRate}%`} />
         </div>
       </div>
 
@@ -124,33 +131,25 @@ export default function DashboardAnalytics() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          {!hasData && (
+            <p className="text-center text-sm text-muted-foreground mt-4">
+              Your analytics will appear here once you have bookings
+            </p>
+          )}
         </CardContent>
       </Card>
-
-      {/* General section */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">⚙️ General</h3>
-        <div className="grid grid-cols-3 gap-3">
-          <MetricCard label="Active Users" value={totalViews.toLocaleString()} change="+18%" />
-          <MetricCard label="Conversion" value={`${conversionRate}%`} change="-0.4%" negative />
-          <MetricCard label="Engagement" value="8.4/10" change="+0.6" />
-        </div>
-      </div>
       </main>
       <BottomNav />
     </div>
   );
 }
 
-function MetricCard({ label, value, change, negative }: { label: string; value: string; change: string; negative?: boolean }) {
+function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="border-border">
-      <CardContent className="p-3 text-center">
+    <Card className="border-border overflow-hidden">
+      <CardContent className="p-3 text-center" style={{ borderLeft: "3px solid #FF5C3B" }}>
         <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
         <p className="text-lg font-bold text-foreground">{value}</p>
-        <p className={`text-[10px] mt-1 ${negative ? "text-destructive" : "text-green-600"}`}>
-          {negative ? "↘" : "↗"} {change}
-        </p>
       </CardContent>
     </Card>
   );

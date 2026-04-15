@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ChevronRight, Star, Clock, MapPin, DollarSign, Pencil, Trash2 } from "lucide-react";
+import { Star, Clock, MapPin, DollarSign, Pencil, Trash2, Plus } from "lucide-react";
 import { AkinHeader } from "@/components/dashboard/AkinHeader";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 
@@ -39,7 +39,7 @@ export default function DashboardExperiences() {
       {/* Current Listings header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          ⊞ Current Listings
+          Current Listings
         </h3>
         {activeCount > 0 && (
           <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-xs">
@@ -51,7 +51,49 @@ export default function DashboardExperiences() {
       {/* Experience cards */}
       <div className="space-y-3">
         {experiences.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">No listings yet. Create your first one!</p>
+          <div className="flex flex-col items-center text-center py-10">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+              style={{ backgroundColor: "rgba(255, 92, 59, 0.08)" }}
+            >
+              <span className="text-4xl">🎨</span>
+            </div>
+            <p className="text-lg font-bold text-foreground mb-1">No listings yet</p>
+            <p className="text-sm text-muted-foreground mb-6 max-w-[260px]">
+              Create your first experience to start getting bookings
+            </p>
+            <Link to="/dashboard/experiences/new">
+              <button
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: "#FF5C3B" }}
+              >
+                <Plus className="h-4 w-4" />
+                Add New Listing
+              </button>
+            </Link>
+
+            {/* How it works */}
+            <div className="w-full mt-10">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">How it works</p>
+              <div className="flex items-start justify-between gap-2">
+                {[
+                  { step: "1", icon: "✏️", label: "Create listing" },
+                  { step: "2", icon: "📅", label: "Get bookings" },
+                  { step: "3", icon: "💰", label: "Earn revenue" },
+                ].map((item, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center text-center">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
+                      style={{ backgroundColor: "#F9E9E4" }}
+                    >
+                      <span className="text-lg">{item.icon}</span>
+                    </div>
+                    <p className="text-xs font-semibold text-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         ) : (
           experiences.map((exp) => (
             <Card key={exp.id} className="border-border overflow-hidden">
@@ -106,30 +148,27 @@ export default function DashboardExperiences() {
         )}
       </div>
 
-      {/* Quick Tools */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-          ＋ Quick Tools
-        </h3>
-        <Link to="/dashboard/experiences/new">
-          <Card className="bg-primary text-primary-foreground border-0 hover:opacity-90 transition-opacity">
-            <CardContent className="p-4 flex items-center justify-between">
-              <p className="font-semibold text-sm">Add New Listing</p>
-              <ChevronRight className="h-5 w-5" />
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Pro Tip */}
-      <Card className="border-border bg-accent/30">
-        <CardContent className="p-4">
-          <p className="text-sm font-semibold text-foreground mb-1">💡 Pro Tip</p>
-          <p className="text-xs text-muted-foreground">
-            Active listings with high-quality images get 3x more bookings. Make sure to add detailed descriptions!
-          </p>
-        </CardContent>
-      </Card>
+      {/* Quick Tools — only show when there are listings */}
+      {experiences.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+            Quick Tools
+          </h3>
+          <Link to="/dashboard/experiences/new">
+            <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
+                >
+                  <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+                </div>
+                <p className="font-semibold text-sm text-foreground">Add New Listing</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      )}
       </main>
       <BottomNav />
     </div>

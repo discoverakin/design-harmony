@@ -1,7 +1,9 @@
 import { useProfile } from "@/hooks/use-profile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Star, Clock, MapPin, DollarSign, Pencil, Trash2, Plus } from "lucide-react";
 import { AkinHeader } from "@/components/dashboard/AkinHeader";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 
@@ -10,17 +12,25 @@ const dummyListings = [
     title: "Watercolor Basics",
     category: "Painting",
     price: "$45",
-    bookings: 12,
-    status: "active",
-    emoji: "🎨",
+    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=120&h=120&fit=crop",
   },
   {
     title: "Pottery Workshop",
     category: "Crafts",
     price: "$65",
-    bookings: 6,
-    status: "active",
-    emoji: "🏺",
+    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=120&h=120&fit=crop",
+  },
+  {
+    title: "Jazz Appreciation Night",
+    category: "Music",
+    price: "$30",
+    image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=120&h=120&fit=crop",
+  },
+  {
+    title: "Recipe Swap Potluck",
+    category: "Cooking",
+    price: "$25",
+    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=120&h=120&fit=crop",
   },
 ];
 
@@ -59,7 +69,7 @@ export default function DashboardExperiences() {
           Current Listings
         </h3>
         <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-xs">
-          {dummyListings.length} Active
+          10 Active
         </Badge>
       </div>
 
@@ -67,34 +77,90 @@ export default function DashboardExperiences() {
       <div className="space-y-3">
         {dummyListings.map((listing, i) => (
           <Card key={i} className="border-border overflow-hidden">
-            <CardContent className="p-4 flex gap-4">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: "#F9E9E4" }}
-              >
-                <span className="text-2xl">{listing.emoji}</span>
+            <CardContent className="p-3 flex gap-3">
+              {/* Image */}
+              <div className="w-20 h-20 rounded-lg flex-shrink-0 overflow-hidden relative">
+                <img
+                  src={listing.image}
+                  alt={listing.title}
+                  className="w-full h-full object-cover"
+                />
+                <Badge className="absolute top-1 left-1 bg-green-600 text-white text-[9px] px-1 py-0">
+                  ACTIVE
+                </Badge>
               </div>
+              {/* Details */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
-                  <h4 className="font-semibold text-sm text-foreground">{listing.title}</h4>
-                  <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-[10px] px-1.5 py-0">
-                    Active
-                  </Badge>
+                  <h4 className="font-semibold text-sm text-foreground truncate">{listing.title}</h4>
+                  <div className="flex items-center gap-0.5 text-primary ml-2 flex-shrink-0">
+                    <Star className="h-3 w-3 fill-current" />
+                    <span className="text-xs font-medium">4.9</span>
+                  </div>
                 </div>
-                <span
-                  className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
-                  style={{ backgroundColor: "#F9E9E4", color: "#8B6B61" }}
-                >
-                  {listing.category}
-                </span>
-                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">{listing.price}</span>
-                  <span>{listing.bookings} bookings</span>
+                <p className="text-xs text-muted-foreground">{listing.category}</p>
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />{listing.price.replace("$", "")}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />2 hours
+                  </span>
                 </div>
+                <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  <span>Downtown Studio</span>
+                </div>
+              </div>
+              {/* Actions */}
+              <div className="flex flex-col gap-1 flex-shrink-0">
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Quick Tools */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          Quick Tools
+        </h3>
+        {isVerified ? (
+          <Link to="/dashboard/experiences/new">
+            <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
+                >
+                  <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+                </div>
+                <p className="font-semibold text-sm text-foreground">Add New Listing</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ) : (
+          <Card className="bg-white border-2 border-border opacity-50 cursor-not-allowed">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
+              >
+                <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-foreground">Add New Listing</p>
+                <p className="text-xs text-muted-foreground">Available after verification</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
       </main>
       <BottomNav />

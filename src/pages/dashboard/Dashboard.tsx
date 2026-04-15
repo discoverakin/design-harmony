@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { AkinHeader } from "@/components/dashboard/AkinHeader";
 import { BottomNav } from "@/components/dashboard/BottomNav";
+import FeedbackButton from "@/components/FeedbackButton";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -168,6 +169,7 @@ export default function Dashboard() {
         </div>
       </div>
       </main>
+      <FeedbackButton />
       <BottomNav />
     </div>
   );

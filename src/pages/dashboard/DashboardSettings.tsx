@@ -123,11 +123,12 @@ export default function DashboardSettings() {
             <div>
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-foreground">{fullName || "Your Name"}</p>
-                {profile?.verificationStatus !== "verified" && (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-                    ⏳ Pending Verification
-                  </span>
-                )}
+                <span
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+                  style={{ backgroundColor: "#F0FDF4", borderColor: "#86EFAC", color: "#16A34A" }}
+                >
+                  ✅ Verified
+                </span>
               </div>
               <p className="text-xs text-muted-foreground">{user?.email || "demo@discoverakin.com"}</p>
             </div>

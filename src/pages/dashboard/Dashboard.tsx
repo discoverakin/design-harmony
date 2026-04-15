@@ -9,7 +9,7 @@ import FeedbackButton from "@/components/FeedbackButton";
 const dummyBookings = [
   { name: "Sarah K.", class: "Watercolor Basics", date: "Apr 14", amount: "$45" },
   { name: "James L.", class: "Pottery Workshop", date: "Apr 13", amount: "$65" },
-  { name: "Mia T.", class: "Watercolor Basics", date: "Apr 12", amount: "$45" },
+  { name: "Mia T.", class: "Jazz Night", date: "Apr 12", amount: "$30" },
 ];
 
 export default function Dashboard() {
@@ -17,7 +17,7 @@ export default function Dashboard() {
 
   const rawName = profile?.name || "Host";
   const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-  const verificationStatus = profile?.verificationStatus ?? "pending";
+  const verificationStatus = "verified";
 
   return (
     <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl">
@@ -37,16 +37,16 @@ export default function Dashboard() {
       </div>
 
       {/* Verification Banner */}
-      {verificationStatus === "pending" && (
-        <div className="p-4 rounded-2xl border-2 border-amber-200 bg-amber-50">
+      {verificationStatus === "verified" && (
+        <div className="p-4 rounded-2xl border-2 border-green-200 bg-green-50">
           <div className="flex items-start gap-3">
-            <span className="text-xl">⏳</span>
+            <span className="text-xl">✅</span>
             <div>
-              <p className="font-semibold text-amber-800 text-sm">
-                Verification Pending
+              <p className="font-semibold text-green-800 text-sm">
+                Verified Business
               </p>
-              <p className="text-amber-700 text-xs mt-0.5">
-                We're reviewing your business profile. You'll be notified within 2-3 business days once approved. In the meantime, explore your dashboard!
+              <p className="text-green-700 text-xs mt-0.5">
+                Your business profile has been verified. You have full access to all features!
               </p>
             </div>
           </div>

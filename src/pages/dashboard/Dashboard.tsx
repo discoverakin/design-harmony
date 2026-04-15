@@ -36,6 +36,7 @@ export default function Dashboard() {
 
   const displayName = profile?.name || "Host";
   const greeting = getGreeting();
+  const verificationStatus = profile?.verificationStatus ?? "pending";
 
   return (
     <div className="min-h-screen flex flex-col max-w-lg mx-auto shadow-xl">
@@ -53,6 +54,23 @@ export default function Dashboard() {
         <h2 className="text-2xl font-bold mt-0.5" style={{ color: "#2D1810" }}>{displayName}</h2>
         <p className="text-sm mt-1" style={{ color: "#8B6B61" }}>Here's what's happening with your business today</p>
       </div>
+
+      {/* Verification Banner */}
+      {verificationStatus === "pending" && (
+        <div className="p-4 rounded-2xl border-2 border-amber-200 bg-amber-50">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">⏳</span>
+            <div>
+              <p className="font-semibold text-amber-800 text-sm">
+                Verification Pending
+              </p>
+              <p className="text-amber-700 text-xs mt-0.5">
+                We're reviewing your business profile. You'll be notified within 2-3 business days once approved. In the meantime, explore your dashboard!
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Stats */}
       <div>

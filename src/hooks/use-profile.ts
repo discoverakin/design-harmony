@@ -9,6 +9,7 @@ export interface ProfileData {
   bio: string | null;
   hasCompletedOnboarding: boolean;
   userType?: "seeker" | "owner";
+  verificationStatus?: "pending" | "verified" | "rejected";
   quizResults?: {
     recommendations: Array<{ slug: string; reason: string }>;
     personality_summary: string;
@@ -36,6 +37,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     bio: null,
     hasCompletedOnboarding: false,
     userType: undefined,
+    verificationStatus: undefined,
     quizResults: null,
   });
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
   // Fetch profile from Supabase on mount / user change — auto-create if missing
   useEffect(() => {
     if (!user) {
-      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, userType: undefined, quizResults: null });
+      setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, userType: undefined, verificationStatus: undefined, quizResults: null });
       setLoading(false);
       return;
     }
@@ -53,7 +55,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
     async function fetchProfile() {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results, user_type")
+        .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results, user_type, verification_status")
         .eq("user_id", user!.id)
         .maybeSingle();
 
@@ -61,7 +63,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
 
       if (error) {
         console.error("Failed to fetch profile:", error.message);
-        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, userType: undefined, quizResults: null });
+        setProfile({ name: fallbackName, handle: fallbackHandle, avatarUrl: null, bio: null, hasCompletedOnboarding: false, userType: undefined, verificationStatus: undefined, quizResults: null });
       } else if (data) {
         setProfile({
           name: data.display_name,
@@ -70,6 +72,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
           bio: data.bio,
           hasCompletedOnboarding: data.has_completed_onboarding ?? false,
           userType: data.user_type ?? undefined,
+          verificationStatus: data.verification_status ?? undefined,
           quizResults: data.quiz_results ?? null,
         });
       } else {
@@ -90,7 +93,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             },
             { onConflict: "user_id" }
           )
-          .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results, user_type")
+          .select("display_name, handle, avatar_url, bio, has_completed_onboarding, quiz_results, user_type, verification_status")
           .single();
 
         if (cancelled) return;
@@ -105,6 +108,7 @@ export function useProfile(defaults?: { name: string; handle: string }) {
             bio: inserted.bio,
             hasCompletedOnboarding: inserted.has_completed_onboarding ?? false,
             userType: inserted.user_type ?? undefined,
+            verificationStatus: inserted.verification_status ?? undefined,
             quizResults: inserted.quiz_results ?? null,
           });
         }

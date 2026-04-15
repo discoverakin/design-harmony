@@ -121,7 +121,14 @@ export default function DashboardSettings() {
               />
             </div>
             <div>
-              <p className="font-semibold text-foreground">{fullName || "Your Name"}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-foreground">{fullName || "Your Name"}</p>
+                {profile?.verificationStatus !== "verified" && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                    ⏳ Pending Verification
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">{user?.email || "demo@discoverakin.com"}</p>
             </div>
           </div>

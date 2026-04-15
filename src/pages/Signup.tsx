@@ -127,7 +127,11 @@ const Signup = () => {
             Create your account
           </h1>
           <p className="text-muted-foreground mb-8">
-            Join Akin and start discovering hobbies you'll love.
+            {typeFromUrl === "seeker" || selectedType === "seeker"
+              ? "Join Akin and start discovering hobbies you'll love."
+              : typeFromUrl === "owner" || selectedType === "owner"
+              ? "Join Akin and start growing your studio business."
+              : "Join Akin today."}
           </p>
 
           {success ? (
@@ -236,7 +240,7 @@ const Signup = () => {
               <p className="text-center text-sm text-muted-foreground mt-6">
                 Already have an account?{" "}
                 <Link
-                  to="/login"
+                  to="/"
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign In

@@ -88,7 +88,7 @@ const Signup = () => {
           {typeFromUrl ? (
             <div
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-              style={{ backgroundColor: "rgba(255, 92, 59, 0.12)", color: "#FF5C3B" }}
+              style={{ backgroundColor: "#FF5C3B", color: "#FFFFFF" }}
             >
               {typeFromUrl === "seeker" ? "🎨 Signing up as Hobby Seeker" : "🏢 Signing up as Business Owner"}
             </div>

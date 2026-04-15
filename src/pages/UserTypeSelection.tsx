@@ -255,22 +255,6 @@ const UserTypeSelection = () => {
         )}
 
         <p style={{ fontSize: 14, color: "#8B6B61" }}>
-          Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            style={{
-              color: "#FF5C3B",
-              fontWeight: 700,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 14,
-            }}
-          >
-            Sign In
-          </button>
-        </p>
-        <p style={{ fontSize: 14, color: "#8B6B61", marginTop: 8 }}>
           Don't have an account?{" "}
           {userType ? (
             <button

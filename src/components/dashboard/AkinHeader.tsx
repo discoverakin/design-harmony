@@ -1,17 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, User, Settings, Moon, Sun, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
 import akinLogo from "@/assets/logo-akin.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export function AkinHeader() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="w-full bg-secondary py-5 px-4 flex items-center justify-between rounded-b-3xl">
@@ -29,6 +32,33 @@ export function AkinHeader() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 rounded-xl">
           <DropdownMenuItem
+            onClick={() => navigate("/dashboard/settings")}
+            className="gap-2 cursor-pointer"
+          >
+            <User className="w-4 h-4" />
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => navigate("/dashboard/settings")}
+            className="gap-2 cursor-pointer"
+          >
+            <Settings className="w-4 h-4" />
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={toggleTheme}
+            className="gap-2 cursor-pointer"
+          >
+            {theme === "dark" ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
             onClick={async () => {
               await signOut();
               navigate("/", { replace: true });
@@ -36,7 +66,7 @@ export function AkinHeader() {
             className="gap-2 cursor-pointer text-destructive focus:text-destructive"
           >
             <LogOut className="w-4 h-4" />
-            Sign Out
+            Log Out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

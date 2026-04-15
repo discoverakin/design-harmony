@@ -4,6 +4,7 @@ import BrowseHobbiesSection from "@/components/BrowseHobbiesSection";
 import HobbyQuizCTA from "@/components/HobbyQuizCTA";
 import NearYouMap from "@/components/NearYouMap";
 import BottomNav from "@/components/BottomNav";
+import FeedbackButton from "@/components/FeedbackButton";
 import { useProfile } from "@/hooks/use-profile";
 
 const Index = () => {
@@ -21,6 +22,7 @@ const Index = () => {
           <NearYouMap />
         </div>
       </main>
+      <FeedbackButton />
       <BottomNav />
     </div>
   );

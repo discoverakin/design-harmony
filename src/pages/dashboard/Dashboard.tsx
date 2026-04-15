@@ -1,39 +1,19 @@
-import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
-import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, Calendar, Plus, BarChart3, CalendarCheck } from "lucide-react";
+import { ChevronRight, Calendar, Plus, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { AkinHeader } from "@/components/dashboard/AkinHeader";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 import FeedbackButton from "@/components/FeedbackButton";
 
+const dummyBookings = [
+  { name: "Sarah K.", class: "Watercolor Basics", date: "Apr 14", amount: "$45" },
+  { name: "James L.", class: "Pottery Workshop", date: "Apr 13", amount: "$65" },
+  { name: "Mia T.", class: "Watercolor Basics", date: "Apr 12", amount: "$45" },
+];
+
 export default function Dashboard() {
-  const { user } = useAuth();
   const { profile } = useProfile();
-
-  const { data: stats } = useQuery({
-    queryKey: ["host-dashboard-stats", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const [exps, bookingsRes] = await Promise.all([
-        supabase.from("experiences").select("id", { count: "exact", head: true }).eq("host_id", user!.id).eq("status", "published"),
-        supabase.from("bookings").select("amount_paid, status, attendee_name, experience_id, created_at").limit(10),
-      ]);
-
-      const bookings = bookingsRes.data ?? [];
-      const totalRevenue = bookings.reduce((s, b) => s + Number(b.amount_paid), 0);
-
-      return {
-        revenue: totalRevenue,
-        bookings: bookings.length,
-        reviews: 4.8,
-        recentBookings: bookings.slice(0, 3),
-      };
-    },
-  });
 
   const rawName = profile?.name || "Host";
   const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
@@ -79,9 +59,9 @@ export default function Dashboard() {
           Quick Stats
         </h3>
         <div className="grid grid-cols-3 gap-3">
-          <StatCard label="Revenue" value={`$${(stats?.revenue ?? 0).toLocaleString()}`} />
-          <StatCard label="Bookings" value={String(stats?.bookings ?? 0)} />
-          <StatCard label="Reviews" value={String(stats?.reviews ?? "—")} />
+          <StatCard label="Revenue" value="$1,240" />
+          <StatCard label="Bookings" value="18" />
+          <StatCard label="Reviews" value="4.8" />
         </div>
       </div>
 
@@ -128,45 +108,32 @@ export default function Dashboard() {
           </h3>
           <Link to="/dashboard/payments" className="text-xs text-primary font-medium">View All</Link>
         </div>
-        <div className="space-y-3">
-          {(stats?.recentBookings ?? []).length === 0 ? (
-            <Card className="border-border">
-              <CardContent className="p-6 flex flex-col items-center text-center">
+        <Card className="border-border">
+          <CardContent className="p-0">
+            {dummyBookings.map((b, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-3 px-4 py-3 ${i < dummyBookings.length - 1 ? "border-b border-border" : ""}`}
+              >
                 <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center mb-3"
-                  style={{ backgroundColor: "rgba(255, 92, 59, 0.08)" }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold text-white"
+                  style={{ backgroundColor: "#FF5C3B" }}
                 >
-                  <CalendarCheck className="h-7 w-7" style={{ color: "#FF5C3B", opacity: 0.6 }} />
+                  {b.name.charAt(0)}
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">No bookings yet</p>
-                <p className="text-xs text-muted-foreground">Bookings from your listings will show up here</p>
-              </CardContent>
-            </Card>
-          ) : (
-            stats?.recentBookings?.map((b, i) => (
-              <Card key={i} className="border-border">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm">{b.attendee_name || "Guest"}</p>
-                      <Badge
-                        variant={b.status === "confirmed" ? "default" : "secondary"}
-                        className={b.status === "confirmed" ? "bg-green-100 text-green-700 hover:bg-green-100" : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"}
-                      >
-                        {b.status?.toUpperCase()}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      <Calendar className="inline h-3 w-3 mr-1" />
-                      {new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{b.name}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {b.class} · {b.date}
+                  </p>
+                </div>
+                <p className="text-sm font-semibold text-foreground">{b.amount}</p>
+                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
       </main>
       <FeedbackButton />
@@ -185,4 +152,3 @@ function StatCard({ label, value }: { label: string; value: string }) {
     </Card>
   );
 }
-

@@ -59,6 +59,59 @@ export default function DashboardAnalytics() {
           </div>
         </CardContent>
       </Card>
+      {/* Top Experiences */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">Top Experiences</h3>
+        <Card className="border-border">
+          <CardContent className="p-0">
+            {[
+              { emoji: "🎨", name: "Watercolor Basics", bookings: 8, revenue: "$360" },
+              { emoji: "🏺", name: "Pottery Workshop", bookings: 6, revenue: "$390" },
+              { emoji: "🎵", name: "Jazz Night", bookings: 4, revenue: "$120" },
+            ].map((exp, i, arr) => (
+              <div
+                key={i}
+                className={`flex items-center justify-between px-4 py-3 ${i < arr.length - 1 ? "border-b border-border" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{exp.emoji}</span>
+                  <p className="text-sm font-medium text-foreground">{exp.name}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-foreground">{exp.revenue}</p>
+                  <p className="text-[11px] text-muted-foreground">{exp.bookings} bookings</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">Recent Activity</h3>
+        <Card className="border-border">
+          <CardContent className="p-0">
+            {[
+              { icon: "📅", text: "New booking for Watercolor Basics", time: "2h ago" },
+              { icon: "⭐", text: "Sarah K. left a 5-star review", time: "5h ago" },
+              { icon: "📅", text: "New booking for Pottery Workshop", time: "1d ago" },
+              { icon: "💰", text: "Payout of $892 processed", time: "2d ago" },
+            ].map((item, i, arr) => (
+              <div
+                key={i}
+                className={`flex items-center justify-between px-4 py-3 ${i < arr.length - 1 ? "border-b border-border" : ""}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{item.icon}</span>
+                  <p className="text-sm text-foreground">{item.text}</p>
+                </div>
+                <p className="text-xs text-muted-foreground flex-shrink-0 ml-3">{item.time}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
       </main>
       <BottomNav />
     </div>

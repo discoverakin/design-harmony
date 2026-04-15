@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
+import { supabase } from "@/lib/supabase";
 import logoAkin from "@/assets/logo-akin.png";
 import logoAkinDark from "@/assets/logo-akin-dark.png";
 
@@ -11,6 +12,9 @@ import logoAkinDark from "@/assets/logo-akin-dark.png";
 const Signup = () => {
   const { signUp, user } = useAuth();
   const { theme } = useTheme();
+  const [searchParams] = useSearchParams();
+  const typeFromUrl = searchParams.get("type") as "seeker" | "owner" | null;
+  const [selectedType, setSelectedType] = useState<"seeker" | "owner" | null>(typeFromUrl);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,11 +23,17 @@ const Signup = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <Navigate to="/" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const finalType = typeFromUrl || selectedType;
+    if (!finalType) {
+      setError("Please select whether you're a Hobby Seeker or Business Owner.");
+      return;
+    }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -39,9 +49,20 @@ const Signup = () => {
     const { error } = await signUp(email, password);
     if (error) {
       setError(error);
-    } else {
-      setSuccess(true);
+      setLoading(false);
+      return;
     }
+
+    localStorage.setItem("akin-user-type", finalType);
+    const { data: { user: newUser } } = await supabase.auth.getUser();
+    if (newUser) {
+      await supabase
+        .from("profiles")
+        .update({ user_type: finalType })
+        .eq("user_id", newUser.id);
+    }
+
+    setSuccess(true);
     setLoading(false);
   };
 
@@ -63,6 +84,41 @@ const Signup = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
+          {/* Type badge or toggle */}
+          {typeFromUrl ? (
+            <div
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-4"
+              style={{ backgroundColor: "rgba(255, 92, 59, 0.12)", color: "#FF5C3B" }}
+            >
+              {typeFromUrl === "seeker" ? "🎨 Signing up as Hobby Seeker" : "🏢 Signing up as Business Owner"}
+            </div>
+          ) : (
+            <div className="flex gap-2 mb-4">
+              <button
+                type="button"
+                onClick={() => setSelectedType("seeker")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
+                style={{
+                  backgroundColor: selectedType === "seeker" ? "#FF5C3B" : "rgba(255, 92, 59, 0.12)",
+                  color: selectedType === "seeker" ? "#FFFFFF" : "#FF5C3B",
+                }}
+              >
+                🎨 Hobby Seeker
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedType("owner")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
+                style={{
+                  backgroundColor: selectedType === "owner" ? "#FF5C3B" : "rgba(255, 92, 59, 0.12)",
+                  color: selectedType === "owner" ? "#FFFFFF" : "#FF5C3B",
+                }}
+              >
+                🏢 Business Owner
+              </button>
+            </div>
+          )}
+
           <div className="w-16 h-16 rounded-full bg-brand-creamsicle/30 flex items-center justify-center mb-6">
             <span className="text-3xl">🚀</span>
           </div>

@@ -270,6 +270,35 @@ const UserTypeSelection = () => {
             Sign In
           </button>
         </p>
+        <p style={{ fontSize: 14, color: "#8B6B61", marginTop: 8 }}>
+          Don't have an account?{" "}
+          {userType ? (
+            <button
+              onClick={() => navigate(`/signup?type=${userType}`)}
+              style={{
+                color: "#FF5C3B",
+                fontWeight: 700,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: 14,
+              }}
+            >
+              Sign Up
+            </button>
+          ) : (
+            <span
+              style={{
+                color: "#C4A79E",
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: "not-allowed",
+              }}
+            >
+              Sign Up
+            </span>
+          )}
+        </p>
       </div>
     </motion.div>
   );

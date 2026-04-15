@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/lib/supabase";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { BottomNav } from "@/components/dashboard/BottomNav";
 
 export default function DashboardExperiences() {
   const { user } = useAuth();
+  const { profile } = useProfile();
+  const isVerified = profile?.verificationStatus === "verified";
 
   const { data: experiences = [] } = useQuery({
     queryKey: ["host-experiences", user?.id],
@@ -62,15 +65,29 @@ export default function DashboardExperiences() {
             <p className="text-sm text-muted-foreground mb-6 max-w-[260px]">
               Create your first experience to start getting bookings
             </p>
-            <Link to="/dashboard/experiences/new">
-              <button
-                className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "#FF5C3B" }}
-              >
-                <Plus className="h-4 w-4" />
-                Add New Listing
-              </button>
-            </Link>
+            {isVerified ? (
+              <Link to="/dashboard/experiences/new">
+                <button
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#FF5C3B" }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Listing
+                </button>
+              </Link>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  disabled
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold text-white opacity-50 cursor-not-allowed"
+                  style={{ backgroundColor: "#FF5C3B" }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Listing
+                </button>
+                <p className="text-xs text-muted-foreground">You can add listings once your account is verified</p>
+              </div>
+            )}
 
             {/* How it works */}
             <div className="w-full mt-10">
@@ -154,8 +171,22 @@ export default function DashboardExperiences() {
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
             Quick Tools
           </h3>
-          <Link to="/dashboard/experiences/new">
-            <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+          {isVerified ? (
+            <Link to="/dashboard/experiences/new">
+              <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
+                  >
+                    <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+                  </div>
+                  <p className="font-semibold text-sm text-foreground">Add New Listing</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ) : (
+            <Card className="bg-white border-2 border-border opacity-50 cursor-not-allowed">
               <CardContent className="p-4 flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
@@ -163,10 +194,13 @@ export default function DashboardExperiences() {
                 >
                   <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
                 </div>
-                <p className="font-semibold text-sm text-foreground">Add New Listing</p>
+                <div>
+                  <p className="font-semibold text-sm text-foreground">Add New Listing</p>
+                  <p className="text-xs text-muted-foreground">Available after verification</p>
+                </div>
               </CardContent>
             </Card>
-          </Link>
+          )}
         </div>
       )}
       </main>

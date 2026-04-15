@@ -34,8 +34,8 @@ export default function Dashboard() {
     },
   });
 
-  const displayName = profile?.name || "Host";
-  const greeting = getGreeting();
+  const rawName = profile?.name || "Host";
+  const displayName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
   const verificationStatus = profile?.verificationStatus ?? "pending";
 
   return (
@@ -50,7 +50,7 @@ export default function Dashboard() {
           padding: "20px 16px 24px",
         }}
       >
-        <p className="text-sm" style={{ color: "#8B6B61" }}>{greeting},</p>
+        <p className="text-sm" style={{ color: "#8B6B61" }}>Hello,</p>
         <h2 className="text-2xl font-bold mt-0.5" style={{ color: "#2D1810" }}>{displayName}</h2>
         <p className="text-sm mt-1" style={{ color: "#8B6B61" }}>Here's what's happening with your business today</p>
       </div>
@@ -184,9 +184,3 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good Morning";
-  if (h < 17) return "Good Afternoon";
-  return "Good Evening";
-}

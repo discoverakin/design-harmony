@@ -407,7 +407,7 @@ const Settings = () => {
             <button
               onClick={async () => {
                 await signOut();
-                navigate("/login", { replace: true });
+                navigate("/", { replace: true });
               }}
               className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl border-2 border-destructive/30 hover:bg-destructive/10 transition-colors"
             >

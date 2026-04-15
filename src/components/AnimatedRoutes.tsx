@@ -57,7 +57,7 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
       return <Navigate to={`/login?payment=${paymentStatus}&redirect=${encodeURIComponent(redirectPath)}`} replace />;
     }
 
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
   return <>{children}</>;
 };

@@ -51,7 +51,7 @@ const UserTypeSelection = () => {
       {/* Decorative circles — z-0, pointer-events none */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
         <div
-          className="absolute rounded-full"
+          className="absolute rounded-full pointer-events-none"
           style={{
             width: 280,
             height: 280,
@@ -59,10 +59,11 @@ const UserTypeSelection = () => {
             right: -80,
             backgroundColor: "#FF5C3B",
             opacity: 0.15,
+            zIndex: 0,
           }}
         />
         <div
-          className="absolute rounded-full"
+          className="absolute rounded-full pointer-events-none"
           style={{
             width: 220,
             height: 220,
@@ -70,6 +71,7 @@ const UserTypeSelection = () => {
             left: -60,
             backgroundColor: "#FF5C3B",
             opacity: 0.1,
+            zIndex: 0,
           }}
         />
       </div>
@@ -212,7 +214,7 @@ const UserTypeSelection = () => {
       </motion.div>
 
       {/* Spacer — pushes button to bottom */}
-      <div className="flex-1" />
+      <div className="flex-1 relative" style={{ zIndex: 1 }} />
 
       {/* Button */}
       <div className="relative flex flex-col items-center" style={{ zIndex: 1 }}>

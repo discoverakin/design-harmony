@@ -63,7 +63,7 @@ const AppHeader = () => {
           <DropdownMenuItem
             onClick={async () => {
               await signOut();
-              navigate("/login", { replace: true });
+              navigate("/", { replace: true });
             }}
             className="gap-2 cursor-pointer text-destructive focus:text-destructive"
           >

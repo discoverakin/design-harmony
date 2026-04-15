@@ -387,7 +387,7 @@ const EventDetail = () => {
                 <p className="text-sm font-semibold text-green-700">Payment successful! Sign in to see your booking 🎉</p>
               </div>
               <Button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/", { replace: true })}
                 className="w-full rounded-xl h-10 text-sm font-semibold"
               >
                 Sign In

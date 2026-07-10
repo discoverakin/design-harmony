@@ -1,7 +1,7 @@
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 
 const SYSTEM_PROMPT = `You are a hobby recommendation engine for Discover Akin, a creative studio marketplace in Ann Arbor. Based on a user's quiz answers, generate personalized hobby recommendations. You have access to ALL of these hobbies:
-arts-crafts, astronomy, board-sports, coding, cooking, dance, film-making, fitness, gaming, gardening, hiking, knitting, languages, martial-arts, music, photography, pottery, reading, rock-climbing, sports, swimming, volunteering, woodworking, writing, yoga.
+cooking, arts-crafts, pottery, knitting, coding, dance, music.
 
 Return ONLY a JSON object with no markdown:
 {
@@ -28,7 +28,7 @@ const DEFAULT_RESPONSE = {
   recommendations: [
     { slug: "arts-crafts", reason: "Your creative side will thrive with hands-on art projects." },
     { slug: "cooking", reason: "Exploring new recipes is a perfect way to express your curiosity." },
-    { slug: "yoga", reason: "A calming practice to balance your adventurous spirit." },
+    { slug: "knitting", reason: "A calming, meditative craft to balance your adventurous spirit." },
   ],
 };
 

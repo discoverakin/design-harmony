@@ -29,14 +29,25 @@ const ANN_ARBOR_LANDMARKS: Record<string, { lat: number; lng: number }> = {
 const PROXIMITY_RADIUS = 0.012; // ~0.8 miles in degrees
 
 const MOOD_TO_HOBBIES: Record<string, string[]> = {
-  relaxing: ["yoga", "fitness", "reading", "gardening", "knitting"],
-  stressed: ["yoga", "fitness", "pottery", "gardening"],
-  creative: ["pottery", "photography", "film-making", "arts-crafts", "writing"],
-  social: ["dance", "cooking", "board-sports", "gaming"],
-  adventurous: ["hiking", "rock-climbing", "board-sports", "martial-arts"],
-  bored: ["gaming", "coding", "reading", "board-sports", "astronomy"],
-  fun: ["dance", "cooking", "gaming", "board-sports"],
-  active: ["fitness", "hiking", "rock-climbing", "swimming", "martial-arts"],
+  relaxing: ["arts-crafts", "pottery", "knitting"],
+  stressed: ["pottery", "knitting", "arts-crafts"],
+  creative: ["arts-crafts", "pottery", "knitting", "music"],
+  artistic: ["arts-crafts", "pottery", "knitting", "music"],
+  social: ["cooking", "dance", "music"],
+  fun: ["cooking", "dance", "music"],
+  "meet people": ["cooking", "dance", "music"],
+  learn: ["coding", "cooking", "pottery"],
+  skill: ["coding", "cooking", "pottery"],
+  active: ["dance"],
+  energetic: ["dance"],
+  food: ["cooking"],
+  bake: ["cooking"],
+  eat: ["cooking"],
+  tech: ["coding"],
+  make: ["coding"],
+  build: ["coding"],
+  bored: ["coding", "cooking", "dance"],
+  adventurous: ["dance", "coding"],
 };
 
 function buildSystemPrompt(): string {
@@ -53,20 +64,22 @@ Today's date is ${todayFormatted} (${todayISO}).
 
 Extract search intent from the user's query and return ONLY a JSON object with these fields:
 {
-  "keywords": string,        // key topic words (e.g. "pottery", "painting", "yoga")
-  "hobby_slug": string | null, // one of: arts-crafts, astronomy, board-sports, coding, cooking,
-                                //  dance, film-making, fitness, gaming, gardening, hiking, knitting,
-                                //  languages, martial-arts, music, photography, pottery, reading,
-                                //  rock-climbing, sports, swimming, volunteering, woodworking,
-                                //  writing, yoga
+  "keywords": string,        // key topic words (e.g. "pottery", "painting", "baking")
+  "hobby_slug": string | null, // one of: cooking, arts-crafts, pottery, knitting, coding, dance, music
   "mood": string | null,     // Map vague queries aggressively to moods:
                             //   "relaxing", "chill", "calm", "peaceful" → "relaxing"
                             //   "fun", "exciting", "something to do" → "fun"
                             //   "creative", "artsy", "make something" → "creative"
-                            //   "meet people", "social", "with friends" → "social"
+                            //   "artistic", "art" → "artistic"
+                            //   "meet people", "with friends" → "meet people"
+                            //   "social" → "social"
                             //   "stressed", "need to unwind", "de-stress" → "stressed"
                             //   "bored", "nothing to do" → "bored"
                             //   "adventurous", "try something new" → "adventurous"
+                            //   "active", "energetic", "workout" → "active"
+                            //   "learn something new", "pick up a skill" → "learn"
+                            //   "food", "eat", "bake" → "food"
+                            //   "tech", "make", "build" → "tech"
   "time_of_day": string | null, // "morning", "afternoon", "evening", or null
   "location_hint": string | null, // extracted location/area, or null
   "date_filter": {
@@ -79,12 +92,14 @@ Extract search intent from the user's query and return ONLY a JSON object with t
 
 IMPORTANT: If the user mentions a specific activity by name that matches one of the hobby_slug values, always set hobby_slug to that slug — never leave it null.
 Examples:
-- "hiking next weekend" → hobby_slug: "hiking"
 - "pottery class" → hobby_slug: "pottery"
 - "cooking something fun" → hobby_slug: "cooking"
-- "yoga near me" → hobby_slug: "yoga"
+- "baking class" → hobby_slug: "cooking"
 - "arts and crafts" → hobby_slug: "arts-crafts"
-- "rock climbing" → hobby_slug: "rock-climbing"
+- "knitting or sewing" → hobby_slug: "knitting"
+- "learn to code" → hobby_slug: "coding"
+- "dance class" → hobby_slug: "dance"
+- "music lessons" → hobby_slug: "music"
 
 If the user mentions a specific Ann Arbor location, neighborhood, street or landmark, extract it as location_hint (lowercase text). Examples:
 - "near Burns Park" → location_hint: "burns park"

@@ -5,29 +5,19 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 const HOBBY_PHOTOS: Record<string, string> = {
-  'photography': 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&q=80',
-  'yoga': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80',
   'cooking': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80',
-  'rock-climbing': 'https://images.unsplash.com/photo-1522163182402-834f871fd851?w=400&q=80',
+  'arts-crafts': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&q=80',
   'pottery': 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&q=80',
   'dance': 'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=400&q=80',
   'music': 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=80',
-  'reading': 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&q=80',
-  'fitness': 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&q=80',
-  'hiking': 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&q=80',
-  'painting': 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&q=80',
-  'arts-crafts': 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&q=80',
-  'gaming': 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&q=80',
-  'gardening': 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=80',
-  'woodworking': 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400&q=80',
 };
 
 const DEFAULT_SLUGS = [
-  "photography",
-  "yoga",
   "cooking",
-  "rock-climbing",
+  "arts-crafts",
   "pottery",
+  "knitting",
+  "coding",
   "dance",
 ];
 

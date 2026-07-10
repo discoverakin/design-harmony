@@ -1,15 +1,13 @@
-import { useState, useEffect as useEffectOnce } from "react";
-import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
   Clock,
-  Home,
   MapPin,
   Users,
   Bookmark,
   BookmarkCheck,
-  ExternalLink,
   CheckCircle2,
   Timer,
 } from "lucide-react";
@@ -25,52 +23,23 @@ import {
 } from "@/components/ui/sheet";
 import { useEvents } from "@/hooks/use-events";
 import { useActivityLog } from "@/hooks/use-activity-log";
-import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
-import EmbeddedCheckout from "@/components/EmbeddedCheckout";
 
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const {
-    getEvent, toggleRSVP, toggleSave, markAttended, unmarkAttended,
-    initiatePayment, refresh, loading,
+    getEvent, toggleSave, markAttended, unmarkAttended, loading,
   } = useEvents();
   const { addLog, logs, deleteLog } = useActivityLog();
-  const { user } = useAuth();
   const { toast } = useToast();
 
   const [showAttendedSheet, setShowAttendedSheet] = useState(false);
   const [attendedHours, setAttendedHours] = useState("");
   const [attendedMinutes, setAttendedMinutes] = useState("");
-  const [paymentLoading, setPaymentLoading] = useState(false);
-  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
-  const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
-
-  // Handle Stripe redirect return
-  useEffectOnce(() => {
-    const paymentStatus = searchParams.get("payment");
-    if (paymentStatus === "success") {
-      setShowPaymentSuccess(true);
-      if (user) {
-        refresh();
-      }
-      window.history.replaceState({}, "", window.location.pathname);
-      navigate(`/events/${id}`, { replace: true });
-    } else if (paymentStatus === "cancel") {
-      toast({
-        title: "Payment cancelled",
-        description: "You can try again when you're ready.",
-        variant: "destructive",
-      });
-      window.history.replaceState({}, "", window.location.pathname);
-      navigate(`/events/${id}`, { replace: true });
-    }
-  }, [searchParams]);
 
   const event = getEvent(id ?? "");
 
@@ -110,16 +79,6 @@ const EventDetail = () => {
   const existingLog = logs.find(
     (l) => l.source === "event" && l.eventId === event.id
   );
-
-  const handleRSVP = () => {
-    toggleRSVP(event.id);
-    toast({
-      title: event.is_attending ? "RSVP cancelled" : "You're going! 🎉",
-      description: event.is_attending
-        ? `Removed from ${event.title}`
-        : `Added to ${event.title}`,
-    });
-  };
 
   const handleSave = () => {
     toggleSave(event.id);
@@ -193,21 +152,12 @@ const EventDetail = () => {
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
       {/* Top bar */}
       <header className="flex items-center gap-3 px-4 py-4 bg-secondary">
-        {event.has_paid || showPaymentSuccess ? (
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
-          >
-            <Home className="w-5 h-5 text-foreground" />
-          </button>
-        ) : (
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-foreground" />
-          </button>
-        )}
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </button>
         <h2 className="text-sm font-semibold text-foreground flex-1 truncate">
           Event Details
         </h2>
@@ -275,11 +225,6 @@ const EventDetail = () => {
                     {formatPrice(event.price_cents)}
                   </Badge>
                 )}
-                {event.has_paid && event.price_cents > 0 && (
-                  <Badge className="text-[10px] px-1.5 py-0 flex-shrink-0 bg-green-500/15 text-green-600 border-0">
-                    Paid
-                  </Badge>
-                )}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 {event.group_name && (() => {
@@ -332,19 +277,6 @@ const EventDetail = () => {
             </div>
           </div>
 
-          {/* External link */}
-          {event.external_link && (
-            <a
-              href={event.external_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-primary font-medium mb-5 hover:underline"
-            >
-              <ExternalLink className="w-4 h-4" />
-              View original post
-            </a>
-          )}
-
           {/* Description */}
           <div className="mb-6">
             <h3 className="text-sm font-bold text-foreground mb-2">About this event</h3>
@@ -379,74 +311,24 @@ const EventDetail = () => {
             </div>
           )}
 
-          {/* Payment success banner */}
-          {showPaymentSuccess && !user && (
-            <div className="flex flex-col gap-3 mb-4 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
-                <p className="text-sm font-semibold text-green-700">Payment successful! Sign in to see your booking 🎉</p>
-              </div>
-              <Button
-                onClick={() => navigate("/", { replace: true })}
-                className="w-full rounded-xl h-10 text-sm font-semibold"
-              >
-                Sign In
-              </Button>
-            </div>
-          )}
-          {(showPaymentSuccess || event.has_paid) && user && event.price_cents > 0 && (
-            <div className="flex items-center gap-3 mb-4 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20">
-              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-green-700">You're booked! See you there 🎉</p>
-                <p className="text-xs text-green-600/80">Payment confirmed — you're registered for this event.</p>
-              </div>
-            </div>
-          )}
-
           {/* Action buttons */}
           <div className="space-y-3">
-            {/* Nav buttons for paid users, Pay & RSVP, or normal RSVP */}
-            {event.price_cents > 0 && (event.has_paid || showPaymentSuccess) ? (
-              <Button
-                variant="outline"
-                onClick={() => navigate("/")}
-                className="w-full rounded-xl h-11 text-sm font-semibold"
+            {event.external_link ? (
+              <a
+                href={event.external_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-semibold text-base flex items-center justify-center gap-2"
               >
-                Explore More Classes
-              </Button>
-            ) : event.price_cents > 0 && !event.is_attending ? (
-              <Button
-                onClick={async () => {
-                  setPaymentLoading(true);
-                  const secret = await initiatePayment(event.id);
-                  setPaymentLoading(false);
-                  if (secret) setCheckoutClientSecret(secret);
-                }}
-                className="w-full rounded-xl h-12 text-sm font-semibold"
-                disabled={paymentLoading || (spotsLeft !== null && spotsLeft <= 0)}
-              >
-                {paymentLoading ? (
-                  <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                ) : spotsLeft !== null && spotsLeft <= 0 ? (
-                  "Event Full"
-                ) : (
-                  `Pay ${formatPrice(event.price_cents)} & RSVP`
-                )}
-              </Button>
+                🎟️ RSVP / Book Now
+              </a>
             ) : (
-              <Button
-                onClick={handleRSVP}
-                className="w-full rounded-xl h-12 text-sm font-semibold"
-                variant={event.is_attending ? "secondary" : "default"}
-                disabled={!event.is_attending && spotsLeft !== null && spotsLeft <= 0}
+              <button
+                disabled
+                className="w-full h-14 rounded-2xl bg-muted text-muted-foreground font-semibold text-base flex items-center justify-center gap-2 cursor-not-allowed"
               >
-                {event.is_attending
-                  ? "Cancel RSVP"
-                  : spotsLeft !== null && spotsLeft <= 0
-                  ? "Event Full"
-                  : "RSVP — I'm Going! 🎉"}
-              </Button>
+                Booking not available
+              </button>
             )}
 
             {/* Mark as Attended — only show for RSVP'd users who haven't marked yet */}
@@ -545,13 +427,6 @@ const EventDetail = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Embedded Stripe Checkout modal */}
-      {checkoutClientSecret && (
-        <EmbeddedCheckout
-          clientSecret={checkoutClientSecret}
-          onClose={() => setCheckoutClientSecret(null)}
-        />
-      )}
     </div>
   );
 };

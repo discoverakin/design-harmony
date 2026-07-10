@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { useEvents } from "@/hooks/use-events";
 import { useActivityLog } from "@/hooks/use-activity-log";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
@@ -35,6 +36,7 @@ const EventDetail = () => {
     getEvent, toggleSave, markAttended, unmarkAttended, loading,
   } = useEvents();
   const { addLog, logs, deleteLog } = useActivityLog();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   const [showAttendedSheet, setShowAttendedSheet] = useState(false);
@@ -43,7 +45,7 @@ const EventDetail = () => {
 
   const event = getEvent(id ?? "");
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <span className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -426,6 +428,41 @@ const EventDetail = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Signup wall for anonymous visitors */}
+      {!user && (
+        <div className="fixed inset-x-0 bottom-0 z-40 pointer-events-none">
+          <div className="max-w-lg mx-auto">
+            {/* Fade + blur gradient covering bottom portion */}
+            <div className="h-40 bg-gradient-to-b from-transparent to-card/95 backdrop-blur-sm" />
+            {/* Solid sheet with CTA */}
+            <div className="bg-card border-t border-border rounded-t-3xl shadow-2xl px-6 pt-6 pb-8 pointer-events-auto">
+              <div className="w-12 h-1 bg-border rounded-full mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-foreground text-center mb-2">
+                Sign up to RSVP for this event
+              </h3>
+              <p className="text-sm text-muted-foreground text-center mb-5">
+                Create a free account to book classes and track your progress.
+              </p>
+              <button
+                onClick={() => navigate("/signup?type=seeker")}
+                className="w-full h-12 rounded-2xl bg-[#E8604A] hover:bg-[#E8604A]/90 text-white font-semibold text-base mb-3 transition-colors"
+              >
+                Create Account
+              </button>
+              <p className="text-sm text-center text-muted-foreground">
+                Already have an account?{" "}
+                <button
+                  onClick={() => navigate("/login?type=seeker")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Sign In
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

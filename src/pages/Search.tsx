@@ -14,31 +14,13 @@ interface ParsedSearch {
 }
 
 const HOBBY_EMOJI: Record<string, string> = {
-  "fitness": "🏃",
-  "yoga": "🧘",
+  "cooking": "🍳",
+  "arts-crafts": "🎨",
   "pottery": "🏺",
-  "cooking": "👨‍🍳",
-  "photography": "📷",
-  "hiking": "🥾",
   "knitting": "🧶",
+  "coding": "💻",
   "dance": "💃",
   "music": "🎵",
-  "reading": "📚",
-  "gaming": "🎮",
-  "gardening": "🌱",
-  "woodworking": "🪵",
-  "arts-crafts": "🎨",
-  "rock-climbing": "🧗",
-  "swimming": "🏊",
-  "coding": "💻",
-  "writing": "✍️",
-  "astronomy": "🔭",
-  "film-making": "🎬",
-  "board-sports": "🛹",
-  "martial-arts": "🥋",
-  "languages": "🌍",
-  "volunteering": "🤝",
-  "sports": "⚽",
 };
 
 interface SearchResult {

@@ -9,22 +9,13 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
 const DEFAULT_CENTER = { lat: 42.2808, lng: -83.743 };
 
 const HOBBY_EMOJI: Record<string, string> = {
+  cooking: "🍳",
   "arts-crafts": "🎨",
-  music: "🎵",
-  photography: "📸",
-  knitting: "🧶",
   pottery: "🏺",
-  woodworking: "🪵",
-  "film-making": "🎬",
-  sports: "⚽",
-  yoga: "🧘",
+  knitting: "🧶",
+  coding: "💻",
   dance: "💃",
-  hiking: "🥾",
-  fitness: "💪",
-  swimming: "🏊",
-  "martial-arts": "🥋",
-  cooking: "👨‍🍳",
-  reading: "📚",
+  music: "🎵",
 };
 
 interface MapEvent {

@@ -15,7 +15,7 @@ import {
 const AppHeader = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const logo = theme === "dark" ? akinLogoDark : akinLogo;
 
   return (
@@ -25,53 +25,62 @@ const AppHeader = () => {
 
       <img src={logo} alt="Akin" className="h-12 w-auto" key={theme} />
 
-      {/* Hamburger menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="p-2 rounded-xl hover:bg-accent transition-colors">
-            <Menu className="w-5 h-5 text-foreground" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 rounded-xl">
-          <DropdownMenuItem
-            onClick={() => navigate("/profile")}
-            className="gap-2 cursor-pointer"
-          >
-            <User className="w-4 h-4" />
-            Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => navigate("/settings")}
-            className="gap-2 cursor-pointer"
-          >
-            <Settings className="w-4 h-4" />
-            Settings
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={toggleTheme}
-            className="gap-2 cursor-pointer"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-4 h-4" />
-            ) : (
-              <Moon className="w-4 h-4" />
-            )}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={async () => {
-              await signOut();
-              navigate("/", { replace: true });
-            }}
-            className="gap-2 cursor-pointer text-destructive focus:text-destructive"
-          >
-            <LogOut className="w-4 h-4" />
-            Log Out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {user ? (
+        /* Hamburger menu */
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 rounded-xl hover:bg-accent transition-colors">
+              <Menu className="w-5 h-5 text-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48 rounded-xl">
+            <DropdownMenuItem
+              onClick={() => navigate("/profile")}
+              className="gap-2 cursor-pointer"
+            >
+              <User className="w-4 h-4" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => navigate("/settings")}
+              className="gap-2 cursor-pointer"
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={toggleTheme}
+              className="gap-2 cursor-pointer"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={async () => {
+                await signOut();
+                navigate("/", { replace: true });
+              }}
+              className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+            >
+              <LogOut className="w-4 h-4" />
+              Log Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <button
+          onClick={() => navigate("/login?type=seeker")}
+          className="px-4 h-9 rounded-full bg-[#E8604A] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          Sign In
+        </button>
+      )}
     </header>
   );
 };

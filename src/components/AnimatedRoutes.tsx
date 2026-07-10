@@ -69,17 +69,12 @@ const useHasCompletedOnboarding = () => {
 };
 
 const HomeRoute = () => {
+  const { user } = useAuth();
   const onboarded = useHasCompletedOnboarding();
-  return onboarded ? (
-    <PageTransition><Index /></PageTransition>
-  ) : (
-    <Navigate to="/onboarding" replace />
-  );
+  // Only force onboarding for logged-in users; anon visitors go straight to Index
+  if (user && !onboarded) return <Navigate to="/onboarding" replace />;
+  return <PageTransition><Index /></PageTransition>;
 };
-
-const AuthHomeRoute = () => (
-  <RequireAuth><HomeRoute /></RequireAuth>
-);
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -93,20 +88,23 @@ const AnimatedRoutes = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
 
+        {/* Public browse routes */}
+        <Route path="/home" element={<HomeRoute />} />
+        <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+        <Route path="/hobby/:slug" element={<PageTransition><HobbyDetail /></PageTransition>} />
+        <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
+        {/* /events/:id is public — page-level signup wall handles auth */}
+        <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
+
         {/* Protected routes */}
-        <Route path="/home" element={<AuthHomeRoute />} />
         <Route path="/community" element={<RequireAuth><PageTransition><Community /></PageTransition></RequireAuth>} />
         <Route path="/community/:slug" element={<RequireAuth><PageTransition><GroupDetail /></PageTransition></RequireAuth>} />
-        <Route path="/events" element={<RequireAuth><PageTransition><Events /></PageTransition></RequireAuth>} />
         <Route path="/events/create" element={<RequireAuth><PageTransition><CreateEvent /></PageTransition></RequireAuth>} />
-        <Route path="/events/:id" element={<RequireAuth><PageTransition><EventDetail /></PageTransition></RequireAuth>} />
-        <Route path="/search" element={<RequireAuth><PageTransition><Search /></PageTransition></RequireAuth>} />
         <Route path="/admin-events" element={<RequireAuth><PageTransition><AdminEvents /></PageTransition></RequireAuth>} />
         <Route path="/tracker" element={<RequireAuth><PageTransition><HobbyTracker /></PageTransition></RequireAuth>} />
         <Route path="/quiz" element={<RequireAuth><PageTransition><HobbyQuiz /></PageTransition></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><PageTransition><Profile /></PageTransition></RequireAuth>} />
         <Route path="/settings" element={<RequireAuth><PageTransition><Settings /></PageTransition></RequireAuth>} />
-        <Route path="/hobby/:slug" element={<RequireAuth><PageTransition><HobbyDetail /></PageTransition></RequireAuth>} />
 
         {/* Host Dashboard routes */}
         <Route path="/dashboard" element={<RequireAuth><PageTransition><Dashboard /></PageTransition></RequireAuth>} />

@@ -5,9 +5,11 @@ import HobbyQuizCTA from "@/components/HobbyQuizCTA";
 import NearYouMap from "@/components/NearYouMap";
 import BottomNav from "@/components/BottomNav";
 import FeedbackButton from "@/components/FeedbackButton";
+import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 
 const Index = () => {
+  const { user } = useAuth();
   const { profile } = useProfile();
   const quizSlugs = profile.quizResults?.recommendations?.map((r) => r.slug);
 
@@ -16,9 +18,9 @@ const Index = () => {
       <AppHeader />
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
-          <FeaturedHobbiesCarousel quizSlugs={quizSlugs} />
+          {user && <FeaturedHobbiesCarousel quizSlugs={quizSlugs} />}
           <BrowseHobbiesSection />
-          <HobbyQuizCTA />
+          {user && <HobbyQuizCTA />}
           <NearYouMap />
         </div>
       </main>

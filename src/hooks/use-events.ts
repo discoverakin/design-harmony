@@ -11,7 +11,29 @@ export function useEvents() {
 
   /* ── Fetch all events + enrich with per-user flags ── */
   const refresh = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      // Anonymous browse: fetch events + public RSVP counts, no per-user flags
+      const [eventsRes, rsvpsRes] = await Promise.all([
+        supabase.from("events").select("*").order("date"),
+        supabase.from("event_rsvps").select("event_id"),
+      ]);
+      const rsvpCounts = new Map<string, number>();
+      (rsvpsRes.data ?? []).forEach((r) => {
+        rsvpCounts.set(r.event_id, (rsvpCounts.get(r.event_id) ?? 0) + 1);
+      });
+      const enriched: CommunityEvent[] = ((eventsRes.data ?? []) as DbEvent[]).map((evt) => ({
+        ...evt,
+        rsvp_count: rsvpCounts.get(evt.id) ?? 0,
+        is_attending: false,
+        is_saved: false,
+        has_attended: false,
+        attendance_minutes: null,
+        has_paid: false,
+      }));
+      setEvents(enriched);
+      setLoading(false);
+      return;
+    }
 
     const [eventsRes, rsvpsRes, myRsvpsRes, mySavesRes, myAttRes, myPaymentsRes] =
       await Promise.all([

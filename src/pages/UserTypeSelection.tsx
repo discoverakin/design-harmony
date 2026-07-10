@@ -37,7 +37,8 @@ const UserTypeSelection = () => {
       navigate(userType === "owner" ? "/dashboard" : "/home");
       return;
     }
-    navigate(`/login?type=${userType}`);
+    // Seekers browse freely; owners still need to sign in before dashboard access
+    navigate(userType === "seeker" ? "/home" : "/login?type=owner");
   };
 
   return (

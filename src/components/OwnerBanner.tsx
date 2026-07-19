@@ -7,7 +7,7 @@ const OwnerBanner = () => {
   if (user) return null;
 
   return (
-    <div className="max-w-lg mx-auto bg-[#2D1810] text-center py-2 px-4 text-xs text-white">
+    <div className="max-w-lg mx-auto bg-[#7A4E2D] text-center py-2 px-4 text-xs text-white">
       Business owner?{" "}
       <Link
         to="/login?type=owner"

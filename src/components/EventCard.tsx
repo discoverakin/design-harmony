@@ -98,26 +98,32 @@ const EventCard = ({
           {title}
         </h3>
 
-        {price_display ? (
-          <p className="text-[10px] text-muted-foreground">
-            {summarizePriceDisplay(price_display)}
-          </p>
-        ) : (
-          <span className="text-sm font-bold text-[#E8604A] block">
-            {formatPrice(price_cents)}
-          </span>
-        )}
+        {/* Price + optional multi-date chip on the same row so tile heights stay uniform */}
+        <div className="flex items-center justify-between gap-2">
+          {price_display ? (
+            <span className="text-[10px] text-muted-foreground">
+              {summarizePriceDisplay(price_display)}
+            </span>
+          ) : (
+            <span className="text-sm font-bold text-[#E8604A]">
+              {formatPrice(price_cents)}
+            </span>
+          )}
+          {chipLabel && (
+            <Badge
+              variant="secondary"
+              className="text-[9px] px-1.5 py-0 font-medium flex-shrink-0"
+            >
+              {chipLabel}
+            </Badge>
+          )}
+        </div>
 
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground flex items-center gap-1">
             <Calendar className="w-2.5 h-2.5 flex-shrink-0" />
             {formattedDate} · {formattedTime}
           </p>
-          {chipLabel && (
-            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-medium">
-              {chipLabel}
-            </Badge>
-          )}
           <p className="text-[10px] text-muted-foreground flex items-center gap-1 truncate">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
             {location}

@@ -240,7 +240,7 @@ const Signup = () => {
               <p className="text-center text-sm text-muted-foreground mt-6">
                 Already have an account?{" "}
                 <Link
-                  to="/"
+                  to="/login"
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign In

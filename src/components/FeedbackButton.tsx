@@ -1,3 +1,6 @@
+import { useMatch } from "react-router-dom";
+import { useAuth } from "@/hooks/use-auth";
+
 declare global {
   interface Window {
     Tally?: {
@@ -7,6 +10,15 @@ declare global {
 }
 
 const FeedbackButton = () => {
+  const { user } = useAuth();
+  const eventDetailMatch = useMatch("/events/:id");
+  // Hide only on /events/:id for logged-out users — avoids collision with the RSVP overlay.
+  // Excludes /events/create (also matches "/events/:id") since that route is auth-gated anyway.
+  const isEventDetailPage =
+    !!eventDetailMatch && eventDetailMatch.params.id !== "create";
+
+  if (isEventDetailPage && !user) return null;
+
   return (
     <button
       onClick={() => {

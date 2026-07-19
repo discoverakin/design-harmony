@@ -71,7 +71,7 @@ const BrowseHobbiesSection = () => {
           </button>
         )}
         <p className="text-[10px] text-muted-foreground/70 mt-1.5">
-          AI-powered search — try "relaxing classes" or "meet people this weekend"
+          Try saying "relaxing classes" or "meet people this weekend"
         </p>
       </form>
 

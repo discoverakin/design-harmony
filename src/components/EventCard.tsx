@@ -3,6 +3,24 @@ import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format-price";
 
+/**
+ * Condense a free-form price string into a compact label.
+ * "$35 for workshop and $60 for kit" → "from $35"
+ * "$35–$325" → "from $35"
+ * "$35" → "$35"
+ * "TBD" → "TBD" (raw fallback)
+ */
+function summarizePriceDisplay(raw: string): string {
+  const matches = [...raw.matchAll(/\$(\d+(?:\.\d{1,2})?)/g)];
+  if (matches.length === 0) return raw;
+  const parsed = matches.map((m) => ({ raw: m[1], num: parseFloat(m[1]) }));
+  const unique = [...new Set(parsed.map((p) => p.num))];
+  if (unique.length === 1) return `$${parsed[0].raw}`;
+  const min = Math.min(...unique);
+  const minRaw = parsed.find((p) => p.num === min)!.raw;
+  return `from $${minRaw}`;
+}
+
 interface EventCardProps {
   id: string;
   title: string;
@@ -73,9 +91,15 @@ const EventCard = ({
           {title}
         </h3>
 
-        <span className="text-sm font-bold text-[#E8604A] block">
-          {price_display ?? formatPrice(price_cents)}
-        </span>
+        {price_display ? (
+          <p className="text-[10px] text-muted-foreground">
+            {summarizePriceDisplay(price_display)}
+          </p>
+        ) : (
+          <span className="text-sm font-bold text-[#E8604A] block">
+            {formatPrice(price_cents)}
+          </span>
+        )}
 
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground flex items-center gap-1">

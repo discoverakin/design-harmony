@@ -13,6 +13,10 @@ interface EventCardProps {
   emoji: string;
   flyer_url?: string | null;
   hobby_slug?: string | null;
+  /** Free-form price string (e.g. "$35–$325") preferred over the derived price when set. */
+  price_display?: string | null;
+  /** When true, the CTA always links to /events/:id, ignoring hobby_slug. */
+  forceEventDetail?: boolean;
 }
 
 const EventCard = ({
@@ -25,6 +29,8 @@ const EventCard = ({
   emoji,
   flyer_url,
   hobby_slug,
+  price_display,
+  forceEventDetail = false,
 }: EventCardProps) => {
   const dateObj = new Date(date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("en-US", {
@@ -68,7 +74,7 @@ const EventCard = ({
         </h3>
 
         <span className="text-sm font-bold text-[#E8604A] block">
-          {formatPrice(price_cents)}
+          {price_display ?? formatPrice(price_cents)}
         </span>
 
         <div className="space-y-0.5">
@@ -82,7 +88,7 @@ const EventCard = ({
           </p>
         </div>
 
-        <Link to={hobby_slug ? `/hobby/${hobby_slug}` : `/events/${id}`}>
+        <Link to={hobby_slug && !forceEventDetail ? `/hobby/${hobby_slug}` : `/events/${id}`}>
           <Button className="w-full rounded-lg h-8 text-xs font-semibold mt-1.5">
             Book Now
           </Button>

@@ -1,0 +1,108 @@
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { weeklyShuffle } from "@/lib/weeklyShuffle";
+import EventCard from "@/components/EventCard";
+
+interface FeaturedEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  emoji: string;
+  price_cents: number;
+  price_display: string | null;
+  hobby_slug: string | null;
+  flyer_url: string | null;
+}
+
+const FEATURED_COUNT = 8;
+const POOL_LIMIT = 50;
+
+const FeaturedThisWeek = () => {
+  const [pool, setPool] = useState<FeaturedEvent[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const today = new Date().toISOString().split("T")[0];
+
+    supabase
+      .from("events")
+      .select(
+        "id, title, date, time, location, emoji, price_cents, price_display, hobby_slug, flyer_url"
+      )
+      .eq("status", "approved")
+      .gte("date", today)
+      .order("date", { ascending: true })
+      .limit(POOL_LIMIT)
+      .then(({ data }) => {
+        if (cancelled) return;
+        setPool((data ?? []) as FeaturedEvent[]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const featured = useMemo(() => {
+    if (!pool) return null;
+    return weeklyShuffle(pool).slice(0, FEATURED_COUNT);
+  }, [pool]);
+
+  if (featured === null) {
+    return (
+      <section className="pt-6">
+        <h2 className="text-lg font-bold text-foreground px-4 mb-3">
+          Featured this week
+        </h2>
+        <div className="flex gap-3 pl-4 pr-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 w-40 rounded-xl border border-border bg-card overflow-hidden animate-pulse snap-start"
+            >
+              <div className="w-full h-24 bg-secondary" />
+              <div className="p-3 space-y-2">
+                <div className="h-3 bg-secondary rounded w-3/4" />
+                <div className="h-3 bg-secondary rounded w-1/2" />
+                <div className="h-3 bg-secondary rounded w-2/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  if (featured.length === 0) return null;
+
+  return (
+    <section className="pt-6">
+      <h2 className="text-lg font-bold text-foreground px-4 mb-3">
+        Featured this week
+      </h2>
+      <div className="flex gap-3 pl-4 pr-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+        {featured.map((evt) => (
+          <div key={evt.id} className="flex-shrink-0 w-40 snap-start">
+            <EventCard
+              id={evt.id}
+              title={evt.title}
+              date={evt.date}
+              time={evt.time}
+              location={evt.location}
+              price_cents={evt.price_cents}
+              price_display={evt.price_display}
+              emoji={evt.emoji}
+              flyer_url={evt.flyer_url}
+              hobby_slug={evt.hobby_slug}
+              forceEventDetail
+            />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default FeaturedThisWeek;

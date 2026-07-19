@@ -91,20 +91,19 @@ const AnimatedRoutes = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
 
-        {/* Public browse routes */}
+        {/* Public browse routes — page-level auth prompts gate write actions */}
         <Route path="/home" element={<HomeRoute />} />
         <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
         <Route path="/hobby/:slug" element={<PageTransition><HobbyDetail /></PageTransition>} />
         <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
-        {/* /events/:id is public — page-level signup wall handles auth */}
         <Route path="/events/:id" element={<PageTransition><EventDetail /></PageTransition>} />
+        <Route path="/community" element={<PageTransition><Community /></PageTransition>} />
+        <Route path="/community/:slug" element={<PageTransition><GroupDetail /></PageTransition>} />
+        <Route path="/tracker" element={<PageTransition><HobbyTracker /></PageTransition>} />
 
         {/* Protected routes */}
-        <Route path="/community" element={<RequireAuth><PageTransition><Community /></PageTransition></RequireAuth>} />
-        <Route path="/community/:slug" element={<RequireAuth><PageTransition><GroupDetail /></PageTransition></RequireAuth>} />
         <Route path="/events/create" element={<RequireAuth><PageTransition><CreateEvent /></PageTransition></RequireAuth>} />
         <Route path="/admin-events" element={<RequireAuth><PageTransition><AdminEvents /></PageTransition></RequireAuth>} />
-        <Route path="/tracker" element={<RequireAuth><PageTransition><HobbyTracker /></PageTransition></RequireAuth>} />
         <Route path="/quiz" element={<RequireAuth><PageTransition><HobbyQuiz /></PageTransition></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><PageTransition><Profile /></PageTransition></RequireAuth>} />
         <Route path="/settings" element={<RequireAuth><PageTransition><Settings /></PageTransition></RequireAuth>} />

@@ -14,6 +14,7 @@ interface FeaturedEvent {
   price_display: string | null;
   hobby_slug: string | null;
   flyer_url: string | null;
+  description: string | null;
 }
 
 const FEATURED_COUNT = 8;
@@ -29,7 +30,7 @@ const FeaturedThisWeek = () => {
     supabase
       .from("events")
       .select(
-        "id, title, date, time, location, emoji, price_cents, price_display, hobby_slug, flyer_url"
+        "id, title, date, time, location, emoji, price_cents, price_display, hobby_slug, flyer_url, description"
       )
       .eq("status", "approved")
       .gte("date", today)
@@ -96,6 +97,7 @@ const FeaturedThisWeek = () => {
               emoji={evt.emoji}
               flyer_url={evt.flyer_url}
               hobby_slug={evt.hobby_slug}
+              description={evt.description}
               forceEventDetail
             />
           </div>

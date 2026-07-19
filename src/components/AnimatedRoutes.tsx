@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import PageTransition from "@/components/PageTransition";
 import FeedbackButton from "@/components/FeedbackButton";
+import OwnerBanner from "@/components/OwnerBanner";
 import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
@@ -81,6 +82,7 @@ const AnimatedRoutes = () => {
 
   return (
     <>
+    <OwnerBanner />
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public routes */}

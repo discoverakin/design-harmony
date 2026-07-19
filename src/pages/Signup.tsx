@@ -23,7 +23,14 @@ const Signup = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  const rawRedirect = searchParams.get("redirect");
+  // Only allow internal relative paths — must start with "/" but not "//" (protocol-relative)
+  const safeRedirect =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : null;
+
+  if (user) return <Navigate to={safeRedirect ?? "/"} replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +157,7 @@ const Signup = () => {
                 Click it to activate your account.
               </p>
               <Link
-                to="/login"
+                to={safeRedirect ? `/login?redirect=${encodeURIComponent(safeRedirect)}` : "/login"}
                 className="text-primary font-semibold text-sm hover:underline"
               >
                 Back to Sign In
@@ -240,7 +247,7 @@ const Signup = () => {
               <p className="text-center text-sm text-muted-foreground mt-6">
                 Already have an account?{" "}
                 <Link
-                  to="/login"
+                  to={safeRedirect ? `/login?redirect=${encodeURIComponent(safeRedirect)}` : "/login"}
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign In

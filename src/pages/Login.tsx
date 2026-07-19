@@ -20,14 +20,29 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const paymentStatus = searchParams.get("payment");
-  const redirectPath = searchParams.get("redirect") || sessionStorage.getItem("redirectAfterLogin");
+  const rawRedirect = searchParams.get("redirect") || sessionStorage.getItem("redirectAfterLogin");
+  // Only allow internal relative paths — must start with "/" but not "//" (protocol-relative)
+  const safeRedirect =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : null;
   const isPaymentReturn = paymentStatus === "success";
   const userType = searchParams.get("type");
 
+  const buildRedirectTarget = (): string | null => {
+    if (!safeRedirect) return null;
+    if (paymentStatus) {
+      const sep = safeRedirect.includes("?") ? "&" : "?";
+      return `${safeRedirect}${sep}payment=${paymentStatus}`;
+    }
+    return safeRedirect;
+  };
+
   if (user) {
-    if (redirectPath) {
+    const target = buildRedirectTarget();
+    if (target) {
       sessionStorage.removeItem("redirectAfterLogin");
-      return <Navigate to={`${redirectPath}?payment=${paymentStatus}`} replace />;
+      return <Navigate to={target} replace />;
     }
     if (userType === "owner") {
       return <Navigate to="/dashboard" replace />;
@@ -44,9 +59,12 @@ const Login = () => {
     if (error) {
       setError(error);
       setLoading(false);
-    } else if (redirectPath) {
+      return;
+    }
+    const target = buildRedirectTarget();
+    if (target) {
       sessionStorage.removeItem("redirectAfterLogin");
-      navigate(`${redirectPath}?payment=${paymentStatus}`, { replace: true });
+      navigate(target, { replace: true });
     } else if (userType === "owner") {
       navigate("/dashboard", { replace: true });
     } else {

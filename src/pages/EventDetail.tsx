@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -32,6 +32,8 @@ import { formatPrice } from "@/lib/format-price";
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const redirectQuery = `redirect=${encodeURIComponent(pathname)}`;
   const {
     getEvent, toggleSave, markAttended, unmarkAttended, loading,
   } = useEvents();
@@ -445,7 +447,7 @@ const EventDetail = () => {
                 Create a free account to book classes and track your progress.
               </p>
               <button
-                onClick={() => navigate("/signup?type=seeker")}
+                onClick={() => navigate(`/signup?type=seeker&${redirectQuery}`)}
                 className="w-full h-12 rounded-2xl bg-[#E8604A] hover:bg-[#E8604A]/90 text-white font-semibold text-base mb-3 transition-colors"
               >
                 Create Account
@@ -453,7 +455,7 @@ const EventDetail = () => {
               <p className="text-sm text-center text-muted-foreground">
                 Already have an account?{" "}
                 <button
-                  onClick={() => navigate("/login?type=seeker")}
+                  onClick={() => navigate(`/login?type=seeker&${redirectQuery}`)}
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign In

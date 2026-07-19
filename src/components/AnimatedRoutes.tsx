@@ -3,6 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import PageTransition from "@/components/PageTransition";
+import FeedbackButton from "@/components/FeedbackButton";
 import Index from "@/pages/Index";
 import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
@@ -79,6 +80,7 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
+    <>
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* Public routes */}
@@ -120,6 +122,8 @@ const AnimatedRoutes = () => {
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>
+    <FeedbackButton />
+    </>
   );
 };
 

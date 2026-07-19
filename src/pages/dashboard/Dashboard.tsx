@@ -4,7 +4,6 @@ import { ChevronRight, Calendar, Plus, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AkinHeader } from "@/components/dashboard/AkinHeader";
 import { BottomNav } from "@/components/dashboard/BottomNav";
-import FeedbackButton from "@/components/FeedbackButton";
 
 const dummyBookings = [
   { name: "Sarah K.", class: "Watercolor Basics", date: "Apr 14", amount: "$45" },
@@ -136,7 +135,6 @@ export default function Dashboard() {
         </Card>
       </div>
       </main>
-      <FeedbackButton />
       <BottomNav />
     </div>
   );

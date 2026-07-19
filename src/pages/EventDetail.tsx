@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
+  CalendarRange,
   Clock,
   MapPin,
   Users,
@@ -27,6 +28,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
+import { parseEventDates } from "@/lib/eventDates";
 
 
 const EventDetail = () => {
@@ -74,6 +76,8 @@ const EventDetail = () => {
     day: "numeric",
     year: "numeric",
   });
+
+  const parsedDates = parseEventDates(event.description);
 
   const spotsLeft = event.max_attendees
     ? event.max_attendees - event.rsvp_count
@@ -256,6 +260,14 @@ const EventDetail = () => {
               <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
               <span>{formattedDate}</span>
             </div>
+            {parsedDates.classification !== "single" && parsedDates.datesText && (
+              <div className="flex items-start gap-3 text-sm text-foreground">
+                <CalendarRange className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>
+                  <span className="font-medium">Dates:</span> {parsedDates.datesText}
+                </span>
+              </div>
+            )}
             <div className="flex items-center gap-3 text-sm text-foreground">
               <Clock className="w-4 h-4 text-primary flex-shrink-0" />
               <span>{event.time}</span>

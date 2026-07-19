@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/format-price";
+import { parseEventDates, classificationLabel } from "@/lib/eventDates";
 
 /**
  * Condense a free-form price string into a compact label.
@@ -35,6 +37,8 @@ interface EventCardProps {
   price_display?: string | null;
   /** When true, the CTA always links to /events/:id, ignoring hobby_slug. */
   forceEventDetail?: boolean;
+  /** Optional description; used to detect and label multi-date/ongoing events. */
+  description?: string | null;
 }
 
 const EventCard = ({
@@ -49,7 +53,10 @@ const EventCard = ({
   hobby_slug,
   price_display,
   forceEventDetail = false,
+  description,
 }: EventCardProps) => {
+  const { classification } = parseEventDates(description);
+  const chipLabel = classificationLabel(classification);
   const dateObj = new Date(date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     weekday: "short",
@@ -91,15 +98,26 @@ const EventCard = ({
           {title}
         </h3>
 
-        {price_display ? (
-          <p className="text-[10px] text-muted-foreground">
-            {summarizePriceDisplay(price_display)}
-          </p>
-        ) : (
-          <span className="text-sm font-bold text-[#E8604A] block">
-            {formatPrice(price_cents)}
-          </span>
-        )}
+        {/* Price + optional multi-date chip on the same row so tile heights stay uniform */}
+        <div className="flex items-center justify-between gap-2">
+          {price_display ? (
+            <span className="text-[10px] text-muted-foreground">
+              {summarizePriceDisplay(price_display)}
+            </span>
+          ) : (
+            <span className="text-sm font-bold text-[#E8604A]">
+              {formatPrice(price_cents)}
+            </span>
+          )}
+          {chipLabel && (
+            <Badge
+              variant="secondary"
+              className="text-[9px] px-1.5 py-0 font-medium flex-shrink-0"
+            >
+              {chipLabel}
+            </Badge>
+          )}
+        </div>
 
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground flex items-center gap-1">

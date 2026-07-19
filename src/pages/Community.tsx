@@ -1,26 +1,39 @@
 import { useState, useMemo } from "react";
-import { Users, Calendar, MessageCircle, Search, X } from "lucide-react";
+import { Users, Calendar, MessageCircle, Search, X, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
+import AuthPromptSheet from "@/components/AuthPromptSheet";
 import GroupCard from "@/components/community/GroupCard";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
 import ActivityItem from "@/components/community/ActivityItem";
 import CreateGroupSheet from "@/components/community/CreateGroupSheet";
 import { communityEvents, activityFeed } from "@/data/community";
+import { useAuth } from "@/hooks/use-auth";
 import { useGroupMembership } from "@/hooks/use-group-membership";
 import { useGroups } from "@/hooks/use-groups";
 
 const Community = () => {
+  const { user } = useAuth();
   const { isJoined, toggleMembership, joinGroup } = useGroupMembership();
   const { allGroups, addGroup } = useGroups();
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   const handleCreateGroup = (data: Parameters<typeof addGroup>[0]) => {
     const newGroup = addGroup(data);
     joinGroup(newGroup.id);
+  };
+
+  const handleToggleJoin = (groupId: string) => {
+    if (!user) {
+      setAuthPromptOpen(true);
+      return;
+    }
+    toggleMembership(groupId);
   };
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -89,7 +102,18 @@ const Community = () => {
               <div className="mb-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-bold text-foreground">Find a group</h2>
-                  <CreateGroupSheet onCreateGroup={handleCreateGroup} />
+                  {user ? (
+                    <CreateGroupSheet onCreateGroup={handleCreateGroup} />
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="rounded-full text-xs h-8 gap-1.5"
+                      onClick={() => setAuthPromptOpen(true)}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Create Group
+                    </Button>
+                  )}
                 </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -138,7 +162,7 @@ const Community = () => {
               )}
 
               <AnimatePresence mode="popLayout">
-                {yourGroups.length > 0 && (
+                {user && yourGroups.length > 0 && (
                   <motion.div
                     key="your-groups-section"
                     layout
@@ -166,7 +190,7 @@ const Community = () => {
                             <GroupCard
                               group={g}
                               joined
-                              onToggleJoin={toggleMembership}
+                              onToggleJoin={handleToggleJoin}
                             />
                           </motion.div>
                         ))}
@@ -200,7 +224,7 @@ const Community = () => {
                             <GroupCard
                               group={g}
                               joined={false}
-                              onToggleJoin={toggleMembership}
+                              onToggleJoin={handleToggleJoin}
                             />
                           </motion.div>
                         ))}
@@ -242,6 +266,13 @@ const Community = () => {
       </main>
 
       <BottomNav />
+
+      <AuthPromptSheet
+        open={authPromptOpen}
+        onOpenChange={setAuthPromptOpen}
+        title="Log in to join"
+        subtitle="Create a free account to join groups and connect with fellow hobbyists."
+      />
     </div>
   );
 };

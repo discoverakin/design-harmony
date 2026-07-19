@@ -2,9 +2,11 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, MapPin, Calendar, Users } from "lucide-react";
 import { getHobbyBySlug } from "@/data/hobbies";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
 import { useEvents } from "@/hooks/use-events";
 import { formatPrice } from "@/lib/format-price";
+import { parseEventDates, classificationLabel } from "@/lib/eventDates";
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -95,6 +97,8 @@ const HobbyDetail = () => {
                     month: "short",
                     day: "numeric",
                   });
+                  const { classification } = parseEventDates(event.description);
+                  const chipLabel = classificationLabel(classification);
                   return (
                     <Link
                       key={event.id}
@@ -111,6 +115,11 @@ const HobbyDetail = () => {
                             <Calendar className="w-3 h-3" />
                             {formatted} · {event.time}
                           </span>
+                          {chipLabel && (
+                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-medium">
+                              {chipLabel}
+                            </Badge>
+                          )}
                         </div>
                         <span className="text-[11px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
                           <MapPin className="w-3 h-3" />

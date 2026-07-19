@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import BottomNav from "@/components/BottomNav";
+import AuthPromptSheet from "@/components/AuthPromptSheet";
 import CommunityEventCard from "@/components/community/CommunityEventCard";
 import EditGroupSheet from "@/components/community/EditGroupSheet";
 import DeleteGroupDialog from "@/components/community/DeleteGroupDialog";
@@ -35,6 +36,7 @@ const GroupDetail = () => {
   const { allGroups, updateGroup, deleteGroup } = useGroups();
   const group = allGroups.find((g) => g.slug === slug);
   const { isJoined, toggleMembership } = useGroupMembership();
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
   if (!group) {
     return (
@@ -156,7 +158,13 @@ const GroupDetail = () => {
             <Button
               className="w-full rounded-xl h-11 font-semibold"
               variant={joined ? "secondary" : "default"}
-              onClick={() => toggleMembership(group.id)}
+              onClick={() => {
+                if (!user) {
+                  setAuthPromptOpen(true);
+                  return;
+                }
+                toggleMembership(group.id);
+              }}
             >
               {joined ? "Leave Group" : "Join Group"}
             </Button>
@@ -284,6 +292,13 @@ const GroupDetail = () => {
       </main>
 
       <BottomNav />
+
+      <AuthPromptSheet
+        open={authPromptOpen}
+        onOpenChange={setAuthPromptOpen}
+        title="Log in to join"
+        subtitle="Create a free account to join this group and connect with fellow hobbyists."
+      />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
+import { parseEventDates, classificationLabel } from "@/lib/eventDates";
 
 
 interface EventListCardProps {
@@ -19,8 +20,14 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
     day: "numeric",
   });
 
-  const isToday = event.date === new Date().toISOString().split("T")[0];
+  const { classification } = parseEventDates(event.description);
+  const chipLabel = classificationLabel(classification);
+  // The anchor date is misleading for ongoing/multi events, so suppress TODAY/TMRW
+  const isSingleDay = classification === "single";
+  const isToday =
+    isSingleDay && event.date === new Date().toISOString().split("T")[0];
   const isTomorrow =
+    isSingleDay &&
     event.date === new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
   const spotsLeft = event.max_attendees
@@ -90,6 +97,11 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
               <Clock className="w-3 h-3" />
               {event.time}
             </span>
+            {chipLabel && (
+              <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-medium">
+                {chipLabel}
+              </Badge>
+            )}
           </div>
           <span className="text-[11px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
             <MapPin className="w-3 h-3" />

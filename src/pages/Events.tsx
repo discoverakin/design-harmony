@@ -1,19 +1,32 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Plus, CalendarDays, Bookmark, Search, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
+import AuthPromptSheet from "@/components/AuthPromptSheet";
 import EventListCard from "@/components/events/EventListCard";
 import { useEvents } from "@/hooks/use-events";
+import { useAuth } from "@/hooks/use-auth";
 import { parseEventDates, isUpcoming } from "@/lib/eventDates";
 
 const Events = () => {
   const { approvedEvents, loading } = useEvents();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
+
+  const handleCreate = () => {
+    if (user) {
+      navigate("/events/create");
+    } else {
+      setAuthPromptOpen(true);
+    }
+  };
 
   const filteredEvents = useMemo(() => {
     let sorted = [...approvedEvents].sort(
@@ -119,11 +132,13 @@ const Events = () => {
                     <Search className="w-5 h-5 text-foreground" />
                   )}
                 </button>
-                <Button asChild size="sm" className="rounded-full gap-1.5">
-                  <Link to="/events/create">
-                    <Plus className="w-4 h-4" />
-                    Create
-                  </Link>
+                <Button
+                  size="sm"
+                  className="rounded-full gap-1.5"
+                  onClick={handleCreate}
+                >
+                  <Plus className="w-4 h-4" />
+                  Create
                 </Button>
               </div>
             </div>
@@ -239,6 +254,14 @@ const Events = () => {
       </main>
 
       <BottomNav />
+
+      <AuthPromptSheet
+        open={authPromptOpen}
+        onOpenChange={setAuthPromptOpen}
+        title="Log in to create an event"
+        subtitle="Create a free account to publish your event on Discover Akin."
+        pathname="/events/create"
+      />
     </div>
   );
 };

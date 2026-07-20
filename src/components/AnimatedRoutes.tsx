@@ -6,7 +6,6 @@ import PageTransition from "@/components/PageTransition";
 import FeedbackButton from "@/components/FeedbackButton";
 import OwnerBanner from "@/components/OwnerBanner";
 import Index from "@/pages/Index";
-import Homepage from "@/pages/Homepage";
 import HobbyDetail from "@/pages/HobbyDetail";
 import Community from "@/pages/Community";
 import GroupDetail from "@/pages/GroupDetail";

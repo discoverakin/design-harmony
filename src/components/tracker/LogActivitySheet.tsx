@@ -43,9 +43,11 @@ const hobbyOptions: { name: string; emoji: string }[] = [
 
 interface LogActivitySheetProps {
   onLog: (log: Omit<ActivityLog, "id">) => void;
+  /** Optional custom trigger element. Falls back to the small primary pill. */
+  children?: React.ReactNode;
 }
 
-const LogActivitySheet = ({ onLog }: LogActivitySheetProps) => {
+const LogActivitySheet = ({ onLog, children }: LogActivitySheetProps) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [hobby, setHobby] = useState("");
@@ -107,10 +109,12 @@ const LogActivitySheet = ({ onLog }: LogActivitySheetProps) => {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button className="rounded-full gap-1.5" size="sm">
-          <Plus className="w-4 h-4" />
-          Log Activity
-        </Button>
+        {children ?? (
+          <Button className="rounded-full gap-1.5" size="sm">
+            <Plus className="w-4 h-4" />
+            Log Activity
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-3xl max-w-lg mx-auto pb-8">
         <SheetHeader className="pb-2">

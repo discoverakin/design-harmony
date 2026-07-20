@@ -15,7 +15,51 @@ import { useAuth } from "@/hooks/use-auth";
 import { useActivityLog } from "@/hooks/use-activity-log";
 import { useTrackerGoals } from "@/hooks/use-tracker-goals";
 
-/** Anon teaser: zero-state preview + CTA that opens the auth prompt. */
+/**
+ * Feature-explainer card used in both empty states. Caller passes the big
+ * primary button as `trigger` so behavior varies (auth prompt vs log sheet).
+ */
+const TeaserFeatureCard = ({ trigger }: { trigger: React.ReactNode }) => (
+  <section className="px-5 pt-6 pb-8">
+    <div className="rounded-2xl border-2 border-border bg-secondary/40 p-5 flex flex-col items-center text-center">
+      <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
+        <Sparkles className="w-6 h-6 text-primary" />
+      </div>
+      <h2 className="text-base font-bold text-foreground mb-1.5">
+        Track your hobby journey
+      </h2>
+      <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-[300px]">
+        Log the time you spend on each hobby, build streaks, set goals, and
+        see your breakdown across categories.
+      </p>
+
+      <div className="grid grid-cols-3 gap-3 w-full mb-5">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <Timer className="w-4 h-4 text-primary" />
+          <span className="text-[11px] font-semibold text-foreground">
+            Weekly hours
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-center">
+          <Target className="w-4 h-4 text-primary" />
+          <span className="text-[11px] font-semibold text-foreground">
+            Custom goals
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-center">
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <span className="text-[11px] font-semibold text-foreground">
+            Streak & totals
+          </span>
+        </div>
+      </div>
+
+      {trigger}
+    </div>
+  </section>
+);
+
+/** Anon teaser: teaser card + zero-state stats + button opens the auth prompt. */
 const TrackerTeaser = () => {
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
 
@@ -26,23 +70,14 @@ const TrackerTeaser = () => {
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
           <section className="px-5 pt-6 pb-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Tracker</h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Log hours & track your progress.
-                </p>
-              </div>
-              <button
-                onClick={() => setAuthPromptOpen(true)}
-                className="rounded-full border border-[#3F3533]/15 bg-white text-[#3F3533] text-xs font-semibold h-8 px-4 hover:bg-[#3F3533]/5 transition-colors"
-              >
-                Log Activity
-              </button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Tracker</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Log hours & track your progress.
+              </p>
             </div>
           </section>
 
-          {/* Zero-state stats */}
           <div className="px-5 pt-4">
             <TrackerStats
               streak={0}
@@ -52,49 +87,16 @@ const TrackerTeaser = () => {
             />
           </div>
 
-          {/* Feature explainer */}
-          <section className="px-5 pt-6 pb-8">
-            <div className="rounded-2xl border-2 border-border bg-secondary/40 p-5 flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
-                <Sparkles className="w-6 h-6 text-primary" />
-              </div>
-              <h2 className="text-base font-bold text-foreground mb-1.5">
-                Track your hobby journey
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-[300px]">
-                Log the time you spend on each hobby, build streaks, set goals, and
-                see your breakdown across categories.
-              </p>
-
-              <div className="grid grid-cols-3 gap-3 w-full mb-5">
-                <div className="flex flex-col items-center gap-1 text-center">
-                  <Timer className="w-4 h-4 text-primary" />
-                  <span className="text-[11px] font-semibold text-foreground">
-                    Weekly hours
-                  </span>
-                </div>
-                <div className="flex flex-col items-center gap-1 text-center">
-                  <Target className="w-4 h-4 text-primary" />
-                  <span className="text-[11px] font-semibold text-foreground">
-                    Custom goals
-                  </span>
-                </div>
-                <div className="flex flex-col items-center gap-1 text-center">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                  <span className="text-[11px] font-semibold text-foreground">
-                    Streak & totals
-                  </span>
-                </div>
-              </div>
-
+          <TeaserFeatureCard
+            trigger={
               <button
                 onClick={() => setAuthPromptOpen(true)}
                 className="w-full h-12 rounded-2xl bg-[#FF5B3B] hover:bg-[#FF5B3B]/90 text-white font-semibold text-sm transition-colors"
               >
                 Log activity
               </button>
-            </div>
-          </section>
+            }
+          />
         </div>
       </main>
 
@@ -135,6 +137,8 @@ const AuthedTracker = () => {
     ? goalProgress.find((gp) => gp.goal.id === celebratingGoalId) ?? null
     : null;
 
+  const isEmpty = logs.length === 0;
+
   // Group logs by date for the feed
   const groupedLogs = useMemo(() => {
     const groups: Record<string, typeof logs> = {};
@@ -166,7 +170,7 @@ const AuthedTracker = () => {
 
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
-          {/* Header */}
+          {/* Header — top-right Log Activity only when there IS activity to add to */}
           <section className="px-5 pt-6 pb-2">
             <div className="flex items-center justify-between">
               <div>
@@ -175,7 +179,7 @@ const AuthedTracker = () => {
                   Log hours & track your progress.
                 </p>
               </div>
-              <LogActivitySheet onLog={addLog} />
+              {!isEmpty && <LogActivitySheet onLog={addLog} />}
             </div>
           </section>
 
@@ -189,46 +193,49 @@ const AuthedTracker = () => {
             />
           </div>
 
-          {/* Tabs */}
-          <Tabs defaultValue="overview" className="px-5 pt-4">
-            <TabsList className="w-full bg-secondary/60 rounded-xl h-11">
-              <TabsTrigger
-                value="overview"
-                className="flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs font-semibold"
-              >
-                <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="log"
-                className="flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs font-semibold"
-              >
-                <List className="w-3.5 h-3.5 mr-1.5" />
-                Activity Log
-              </TabsTrigger>
-            </TabsList>
+          {isEmpty ? (
+            /* Empty state: single teaser card whose big button opens the log sheet */
+            <TeaserFeatureCard
+              trigger={
+                <LogActivitySheet onLog={addLog}>
+                  <button className="w-full h-12 rounded-2xl bg-[#FF5B3B] hover:bg-[#FF5B3B]/90 text-white font-semibold text-sm transition-colors">
+                    Log activity
+                  </button>
+                </LogActivitySheet>
+              }
+            />
+          ) : (
+            <Tabs defaultValue="overview" className="px-5 pt-4">
+              <TabsList className="w-full bg-secondary/60 rounded-xl h-11">
+                <TabsTrigger
+                  value="overview"
+                  className="flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs font-semibold"
+                >
+                  <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="log"
+                  className="flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs font-semibold"
+                >
+                  <List className="w-3.5 h-3.5 mr-1.5" />
+                  Activity Log
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Overview */}
-            <TabsContent value="overview" className="mt-4 space-y-4 pb-6">
-              <GoalsSection
-                goalProgress={goalProgress}
-                onAddGoal={addGoal}
-                onDeleteGoal={deleteGoal}
-              />
-              <WeeklyChart data={weeklyChart} />
-              <HobbyBreakdown data={hobbyBreakdown} />
-            </TabsContent>
+              {/* Overview */}
+              <TabsContent value="overview" className="mt-4 space-y-4 pb-6">
+                <GoalsSection
+                  goalProgress={goalProgress}
+                  onAddGoal={addGoal}
+                  onDeleteGoal={deleteGoal}
+                />
+                <WeeklyChart data={weeklyChart} />
+                <HobbyBreakdown data={hobbyBreakdown} />
+              </TabsContent>
 
-            {/* Activity Log */}
-            <TabsContent value="log" className="mt-4 pb-6">
-              {groupedLogs.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-3xl mb-2">📝</p>
-                  <p className="text-sm text-muted-foreground">
-                    No activities logged yet. Tap "Log Activity" to get started!
-                  </p>
-                </div>
-              ) : (
+              {/* Activity Log */}
+              <TabsContent value="log" className="mt-4 pb-6">
                 <div className="space-y-4">
                   {groupedLogs.map(([date, dateLogs]) => (
                     <div key={date}>
@@ -247,9 +254,9 @@ const AuthedTracker = () => {
                     </div>
                   ))}
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </main>
 

@@ -460,7 +460,7 @@ const EventDetail = () => {
               </p>
               <button
                 onClick={() => navigate(`/signup?type=seeker&${redirectQuery}`)}
-                className="w-full h-12 rounded-2xl bg-[#E8604A] hover:bg-[#E8604A]/90 text-white font-semibold text-base mb-3 transition-colors"
+                className="w-full h-12 rounded-2xl bg-[#FF5B3B] hover:bg-[#FF5B3B]/90 text-white font-semibold text-base mb-3 transition-colors"
               >
                 Create Account
               </button>

@@ -95,7 +95,7 @@ const Signup = () => {
           {typeFromUrl ? (
             <div
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-              style={{ backgroundColor: "#FF5C3B", color: "#FFFFFF" }}
+              style={{ backgroundColor: "#FF5B3B", color: "#FFFFFF" }}
             >
               {typeFromUrl === "seeker" ? "🎨 Signing up as Hobby Seeker" : "🏢 Signing up as Business Owner"}
             </div>
@@ -106,8 +106,8 @@ const Signup = () => {
                 onClick={() => setSelectedType("seeker")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                 style={{
-                  backgroundColor: selectedType === "seeker" ? "#FF5C3B" : "rgba(255, 92, 59, 0.12)",
-                  color: selectedType === "seeker" ? "#FFFFFF" : "#FF5C3B",
+                  backgroundColor: selectedType === "seeker" ? "#FF5B3B" : "rgba(255, 92, 59, 0.12)",
+                  color: selectedType === "seeker" ? "#FFFFFF" : "#FF5B3B",
                 }}
               >
                 🎨 Hobby Seeker
@@ -117,8 +117,8 @@ const Signup = () => {
                 onClick={() => setSelectedType("owner")}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
                 style={{
-                  backgroundColor: selectedType === "owner" ? "#FF5C3B" : "rgba(255, 92, 59, 0.12)",
-                  color: selectedType === "owner" ? "#FFFFFF" : "#FF5C3B",
+                  backgroundColor: selectedType === "owner" ? "#FF5B3B" : "rgba(255, 92, 59, 0.12)",
+                  color: selectedType === "owner" ? "#FFFFFF" : "#FF5B3B",
                 }}
               >
                 🏢 Business Owner

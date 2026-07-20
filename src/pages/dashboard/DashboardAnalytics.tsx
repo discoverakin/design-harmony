@@ -121,7 +121,7 @@ export default function DashboardAnalytics() {
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
     <Card className="border-border overflow-hidden">
-      <CardContent className="p-3 text-center" style={{ borderLeft: "3px solid #FF5C3B" }}>
+      <CardContent className="p-3 text-center" style={{ borderLeft: "3px solid #FF5B3B" }}>
         <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
         <p className="text-lg font-bold text-foreground">{value}</p>
       </CardContent>

@@ -96,7 +96,7 @@ const Onboarding = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
         className="flex flex-col min-h-screen max-w-lg mx-auto overflow-hidden relative"
-        style={{ background: "linear-gradient(160deg, #E8604A 0%, #FF8C69 100%)" }}
+        style={{ background: "linear-gradient(160deg, #FF5B3B 0%, #FF8C69 100%)" }}
       >
         {/* Decorative background shapes */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -166,7 +166,7 @@ const Onboarding = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
             onClick={() => paginate(1)}
-            className="w-full h-14 rounded-full bg-white text-[#E8604A] font-semibold text-base shadow-lg hover:opacity-90 transition-opacity"
+            className="w-full h-14 rounded-full bg-white text-[#FF5B3B] font-semibold text-base shadow-lg hover:opacity-90 transition-opacity"
             whileTap={{ scale: 0.97 }}
           >
             Next

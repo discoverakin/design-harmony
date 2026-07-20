@@ -33,7 +33,7 @@ const FeedbackButton = () => {
         }
       }}
       className="fixed bottom-20 right-4 z-50 w-12 h-12 rounded-full
-                 bg-[#E8604A] text-white shadow-lg hover:bg-[#E8604A]/90
+                 bg-[#3F3533] text-[#F9E9E4] shadow-lg hover:bg-[#3F3533]/90
                  transition-colors flex items-center justify-center"
     >
       <MessageCircle className="w-5 h-5" />

@@ -147,7 +147,7 @@ const Search = () => {
               {/* Location proximity pill */}
               {locationUsed && (
                 <div className="mb-3">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-[#E8604A]/10 text-[#E8604A] border border-[#E8604A]/20">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-[#FF5B3B]/10 text-[#FF5B3B] border border-[#FF5B3B]/20">
                     📍 Showing classes near {formatSlug(locationUsed)}
                   </span>
                 </div>

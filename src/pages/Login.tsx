@@ -105,9 +105,9 @@ const Login = () => {
 
           <h1 className="text-2xl font-bold text-foreground font-heading mb-1">
             {userType === "seeker"
-              ? <span>Welcome, hobby seeker! <span className="text-[#E8604A]">🎨</span></span>
+              ? <span>Welcome, hobby seeker! <span className="text-[#FF5B3B]">🎨</span></span>
               : userType === "owner"
-              ? <span>Welcome, studio owner! <span className="text-[#E8604A]">🏢</span></span>
+              ? <span>Welcome, studio owner! <span className="text-[#FF5B3B]">🏢</span></span>
               : "Welcome back"}
           </h1>
           <p className="text-muted-foreground mb-8">

@@ -50,7 +50,7 @@ export default function DashboardExperiences() {
         <Link to="/dashboard/experiences/new">
           <button
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#FF5C3B" }}
+            style={{ backgroundColor: "#FF5B3B" }}
           >
             <Plus className="h-4 w-4" />
             Add New
@@ -127,13 +127,13 @@ export default function DashboardExperiences() {
           Quick Tools
         </h3>
         <Link to="/dashboard/experiences/new">
-          <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+          <Card className="bg-white border-2 border-[#FF5B3B]/20 hover:border-[#FF5B3B]/50 transition-colors">
             <CardContent className="p-4 flex items-center gap-3">
               <div
                 className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
               >
-                <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+                <Plus className="h-4 w-4" style={{ color: "#FF5B3B" }} />
               </div>
               <p className="font-semibold text-sm text-foreground">Add New Listing</p>
             </CardContent>

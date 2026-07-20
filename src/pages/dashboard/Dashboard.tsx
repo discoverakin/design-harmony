@@ -71,26 +71,26 @@ export default function Dashboard() {
         </h3>
         <div className="grid grid-cols-2 gap-3">
           <Link to="/dashboard/experiences/new">
-            <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+            <Card className="bg-white border-2 border-[#FF5B3B]/20 hover:border-[#FF5B3B]/50 transition-colors">
               <CardContent className="p-4 flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
                 >
-                  <Plus className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+                  <Plus className="h-4 w-4" style={{ color: "#FF5B3B" }} />
                 </div>
                 <p className="font-semibold text-sm text-foreground">Add Listing</p>
               </CardContent>
             </Card>
           </Link>
           <Link to="/dashboard/analytics">
-            <Card className="bg-white border-2 border-[#FF5C3B]/20 hover:border-[#FF5C3B]/50 transition-colors">
+            <Card className="bg-white border-2 border-[#FF5B3B]/20 hover:border-[#FF5B3B]/50 transition-colors">
               <CardContent className="p-4 flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: "rgba(255, 92, 59, 0.1)" }}
                 >
-                  <BarChart3 className="h-4 w-4" style={{ color: "#FF5C3B" }} />
+                  <BarChart3 className="h-4 w-4" style={{ color: "#FF5B3B" }} />
                 </div>
                 <p className="font-semibold text-sm text-foreground">View Reports</p>
               </CardContent>
@@ -116,7 +116,7 @@ export default function Dashboard() {
               >
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold text-white"
-                  style={{ backgroundColor: "#FF5C3B" }}
+                  style={{ backgroundColor: "#FF5B3B" }}
                 >
                   {b.name.charAt(0)}
                 </div>
@@ -143,7 +143,7 @@ export default function Dashboard() {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <Card className="border-border overflow-hidden">
-      <CardContent className="p-3 text-center" style={{ borderLeft: "3px solid #FF5C3B" }}>
+      <CardContent className="p-3 text-center" style={{ borderLeft: "3px solid #FF5B3B" }}>
         <p className="text-[11px] text-muted-foreground mb-1">{label}</p>
         <p className="text-xl font-bold text-foreground">{value}</p>
       </CardContent>

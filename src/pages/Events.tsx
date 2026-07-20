@@ -8,6 +8,7 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import EventListCard from "@/components/events/EventListCard";
 import { useEvents } from "@/hooks/use-events";
+import { parseEventDates, isUpcoming } from "@/lib/eventDates";
 
 const Events = () => {
   const { approvedEvents, loading } = useEvents();
@@ -45,15 +46,23 @@ const Events = () => {
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
   const nextWeekEnd = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
 
-  // Time-based sections
-  const todayEvents = filteredEvents.filter((e) => e.date === today);
-  const tomorrowEvents = filteredEvents.filter((e) => e.date === tomorrow);
-  const thisWeekEvents = filteredEvents.filter(
+  // Time-based sections only for single-day upcoming events; ongoing/multi get
+  // their own section since their anchor date may be in the past.
+  const singleUpcoming = filteredEvents.filter(
+    (e) => parseEventDates(e.description).classification === "single" && e.date >= today
+  );
+  const ongoingRecurring = filteredEvents.filter(
+    (e) => parseEventDates(e.description).classification !== "single"
+  );
+
+  const todayEvents = singleUpcoming.filter((e) => e.date === today);
+  const tomorrowEvents = singleUpcoming.filter((e) => e.date === tomorrow);
+  const thisWeekEvents = singleUpcoming.filter(
     (e) => e.date > tomorrow && e.date <= nextWeekEnd
   );
-  const laterEvents = filteredEvents.filter((e) => e.date > nextWeekEnd);
+  const laterEvents = singleUpcoming.filter((e) => e.date > nextWeekEnd);
 
-  const upcomingEvents = filteredEvents.filter((e) => e.date >= today);
+  const upcomingEvents = filteredEvents.filter(isUpcoming);
 
   const EventSection = ({
     title,
@@ -179,6 +188,7 @@ const Events = () => {
                   <EventSection title="Tomorrow" events={tomorrowEvents} />
                   <EventSection title="This Week" events={thisWeekEvents} />
                   <EventSection title="Coming Up" events={laterEvents} />
+                  <EventSection title="Ongoing" events={ongoingRecurring} />
                 </>
               )}
             </TabsContent>

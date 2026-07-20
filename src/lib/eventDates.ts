@@ -47,3 +47,20 @@ export function classificationLabel(c: DateClassification): string | null {
   if (c === "multi") return "Multiple dates";
   return null;
 }
+
+/**
+ * True when an event should still surface on "upcoming"-oriented lists:
+ * - ongoing/multi events pass regardless of anchor date
+ * - single-date events pass when their date is today or later (local time)
+ */
+export function isUpcoming(event: {
+  date: string;
+  description?: string | null;
+}): boolean {
+  const { classification } = parseEventDates(event.description);
+  if (classification !== "single") return true;
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const eventDate = new Date(event.date + "T00:00:00");
+  return eventDate.getTime() >= todayStart.getTime();
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { weeklyShuffle } from "@/lib/weeklyShuffle";
+import { isUpcoming } from "@/lib/eventDates";
 import EventCard from "@/components/EventCard";
 
 interface FeaturedEvent {
@@ -18,22 +19,22 @@ interface FeaturedEvent {
 }
 
 const FEATURED_COUNT = 8;
-const POOL_LIMIT = 50;
+const POOL_LIMIT = 200;
 
 const FeaturedThisWeek = () => {
   const [pool, setPool] = useState<FeaturedEvent[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    const today = new Date().toISOString().split("T")[0];
 
+    // Fetch approved events without a server-side date filter so ongoing/multi
+    // events with past anchor dates aren't dropped; isUpcoming filters below.
     supabase
       .from("events")
       .select(
         "id, title, date, time, location, emoji, price_cents, price_display, hobby_slug, flyer_url, description"
       )
       .eq("status", "approved")
-      .gte("date", today)
       .order("date", { ascending: true })
       .limit(POOL_LIMIT)
       .then(({ data }) => {
@@ -48,7 +49,8 @@ const FeaturedThisWeek = () => {
 
   const featured = useMemo(() => {
     if (!pool) return null;
-    return weeklyShuffle(pool).slice(0, FEATURED_COUNT);
+    const upcoming = pool.filter((e) => isUpcoming(e));
+    return weeklyShuffle(upcoming).slice(0, FEATURED_COUNT);
   }, [pool]);
 
   if (featured === null) {

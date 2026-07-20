@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Homepage", icon: Home, path: "/dashboard" },
+  { label: "Dashboard", icon: Home, path: "/dashboard" },
   { label: "Metrics", icon: BarChart3, path: "/dashboard/analytics" },
   { label: "Listings", icon: List, path: "/dashboard/experiences" },
   { label: "Settings", icon: Settings, path: "/dashboard/settings" },

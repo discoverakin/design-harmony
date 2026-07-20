@@ -105,7 +105,25 @@ const HobbyDetail = () => {
                       to={`/events/${event.id}`}
                       className="flex items-center gap-3 w-full p-4 rounded-xl border-2 border-border bg-card hover:bg-secondary/40 transition-colors text-left"
                     >
-                      <span className="text-2xl flex-shrink-0">{event.emoji}</span>
+                      {event.flyer_url ? (
+                        <img
+                          src={event.flyer_url}
+                          alt={event.title}
+                          className="w-11 h-11 rounded-lg object-cover flex-shrink-0"
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            img.style.display = "none";
+                            const emoji = img.nextElementSibling as HTMLElement | null;
+                            if (emoji) emoji.style.display = "";
+                          }}
+                        />
+                      ) : null}
+                      <span
+                        className="text-2xl flex-shrink-0"
+                        style={event.flyer_url ? { display: "none" } : undefined}
+                      >
+                        {event.emoji}
+                      </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-foreground truncate">
                           {event.title}

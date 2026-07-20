@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -5,6 +6,7 @@ import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
 import { parseEventDates, classificationLabel } from "@/lib/eventDates";
+import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
 
 interface EventListCardProps {
@@ -34,18 +36,26 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
     ? event.max_attendees - event.rsvp_count
     : null;
 
+  // Top thumbnail fallback chain: flyer_url → per-hobby image → (no thumbnail).
+  // The emoji column below always renders as the final fallback.
+  const hobbyImage = event.hobby_slug ? HOBBY_IMAGES[event.hobby_slug] : null;
+  const sources = [event.flyer_url, hobbyImage].filter((s): s is string => !!s);
+  const [attemptIdx, setAttemptIdx] = useState(0);
+  const thumbSrc = sources[attemptIdx] ?? null;
+
   return (
     <Link
       to={`/events/${event.id}`}
       className="block rounded-xl border-2 border-border bg-card hover:border-primary/30 transition-colors group overflow-hidden"
     >
-      {/* Flyer thumbnail */}
-      {event.flyer_url && !compact && (
+      {/* Top thumbnail (flyer → hobby image; emoji column below is the ultimate fallback) */}
+      {thumbSrc && !compact && (
         <div className="w-full h-32 overflow-hidden">
           <img
-            src={event.flyer_url}
+            src={thumbSrc}
             alt={`${event.title} flyer`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setAttemptIdx((i) => i + 1)}
           />
         </div>
       )}

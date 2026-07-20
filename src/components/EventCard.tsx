@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/format-price";
 import { parseEventDates, classificationLabel } from "@/lib/eventDates";
+import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
 /**
  * Condense a free-form price string into a compact label.
@@ -57,6 +59,14 @@ const EventCard = ({
 }: EventCardProps) => {
   const { classification } = parseEventDates(description);
   const chipLabel = classificationLabel(classification);
+
+  // Image fallback chain: flyer_url → per-hobby image → emoji. Failed loads (onError)
+  // advance to the next candidate, ultimately falling through to the emoji block.
+  const hobbyImage = hobby_slug ? HOBBY_IMAGES[hobby_slug] : null;
+  const sources = [flyer_url, hobbyImage].filter((s): s is string => !!s);
+  const [attemptIdx, setAttemptIdx] = useState(0);
+  const imageSrc = sources[attemptIdx] ?? null;
+
   const dateObj = new Date(date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     weekday: "short",
@@ -77,13 +87,14 @@ const EventCard = ({
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-      {/* Image or placeholder */}
-      {flyer_url ? (
+      {/* Image (flyer → hobby image) with emoji fallback on missing or failed load */}
+      {imageSrc ? (
         <div className="w-full h-24 bg-secondary overflow-hidden">
           <img
-            src={flyer_url}
+            src={imageSrc}
             alt={title}
             className="w-full h-full object-cover"
+            onError={() => setAttemptIdx((i) => i + 1)}
           />
         </div>
       ) : (

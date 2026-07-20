@@ -76,7 +76,7 @@ const AppHeader = () => {
       ) : (
         <button
           onClick={() => navigate("/login?type=seeker")}
-          className="px-4 h-9 rounded-full bg-[#E8604A] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="px-4 h-9 rounded-full border-[1.5px] border-[#E8604A] bg-transparent text-[#E8604A] text-sm font-semibold hover:bg-[#E8604A]/10 transition-colors"
         >
           Sign In
         </button>

@@ -35,7 +35,7 @@ const TrackerTeaser = () => {
               </div>
               <button
                 onClick={() => setAuthPromptOpen(true)}
-                className="rounded-full bg-primary text-primary-foreground text-xs font-semibold h-8 px-4"
+                className="rounded-full border-[1.5px] border-[#E8604A] bg-transparent text-[#E8604A] text-xs font-semibold h-8 px-4 hover:bg-[#E8604A]/10 transition-colors"
               >
                 Log Activity
               </button>

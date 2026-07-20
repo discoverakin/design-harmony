@@ -105,7 +105,7 @@ const EventCard = ({
               {summarizePriceDisplay(price_display)}
             </span>
           ) : (
-            <span className="text-sm font-bold text-[#E8604A]">
+            <span className="text-sm font-bold text-[#FF5B3B]">
               {formatPrice(price_cents)}
             </span>
           )}

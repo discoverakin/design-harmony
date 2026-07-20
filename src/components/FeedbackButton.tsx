@@ -1,4 +1,5 @@
 import { useMatch } from "react-router-dom";
+import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 declare global {
@@ -21,6 +22,7 @@ const FeedbackButton = () => {
 
   return (
     <button
+      aria-label="Feedback"
       onClick={() => {
         if (window.Tally) {
           window.Tally.openPopup('vGOkQQ', {
@@ -30,12 +32,11 @@ const FeedbackButton = () => {
           });
         }
       }}
-      className="fixed bottom-20 right-4 z-50 bg-white border-2
-                 border-[#FF5C3B] text-[#FF5C3B] text-xs font-semibold
-                 px-3 py-2 rounded-full shadow-lg hover:bg-[#FF5C3B]
-                 hover:text-white transition-all"
+      className="fixed bottom-20 right-4 z-50 w-12 h-12 rounded-full
+                 bg-[#3F3533] text-[#F9E9E4] shadow-lg hover:bg-[#3F3533]/90
+                 transition-colors flex items-center justify-center"
     >
-      Feedback
+      <MessageCircle className="w-5 h-5" />
     </button>
   );
 };

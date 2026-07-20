@@ -155,7 +155,7 @@ const HobbyQuiz = () => {
               <div
                 className="h-full rounded-full"
                 style={{
-                  backgroundColor: "#E8604A",
+                  backgroundColor: "#FF5B3B",
                   animation: "ai-progress 3s ease-in-out forwards",
                 }}
               />

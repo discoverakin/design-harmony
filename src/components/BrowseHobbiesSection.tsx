@@ -64,7 +64,7 @@ const BrowseHobbiesSection = () => {
         {query.trim() && (
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 w-full mt-3 h-10 rounded-full bg-[#E8604A] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="flex items-center justify-center gap-2 w-full mt-3 h-10 rounded-full bg-[#FF5B3B] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             Search classes
             <ArrowRight className="w-4 h-4" />

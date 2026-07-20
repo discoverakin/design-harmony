@@ -35,7 +35,7 @@ const TrackerTeaser = () => {
               </div>
               <button
                 onClick={() => setAuthPromptOpen(true)}
-                className="rounded-full bg-primary text-primary-foreground text-xs font-semibold h-8 px-4"
+                className="rounded-full border border-[#3F3533]/15 bg-white text-[#3F3533] text-xs font-semibold h-8 px-4 hover:bg-[#3F3533]/5 transition-colors"
               >
                 Log Activity
               </button>
@@ -89,7 +89,7 @@ const TrackerTeaser = () => {
 
               <button
                 onClick={() => setAuthPromptOpen(true)}
-                className="w-full h-12 rounded-2xl bg-[#E8604A] hover:bg-[#E8604A]/90 text-white font-semibold text-sm transition-colors"
+                className="w-full h-12 rounded-2xl bg-[#FF5B3B] hover:bg-[#FF5B3B]/90 text-white font-semibold text-sm transition-colors"
               >
                 Log activity
               </button>

@@ -146,7 +146,7 @@ const NearYouMap = () => {
       const pin = document.createElement("div");
       pin.style.cssText = `
         background: white;
-        border: 2px solid #E8604A;
+        border: 2px solid #FF5B3B;
         border-radius: 50%;
         width: 36px;
         height: 36px;
@@ -181,9 +181,9 @@ const NearYouMap = () => {
             <span style="color:#666;font-size:12px;">
               ${formatHobbyLabel(evt.hobby_slug)} · ${formatEventDate(evt.date, evt.time)}
             </span><br/>
-            <span style="color:#E8604A;font-weight:bold;">${formatPrice(evt.price_cents)}</span><br/>
+            <span style="color:#FF5B3B;font-weight:bold;">${formatPrice(evt.price_cents)}</span><br/>
             <a href="/hobby/${evt.hobby_slug}"
-               style="color:#E8604A;font-size:13px;text-decoration:none;">View classes →</a>
+               style="color:#FF5B3B;font-size:13px;text-decoration:none;">View classes →</a>
           </div>
         `);
         infoWindow.open({ map, anchor: marker });

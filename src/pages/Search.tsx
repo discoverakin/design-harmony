@@ -1,16 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search as SearchIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import EventCard from "@/components/EventCard";
+import { isUpcoming } from "@/lib/eventDates";
 
 interface ParsedSearch {
   keywords: string;
   hobby_slug: string | null;
   mood: string | null;
   time_of_day: string | null;
+  location_hint?: string | null;
+  date_filter?: { type: string | null; value?: string | null; start?: string | null; end?: string | null } | null;
 }
 
 const HOBBY_EMOJI: Record<string, string> = {
@@ -52,6 +55,12 @@ const Search = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [fallback, setFallback] = useState<string | null>(null);
   const [locationUsed, setLocationUsed] = useState<string | null>(null);
+
+  // Hide past single-day events (keep ongoing/multi). Respect explicit date-range intent.
+  const visibleResults = useMemo(() => {
+    if (parsed?.date_filter?.type) return results;
+    return results.filter((e) => isUpcoming(e));
+  }, [results, parsed]);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -162,7 +171,7 @@ const Search = () => {
                 </div>
               )}
 
-              {fallback && results.length > 0 && (
+              {fallback && visibleResults.length > 0 && (
                 <p className="text-sm text-muted-foreground mb-3">
                   {parsed?.location_hint
                     ? `No classes found in ${formatSlug(parsed.location_hint)} — here are other great options nearby:`
@@ -174,9 +183,9 @@ const Search = () => {
                 </p>
               )}
 
-              {results.length > 0 ? (
+              {visibleResults.length > 0 ? (
                 <div className="grid grid-cols-2 gap-3">
-                  {results.map((event) => (
+                  {visibleResults.map((event) => (
                     <EventCard
                       key={event.id}
                       id={event.id}

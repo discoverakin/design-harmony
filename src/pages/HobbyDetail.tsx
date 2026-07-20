@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
 import { useEvents } from "@/hooks/use-events";
 import { formatPrice } from "@/lib/format-price";
-import { parseEventDates, classificationLabel } from "@/lib/eventDates";
+import { parseEventDates, classificationLabel, isUpcoming } from "@/lib/eventDates";
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -25,7 +25,7 @@ const HobbyDetail = () => {
     );
   }
 
-  const hobbyEvents = getEventsByHobby(hobby.slug);
+  const hobbyEvents = getEventsByHobby(hobby.slug).filter(isUpcoming);
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">

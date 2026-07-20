@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { MapPin, Navigation } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatPrice } from "@/lib/format-price";
+import { isUpcoming } from "@/lib/eventDates";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
 
@@ -29,6 +30,7 @@ interface MapEvent {
   lat: number;
   lng: number;
   emoji: string;
+  description: string | null;
 }
 
 function formatEventDate(date: string, time: string | null): string {
@@ -97,14 +99,16 @@ const NearYouMap = () => {
       const { data } = await supabase
         .from("events")
         .select(
-          "id, title, hobby_slug, location, date, time, price_cents, lat, lng, emoji"
+          "id, title, hobby_slug, location, date, time, price_cents, lat, lng, emoji, description"
         )
         .eq("status", "approved")
-        .gte("date", new Date().toISOString().split("T")[0])
         .not("lat", "is", null)
         .not("lng", "is", null);
 
-      if (data) setEvents(data as MapEvent[]);
+      if (data) {
+        // Client-side isUpcoming keeps ongoing/multi events even with past anchor dates
+        setEvents((data as MapEvent[]).filter(isUpcoming));
+      }
     }
     fetchEvents();
   }, []);

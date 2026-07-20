@@ -193,7 +193,7 @@ export default async function handler(req: any, res: any) {
       .select("*")
       .eq("status", "approved")
       .order("date", { ascending: true })
-      .limit(10);
+      .limit(30);
 
     if (parsed.hobby_slug) {
       q = q.eq("hobby_slug", parsed.hobby_slug);
@@ -229,12 +229,12 @@ export default async function handler(req: any, res: any) {
     const locationKey = landmarkMatch?.key || null;
 
     if (searchCoords) {
-      // Fetch all upcoming approved events with coordinates, then filter by proximity
+      // Fetch approved events with coordinates; client's isUpcoming filter
+      // drops past single-day events while keeping ongoing/multi ones.
       const { data: allEvents } = await supabase
         .from("events")
         .select("*")
         .eq("status", "approved")
-        .gte("date", today)
         .not("lat", "is", null)
         .not("lng", "is", null);
 
@@ -270,13 +270,9 @@ export default async function handler(req: any, res: any) {
       q = q.eq("date", df.value);
     } else if (df?.type === "date_range" && df.start && df.end) {
       q = q.gte("date", df.start).lte("date", df.end);
-    } else if (df?.type === "day_of_week" && df.value) {
-      // day_of_week filtering isn't supported via PostgREST filters,
-      // so fetch future events and filter in JS
-      q = q.gte("date", today);
-    } else {
-      q = q.gte("date", today);
     }
+    // No default date filter — ongoing/multi events keep past anchor dates and
+    // the client's isUpcoming filter handles single-day past events.
 
     const { data, error } = await q;
 
@@ -302,7 +298,7 @@ export default async function handler(req: any, res: any) {
           .from("events").select("*")
           .eq("status", "approved")
           .eq("hobby_slug", parsed.hobby_slug)
-          .gte("date", today).order("date").limit(10);
+          .order("date").limit(30);
         if (t2 && t2.length > 0)
           return res.status(200).json({ results: t2, parsed, fallback: "hobby_only" });
       }
@@ -313,29 +309,27 @@ export default async function handler(req: any, res: any) {
           .from("events").select("*")
           .eq("status", "approved")
           .in("hobby_slug", MOOD_TO_HOBBIES[parsed.mood])
-          .gte("date", today).order("date").limit(10);
+          .order("date").limit(30);
         if (t3 && t3.length > 0)
           return res.status(200).json({ results: t3, parsed, fallback: "mood_only" });
       }
 
-      // Tier 4: return any upcoming events
+      // Tier 4: return any approved events
       const { data: t4 } = await supabase
         .from("events").select("*")
         .eq("status", "approved")
-        .gte("date", today).order("date").limit(10);
+        .order("date").limit(30);
       return res.status(200).json({ results: t4 ?? [], parsed, fallback: "all_events" });
     }
 
     return res.status(200).json({ results, parsed });
   }
 
-  // Fallback: basic keyword search on title
+  // Fallback: basic keyword search on title (client applies isUpcoming)
   const { data, error } = await supabase
     .from("events")
     .select("*")
     .eq("status", "approved")
-    .eq("status", "active")
-    .gte("date", today)
     .ilike("title", `%${query}%`)
     .order("date", { ascending: true })
     .limit(10);

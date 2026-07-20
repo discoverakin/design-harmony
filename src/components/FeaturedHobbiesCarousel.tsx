@@ -64,7 +64,7 @@ const FeaturedHobbiesCarousel = ({ quizSlugs }: FeaturedHobbiesCarouselProps) =>
   return (
     <section className="pt-6 pb-2">
       <div className="flex items-center justify-between px-4 mb-3">
-        <h2 className="text-lg font-bold text-foreground">Featured for You</h2>
+        <h2 className="text-lg font-bold text-foreground">Recommended hobbies</h2>
         {isPersonalized ? (
           <span className="flex items-center gap-1 text-[11px] font-medium text-primary">
             <Sparkles className="w-3 h-3" />

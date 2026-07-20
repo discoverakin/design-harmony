@@ -18,7 +18,7 @@ const Index = () => {
       <AppHeader />
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg">
-          {!user && <FeaturedThisWeek />}
+          <FeaturedThisWeek />
           {user && <FeaturedHobbiesCarousel quizSlugs={quizSlugs} />}
           <BrowseHobbiesSection />
           {user && <HobbyQuizCTA />}

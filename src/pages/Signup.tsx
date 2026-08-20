@@ -9,6 +9,21 @@ import logoAkin from "@/assets/logo-akin.png";
 import logoAkinDark from "@/assets/logo-akin-dark.png";
 
 
+/**
+ * Password rules for signup, shared by submit and live revalidation so the two
+ * can't drift. `requireMatch` forces the confirm check even when confirm is
+ * empty (submit); live typing stays lenient until the user starts confirming.
+ */
+function validatePassword(
+  pw: string,
+  confirm: string,
+  requireMatch = false
+): string | null {
+  if (pw.length < 6) return "Password must be at least 6 characters.";
+  if ((requireMatch || confirm) && pw !== confirm) return "Passwords do not match.";
+  return null;
+}
+
 const Signup = () => {
   const { signUp, user } = useAuth();
   const { theme } = useTheme();
@@ -20,6 +35,8 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +52,7 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setHasSubmitted(true);
 
     const finalType = typeFromUrl || selectedType;
     if (!finalType) {
@@ -42,15 +60,9 @@ const Signup = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+    const pwError = validatePassword(password, confirmPassword, true);
+    setPasswordError(pwError);
+    if (pwError) return;
 
     setLoading(true);
     const { error } = await signUp(email, password);
@@ -188,7 +200,12 @@ const Signup = () => {
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setPassword(next);
+                        if (hasSubmitted)
+                          setPasswordError(validatePassword(next, confirmPassword));
+                      }}
                       placeholder="At least 6 characters"
                       required
                       className="w-full h-12 rounded-xl border border-border bg-card px-4 pr-12 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
@@ -201,6 +218,15 @@ const Signup = () => {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {passwordError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-destructive mt-1.5"
+                    >
+                      {passwordError}
+                    </motion.p>
+                  )}
                 </div>
 
                 <div>
@@ -210,7 +236,12 @@ const Signup = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setConfirmPassword(next);
+                      if (hasSubmitted)
+                        setPasswordError(validatePassword(password, next));
+                    }}
                     placeholder="Re-enter your password"
                     required
                     className="w-full h-12 rounded-xl border border-border bg-card px-4 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"

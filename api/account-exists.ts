@@ -10,7 +10,9 @@
  * whether an email is registered. That is an accepted product tradeoff, made
  * deliberately to fix the sign-up dead end. Mitigations:
  *   - a shared, Postgres-backed rate limit (see below) that actually holds
- *     across serverless instances, unlike in-process counters;
+ *     across serverless instances, unlike in-process counters. See
+ *     supabase/migrations/010_account_lookup_rate_limit.sql for why Postgres
+ *     was chosen over Vercel WAF/KV, and when to replace it;
  *   - the client only calls it after a failed sign-in, which Supabase itself
  *     rate-limits — note this is a UI convention, not enforcement, since the
  *     route can be called directly;

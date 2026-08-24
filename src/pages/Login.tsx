@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,6 +28,19 @@ const Login = () => {
       : null;
   const isPaymentReturn = paymentStatus === "success";
   const userType = searchParams.get("type");
+
+  /**
+   * Sign-up link carrying the typed email plus any redirect/type context, so
+   * a user who lands here without an account doesn't lose their place.
+   */
+  const buildSignupHref = (prefillEmail?: string): string => {
+    const params = new URLSearchParams();
+    if (prefillEmail) params.set("email", prefillEmail);
+    if (safeRedirect) params.set("redirect", safeRedirect);
+    if (userType) params.set("type", userType);
+    const qs = params.toString();
+    return qs ? `/signup?${qs}` : "/signup";
+  };
 
   const buildRedirectTarget = (): string | null => {
     if (!safeRedirect) return null;
@@ -180,6 +193,16 @@ const Login = () => {
               )}
             </motion.button>
           </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Don't have an account?{" "}
+            <Link
+              to={buildSignupHref(email || undefined)}
+              className="text-primary font-semibold hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
 
         </motion.div>
       </div>

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import Login from "@/pages/Login";
@@ -13,6 +13,24 @@ const { signInMock, signUpMock } = vi.hoisted(() => ({
   signInMock: vi.fn().mockResolvedValue({ error: null }),
   signUpMock: vi.fn().mockResolvedValue({ error: null }),
 }));
+
+function mockLookup(response: { ok: boolean; body?: unknown }) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({ ok: response.ok, json: async () => response.body })
+  );
+}
+
+async function failSignIn(message = "Invalid login credentials") {
+  signInMock.mockResolvedValue({ error: message });
+  fireEvent.change(screen.getByPlaceholderText("you@example.com"), {
+    target: { value: "susan@example.com" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("Enter your password"), {
+    target: { value: "somepassword" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+}
 
 vi.mock("@/hooks/use-auth", () => ({
   useAuth: () => ({ signIn: signInMock, signUp: signUpMock, user: null }),
@@ -72,5 +90,64 @@ describe("Signup accepts the carried email", () => {
   it("starts empty when no email is supplied", () => {
     renderAt(<Signup />, "/signup?type=seeker");
     expect(screen.getByPlaceholderText("you@example.com")).toHaveValue("");
+  });
+});
+
+describe("Sign-in error messages", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    signInMock.mockResolvedValue({ error: null });
+  });
+
+  it("names the missing account and offers creation", async () => {
+    mockLookup({ ok: true, body: { exists: false } });
+    renderAt(<Login />, "/login");
+    await failSignIn();
+
+    expect(await screen.findByText(/no account found for/i)).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /create an account/i });
+    expect(link.getAttribute("href")).toContain("email=susan%40example.com");
+  });
+
+  it("says the password is wrong when the account exists", async () => {
+    mockLookup({ ok: true, body: { exists: true } });
+    renderAt(<Login />, "/login");
+    await failSignIn();
+
+    expect(await screen.findByText(/incorrect password/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no account found/i)).not.toBeInTheDocument();
+  });
+
+  // Fail closed: a broken lookup must never claim the account is missing.
+  it("falls back to friendly generic copy when the lookup fails", async () => {
+    mockLookup({ ok: false });
+    renderAt(<Login />, "/login");
+    await failSignIn();
+
+    expect(
+      await screen.findByText(/don't match an Akin account/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/no account found/i)).not.toBeInTheDocument();
+  });
+
+  it("falls back when the lookup throws", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    renderAt(<Login />, "/login");
+    await failSignIn();
+
+    expect(
+      await screen.findByText(/don't match an Akin account/i)
+    ).toBeInTheDocument();
+  });
+
+  // An unconfirmed email is unambiguous already — no lookup, no overriding.
+  it("does not run a lookup for non-credential errors", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    renderAt(<Login />, "/login");
+    await failSignIn("Email not confirmed");
+
+    expect(await screen.findByText(/confirm your email/i)).toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

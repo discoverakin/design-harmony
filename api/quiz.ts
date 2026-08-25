@@ -1,5 +1,10 @@
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 
+// Pin the model. The previous value (claude-sonnet-4-20250514) was retired on
+// 2026-06-15, so every request 404'd and the quiz silently served
+// DEFAULT_RESPONSE — the same canned three hobbies for every user.
+const QUIZ_MODEL = "claude-sonnet-5";
+
 const SYSTEM_PROMPT = `You are a hobby recommendation engine for Discover Akin, a creative studio marketplace in Ann Arbor. Based on a user's quiz answers, generate personalized hobby recommendations. You have access to ALL of these hobbies:
 cooking, arts-crafts, pottery, knitting, coding, dance, music.
 
@@ -55,20 +60,28 @@ export default async function handler(req: any, res: any) {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 512,
+        model: QUIZ_MODEL,
+        max_tokens: 1024,
+        // Recommendation, not deep reasoning — and adaptive thinking is on by
+        // default on this model, which would eat into max_tokens.
+        thinking: { type: "disabled" },
         system: SYSTEM_PROMPT,
         messages: [{ role: "user", content: userMessage }],
       }),
     });
 
     if (!apiRes.ok) {
+      const detail = await apiRes.text().catch(() => "");
+      console.error(
+        `[quiz] Claude call failed: ${apiRes.status} ${apiRes.statusText} ${detail.slice(0, 300)}`
+      );
       return res.status(200).json(DEFAULT_RESPONSE);
     }
 
     const data = await apiRes.json();
-    const text = data.content?.[0]?.text;
+    const text = data.content?.find((block: { type?: string }) => block?.type === "text")?.text;
     if (!text) {
+      console.error("[quiz] Claude returned no text block:", JSON.stringify(data).slice(0, 300));
       return res.status(200).json(DEFAULT_RESPONSE);
     }
 
@@ -78,6 +91,7 @@ export default async function handler(req: any, res: any) {
       recommendations: parsed.recommendations,
     });
   } catch (err) {
+    console.error("[quiz] Claude call threw — serving default recommendations:", err);
     return res.status(200).json(DEFAULT_RESPONSE);
   }
 }

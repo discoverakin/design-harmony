@@ -5,6 +5,12 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Pin the model. The previous value (claude-sonnet-4-20250514) was retired on
+// 2026-06-15, so every parse 404'd and search silently degraded to raw keyword
+// matching for two months. Check the model is still current before assuming a
+// search bug is a search bug.
+const SEARCH_MODEL = "claude-sonnet-5";
+
 const ANN_ARBOR_LANDMARKS: Record<string, { lat: number; lng: number }> = {
   'downtown': { lat: 42.2808, lng: -83.7430 },
   'main street': { lat: 42.2795, lng: -83.7480 },
@@ -529,7 +535,81 @@ Date filter examples:
 Return only valid JSON, no markdown, no explanation.`;
 }
 
+/**
+ * Structured-output schema for the parse. Constraining the response removes a
+ * whole failure class: before this, a markdown-fenced or slightly-off reply
+ * threw in `JSON.parse` and the handler fell back to raw keyword matching —
+ * silently, because a failed parse looks exactly like a query with no intent.
+ */
+const PARSE_SCHEMA = {
+  type: "object",
+  properties: {
+    keywords: { type: "string" },
+    related_terms: { type: "array", items: { type: "string" } },
+    hobby_slug: {
+      anyOf: [
+        {
+          type: "string",
+          enum: ["cooking", "arts-crafts", "pottery", "knitting", "coding", "dance", "music"],
+        },
+        { type: "null" },
+      ],
+    },
+    mood: { anyOf: [{ type: "string" }, { type: "null" }] },
+    time_of_day: {
+      anyOf: [
+        { type: "string", enum: ["morning", "afternoon", "evening"] },
+        { type: "null" },
+      ],
+    },
+    location_hint: { anyOf: [{ type: "string" }, { type: "null" }] },
+    price_filter: {
+      type: "object",
+      properties: {
+        type: {
+          anyOf: [{ type: "string", enum: ["free", "under", "paid"] }, { type: "null" }],
+        },
+        max_cents: { anyOf: [{ type: "integer" }, { type: "null" }] },
+      },
+      required: ["type", "max_cents"],
+      additionalProperties: false,
+    },
+    date_filter: {
+      type: "object",
+      properties: {
+        type: {
+          anyOf: [
+            { type: "string", enum: ["exact_date", "day_of_week", "date_range"] },
+            { type: "null" },
+          ],
+        },
+        value: { anyOf: [{ type: "string" }, { type: "null" }] },
+        start: { anyOf: [{ type: "string" }, { type: "null" }] },
+        end: { anyOf: [{ type: "string" }, { type: "null" }] },
+      },
+      required: ["type", "value", "start", "end"],
+      additionalProperties: false,
+    },
+  },
+  required: [
+    "keywords",
+    "related_terms",
+    "hobby_slug",
+    "mood",
+    "time_of_day",
+    "location_hint",
+    "price_filter",
+    "date_filter",
+  ],
+  additionalProperties: false,
+} as const;
+
 async function parseQueryWithClaude(query: string): Promise<ParsedSearch | null> {
+  if (!ANTHROPIC_API_KEY) {
+    console.error("[search] ANTHROPIC_API_KEY is not set — falling back to keyword search");
+    return null;
+  }
+
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -538,18 +618,37 @@ async function parseQueryWithClaude(query: string): Promise<ParsedSearch | null>
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 320,
+      model: SEARCH_MODEL,
+      max_tokens: 1024,
+      // Extraction, not reasoning — and adaptive thinking is on by default on
+      // this model, which would eat into max_tokens and truncate the JSON.
+      thinking: { type: "disabled" },
+      output_config: { format: { type: "json_schema", schema: PARSE_SCHEMA } },
       system: buildSystemPrompt(),
       messages: [{ role: "user", content: query }],
     }),
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    console.error(
+      `[search] Claude parse failed: ${res.status} ${res.statusText} ${detail.slice(0, 300)}`
+    );
+    return null;
+  }
 
   const data = await res.json();
-  const text = data.content?.[0]?.text;
-  if (!text) return null;
+
+  if (data.stop_reason === "refusal") {
+    console.error("[search] Claude declined the query:", JSON.stringify(data.stop_details));
+    return null;
+  }
+
+  const text = data.content?.find((block: { type?: string }) => block?.type === "text")?.text;
+  if (!text) {
+    console.error("[search] Claude returned no text block:", JSON.stringify(data).slice(0, 300));
+    return null;
+  }
 
   return JSON.parse(text) as ParsedSearch;
 }
@@ -619,7 +718,11 @@ export default async function handler(req: any, res: any) {
   try {
     parsed = await parseQueryWithClaude(query);
   } catch (err) {
-    // parse failed — fall through to a plain keyword search below
+    console.error("[search] Claude parse threw — falling back to keyword search:", err);
+  }
+
+  if (!parsed) {
+    console.warn(`[search] degraded keyword-only search for query: ${JSON.stringify(query)}`);
   }
 
   // Without Claude we still search the whole record, just with the raw query

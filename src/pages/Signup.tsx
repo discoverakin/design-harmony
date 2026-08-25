@@ -30,7 +30,9 @@ const Signup = () => {
   const [searchParams] = useSearchParams();
   const typeFromUrl = searchParams.get("type") as "seeker" | "owner" | null;
   const [selectedType, setSelectedType] = useState<"seeker" | "owner" | null>(typeFromUrl);
-  const [email, setEmail] = useState("");
+  // Prefilled when arriving from the sign-in page's sign-up link.
+  const emailFromUrl = (searchParams.get("email") ?? "").slice(0, 254);
+  const [email, setEmail] = useState(emailFromUrl);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

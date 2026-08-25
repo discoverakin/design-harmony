@@ -1,12 +1,26 @@
 import { useState } from "react";
-import { Navigate, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, LogIn, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, LogIn, CheckCircle2, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import logoAkin from "@/assets/logo-akin.png";
 import logoAkinDark from "@/assets/logo-akin-dark.png";
 
+
+/** Supabase's raw strings are developer-facing; translate the ones we know. */
+function friendlyAuthError(message: string): string {
+  if (/invalid login credentials/i.test(message)) {
+    return "That email and password don't match an Akin account.";
+  }
+  if (/email not confirmed/i.test(message)) {
+    return "Please confirm your email — check your inbox for the link.";
+  }
+  if (/rate limit/i.test(message)) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  return message;
+}
 
 const Login = () => {
   const { signIn, user } = useAuth();
@@ -17,6 +31,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noAccountEmail, setNoAccountEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const paymentStatus = searchParams.get("payment");
@@ -28,6 +43,19 @@ const Login = () => {
       : null;
   const isPaymentReturn = paymentStatus === "success";
   const userType = searchParams.get("type");
+
+  /**
+   * Sign-up link carrying the typed email plus any redirect/type context, so
+   * a user who lands here without an account doesn't lose their place.
+   */
+  const buildSignupHref = (prefillEmail?: string): string => {
+    const params = new URLSearchParams();
+    if (prefillEmail) params.set("email", prefillEmail);
+    if (safeRedirect) params.set("redirect", safeRedirect);
+    if (userType) params.set("type", userType);
+    const qs = params.toString();
+    return qs ? `/signup?${qs}` : "/signup";
+  };
 
   const buildRedirectTarget = (): string | null => {
     if (!safeRedirect) return null;
@@ -53,11 +81,39 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNoAccountEmail(null);
     setLoading(true);
 
     const { error } = await signIn(email, password);
     if (error) {
-      setError(error);
+      // Supabase returns one message for both "wrong password" and "no such
+      // account". Only that ambiguous case is worth a lookup; other errors
+      // (unconfirmed email, rate limits) already say what went wrong.
+      if (/invalid login credentials/i.test(error)) {
+        try {
+          const res = await fetch("/api/account-exists", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          if (res.ok) {
+            const { exists } = await res.json();
+            if (exists === false) {
+              setNoAccountEmail(email);
+              setLoading(false);
+              return;
+            }
+            if (exists === true) {
+              setError("Incorrect password.");
+              setLoading(false);
+              return;
+            }
+          }
+        } catch {
+          // Lookup unavailable — fall through to the generic message.
+        }
+      }
+      setError(friendlyAuthError(error));
       setLoading(false);
       return;
     }
@@ -154,14 +210,33 @@ const Login = () => {
               </div>
             </div>
 
-            {error && (
-              <motion.p
+            {noAccountEmail ? (
+              <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2"
+                className="text-sm rounded-lg px-3 py-2.5 bg-destructive/10"
               >
-                {error}
-              </motion.p>
+                <p className="text-destructive">
+                  No account found for{" "}
+                  <span className="font-semibold break-all">{noAccountEmail}</span>.
+                </p>
+                <Link
+                  to={buildSignupHref(noAccountEmail)}
+                  className="inline-flex items-center gap-1 mt-1.5 font-semibold text-primary hover:underline"
+                >
+                  Create an account <ArrowRight size={14} />
+                </Link>
+              </motion.div>
+            ) : (
+              error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2"
+                >
+                  {error}
+                </motion.p>
+              )
             )}
 
             <motion.button
@@ -180,6 +255,16 @@ const Login = () => {
               )}
             </motion.button>
           </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Don't have an account?{" "}
+            <Link
+              to={buildSignupHref(email || undefined)}
+              className="text-primary font-semibold hover:underline"
+            >
+              Sign up
+            </Link>
+          </p>
 
         </motion.div>
       </div>

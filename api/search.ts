@@ -405,7 +405,15 @@ export function normalizePriceFilter(raw: unknown): PriceFilter {
 
 export function matchesPrice(event: SearchableEvent, filter: PriceFilter | null): boolean {
   if (!filter?.type) return true;
-  const cents = Number(event?.price_cents ?? 0);
+
+  // A null price_cents means the real price lives in price_display as text
+  // ("$80 per person"), not that the class is free. SQL already excludes those
+  // rows — NULL fails eq/lte/gt — so treating null as 0 here would make the
+  // proximity branch disagree with every other path.
+  if (event?.price_cents == null) return false;
+
+  const cents = Number(event.price_cents);
+  if (!Number.isFinite(cents)) return false;
   if (filter.type === "free") return cents === 0;
   if (filter.type === "paid") return cents > 0;
   // "under" with no ceiling is meaningless — treat it as "show everything".

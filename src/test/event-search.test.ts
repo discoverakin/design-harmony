@@ -184,6 +184,21 @@ describe("price filtering", () => {
     expect(matchesPrice({ ...potteryClass, price_cents: 2000 }, filter)).toBe(true);
   });
 
+  it("does not call an unpriced class free", () => {
+    // price_cents null means the price lives in price_display as text.
+    const unpriced = { ...potteryClass, price_cents: null };
+    expect(matchesPrice(unpriced, normalizePriceFilter({ type: "free" }))).toBe(false);
+    expect(matchesPrice(unpriced, normalizePriceFilter({ type: "paid" }))).toBe(false);
+    expect(
+      matchesPrice(unpriced, normalizePriceFilter({ type: "under", max_cents: 3000 }))
+    ).toBe(false);
+  });
+
+  it("still shows unpriced classes when no price was asked for", () => {
+    const unpriced = { ...potteryClass, price_cents: null };
+    expect(matchesPrice(unpriced, normalizePriceFilter(null))).toBe(true);
+  });
+
   it("ignores a malformed filter instead of hiding everything", () => {
     const filter = normalizePriceFilter({ type: "cheapish" });
     expect(filter.type).toBeNull();

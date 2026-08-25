@@ -787,6 +787,15 @@ export default async function handler(req: any, res: any) {
   const moodSlugs = hobbySlugs.length === 0 ? expandMood(intent.mood) : [];
   const priceFilter = normalizePriceFilter(intent.price_filter);
   const dateFilter = intent.date_filter;
+  const todayISO = new Date().toISOString().split("T")[0];
+
+  // A past single-date class is not a result the client will ever render, so it
+  // must not count as one here either — otherwise a single stale row satisfies
+  // a tier, suppresses the fallback, and the user gets an empty page with no
+  // explanation. Skipped when the query asked for a specific date: then the
+  // caller explicitly wants that window, past or not.
+  const usable = (events: SearchableEvent[]) =>
+    dateFilter?.type ? events : events.filter((event) => !isPastSingleDate(event, todayISO));
 
   const respond = (
     results: SearchableEvent[],
@@ -824,14 +833,16 @@ export default async function handler(req: any, res: any) {
       );
       // Date and price used to be dropped here entirely — "near Kerrytown this
       // Saturday" echoed Saturday back and then ignored it.
-      const exact = onTopic.filter(
-        (event) => matchesDateFilter(event, dateFilter) && matchesPrice(event, priceFilter)
+      const exact = usable(
+        onTopic.filter(
+          (event) => matchesDateFilter(event, dateFilter) && matchesPrice(event, priceFilter)
+        )
       );
 
       if (exact.length > 0) return respond(exact, { location_used: key });
-      if (onTopic.length > 0)
-        return respond(onTopic, { location_used: key, fallback: "relaxed_filters" });
-      return respond(nearby, { location_used: key, fallback: "location_only" });
+      if (usable(onTopic).length > 0)
+        return respond(usable(onTopic), { location_used: key, fallback: "relaxed_filters" });
+      return respond(usable(nearby), { location_used: key, fallback: "location_only" });
     }
   }
 
@@ -875,14 +886,15 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ error: error.message });
   }
 
-  const results = data.filter((event) => matchesDateFilter(event, dateFilter));
+  const results = usable(data.filter((event) => matchesDateFilter(event, dateFilter)));
   if (results.length > 0) return respond(results);
 
   // Tier 2 — same topic, without the date / price / location narrowing.
   const relaxed = await runEventQuery(supabase, (q, includeSearchTerms) =>
     applyFilters(q, includeSearchTerms, { narrow: false })
   );
-  if (relaxed.data.length > 0) return respond(relaxed.data, { fallback: "relaxed_filters" });
+  const relaxedUsable = usable(relaxed.data);
+  if (relaxedUsable.length > 0) return respond(relaxedUsable, { fallback: "relaxed_filters" });
 
   // Tier 3 — nothing matched the topic at all; show what is on.
   const anything = await runEventQuery(supabase, (q) =>

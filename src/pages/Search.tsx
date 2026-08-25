@@ -173,7 +173,9 @@ const Search = () => {
 
               {fallback && visibleResults.length > 0 && (
                 <p className="text-sm text-muted-foreground mb-3">
-                  {parsed?.location_hint
+                  {fallback === "location_only" && locationUsed
+                    ? `Nothing matching that near ${formatSlug(locationUsed)} — here's what else is on there:`
+                    : parsed?.location_hint
                     ? `No classes found in ${formatSlug(parsed.location_hint)} — here are other great options nearby:`
                     : parsed?.hobby_slug && parsed?.date_filter?.type
                     ? `No ${formatSlug(parsed.hobby_slug)} classes found for that time — here are the next available:`

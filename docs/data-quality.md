@@ -1,6 +1,7 @@
 # Event data quality (deferred)
 
-**Status:** not started. Noted 2026-08-25 while fixing search. Nothing here is
+**Status:** not started, except the price check in section 2, which was run on
+2026-08-25 and came back clean. Noted while fixing search. Nothing here is
 blocking — the app degrades gracefully around all of it — but each item costs
 something quietly, and the source keeps producing more.
 
@@ -41,26 +42,51 @@ Scraped listings leave `price_cents` null and put the real price in
 to render null as **"Free"**, so paid classes advertised themselves as free;
 it now returns "See details".
 
-**The one open risk from that change:** a genuinely free class stored as null
-rather than `0` now reads "See details" and looks paid. Understating beats
-overstating, but it is worth a check:
+**Checked 2026-08-25 — the risk did not materialise.** A genuinely free class
+stored as null rather than `0` would now read "See details" and look paid. The
+query below returned four rows, and all four are false positives: the word
+"free" inside *free-form*, *stress-free*, and "free vocal assessment" on a class
+whose `price_display` is "$50 per single lesson". No event needs correcting.
+Re-run it after any bulk import:
 
 ```sql
 select id, title, price_cents, price_display
 from events
 where price_cents is null
-  and (price_display ilike '%free%' or description ilike '%free%');
+  and (price_display ilike '%free%' or description ilike '%free%')
+  and status = 'approved';
 ```
 
-Anything that comes back should be set to `price_cents = 0`.
+Anything genuinely free that comes back should be set to `price_cents = 0`.
 
-To size the wording change overall — this is how many cards changed:
+### What the same measurement did surface
+
+Of **306 approved events**:
+
+| `price_cents` | Count | Renders as |
+|---|---|---|
+| `0` | 30 | "Free" |
+| `> 0` | 201 | A dollar amount |
+| `null` | **75** | See below |
+
+Of those 75, **26 carry a `price_display`** and now show that text ("from $50",
+"$80 per person"). The other **49 have no price information at all** and show
+"See details".
+
+That last number is the finding: **one event in six has no price**. It is a
+bigger gap than the placeholder dates in section 1 — a seeker cannot compare
+those classes to anything, and a listing with no price reads as less trustworthy
+than a competitor's that shows one. Same root cause as the dates (the scout
+cannot always extract a price from the source page) and the same two options:
+accept unpriced listings as a permanent state and design for it, or hold them
+out of `approved` until a price is resolved.
 
 ```sql
 select count(*) filter (where price_cents is null) as unknown,
        count(*) filter (where price_cents = 0)    as free,
        count(*) filter (where price_cents > 0)    as paid
-from events;
+from events
+where status = 'approved';
 ```
 
 ## 3. Events outside Ann Arbor

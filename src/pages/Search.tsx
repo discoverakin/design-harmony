@@ -37,6 +37,7 @@ interface SearchResult {
   flyer_url: string | null;
   hobby_slug: string | null;
   description?: string | null;
+  price_display?: string | null;
 }
 
 const formatSlug = (slug: string) =>
@@ -198,6 +199,7 @@ const Search = () => {
                       time={event.time}
                       location={event.location}
                       price_cents={event.price_cents}
+                      price_display={event.price_display}
                       emoji={event.emoji}
                       flyer_url={event.flyer_url}
                       hobby_slug={event.hobby_slug}

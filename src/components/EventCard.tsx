@@ -4,7 +4,7 @@ import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/format-price";
-import { parseEventDates, classificationLabel } from "@/lib/eventDates";
+import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
 /**
@@ -133,7 +133,7 @@ const EventCard = ({
         <div className="space-y-0.5">
           <p className="text-[10px] text-muted-foreground flex items-center gap-1">
             <Calendar className="w-2.5 h-2.5 flex-shrink-0" />
-            {formattedDate} · {formattedTime}
+            {hasKnownDate(date) ? `${formattedDate} · ${formattedTime}` : "Schedule varies"}
           </p>
           <p className="text-[10px] text-muted-foreground flex items-center gap-1 truncate">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />

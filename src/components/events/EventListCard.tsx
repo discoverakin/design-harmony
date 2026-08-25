@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
-import { parseEventDates, classificationLabel } from "@/lib/eventDates";
+import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
 
@@ -101,7 +101,7 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
             <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
               <Calendar className="w-3 h-3" />
-              {formattedDate}
+              {hasKnownDate(event.date) ? formattedDate : "Schedule varies"}
             </span>
             <span className="text-[11px] text-muted-foreground flex items-center gap-0.5">
               <Clock className="w-3 h-3" />

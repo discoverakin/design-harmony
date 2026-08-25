@@ -16,6 +16,21 @@ import { useToast } from "@/hooks/use-toast";
 
 const emojiOptions = ["🎨", "🏃", "🎵", "👨‍🍳", "📚", "🎮", "🧘", "💃", "📸", "🎲", "🥾", "💪", "🏊", "🥋", "🧗", "🛹", "🧶", "🏺", "🪵", "🎬", "🌱", "🎯", "🎤", "🎭"];
 
+/**
+ * Comma-separated keywords -> the `search_terms` array (migration 012). These
+ * are the adjacent words seekers actually type: a felting workshop tagged
+ * "yarn, wool" is findable by people who don't know the word "felting".
+ */
+const parseSearchTerms = (raw: string): string[] =>
+  Array.from(
+    new Set(
+      raw
+        .split(",")
+        .map((term) => term.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  ).slice(0, 12);
+
 const CreateEvent = () => {
   const navigate = useNavigate();
   const { addEvent } = useEvents();
@@ -33,6 +48,7 @@ const CreateEvent = () => {
   const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
   const [maxAttendees, setMaxAttendees] = useState("");
   const [priceDollars, setPriceDollars] = useState("");
+  const [searchTerms, setSearchTerms] = useState("");
   const [createdBy, setCreatedBy] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -86,6 +102,7 @@ const CreateEvent = () => {
       created_by_name: displayName,
       max_attendees: maxAttendees ? parseInt(maxAttendees, 10) : undefined,
       price_cents: priceDollars ? Math.round(parseFloat(priceDollars) * 100) : 0,
+      search_terms: parseSearchTerms(searchTerms),
     });
 
     setSubmitting(false);
@@ -210,6 +227,25 @@ const CreateEvent = () => {
               className="mt-1.5 rounded-xl min-h-[100px]"
               maxLength={500}
             />
+          </div>
+
+          {/* Search keywords */}
+          <div>
+            <Label htmlFor="search-terms" className="text-xs font-semibold text-foreground">
+              Search Keywords (optional)
+            </Label>
+            <Input
+              id="search-terms"
+              value={searchTerms}
+              onChange={(e) => setSearchTerms(e.target.value)}
+              placeholder="e.g. yarn, wool, fiber"
+              className="mt-1.5 rounded-xl"
+              maxLength={160}
+            />
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              Comma-separated words people might search for instead of your
+              title — materials, styles, or techniques.
+            </p>
           </div>
 
           {/* Date & Time row */}

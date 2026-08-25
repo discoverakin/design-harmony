@@ -37,6 +37,7 @@ interface SearchResult {
   flyer_url: string | null;
   hobby_slug: string | null;
   description?: string | null;
+  price_display?: string | null;
 }
 
 const formatSlug = (slug: string) =>
@@ -56,11 +57,13 @@ const Search = () => {
   const [fallback, setFallback] = useState<string | null>(null);
   const [locationUsed, setLocationUsed] = useState<string | null>(null);
 
-  // Hide past single-day events (keep ongoing/multi). Respect explicit date-range intent.
+  // Hide past single-day events (keep ongoing/multi). An explicit date range is
+  // respected only when the results actually honour it — on a fallback the API
+  // dropped the date filter, so past events would otherwise leak back in.
   const visibleResults = useMemo(() => {
-    if (parsed?.date_filter?.type) return results;
+    if (parsed?.date_filter?.type && !fallback) return results;
     return results.filter((e) => isUpcoming(e));
-  }, [results, parsed]);
+  }, [results, parsed, fallback]);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -173,7 +176,9 @@ const Search = () => {
 
               {fallback && visibleResults.length > 0 && (
                 <p className="text-sm text-muted-foreground mb-3">
-                  {parsed?.location_hint
+                  {fallback === "location_only" && locationUsed
+                    ? `Nothing matching that near ${formatSlug(locationUsed)} — here's what else is on there:`
+                    : parsed?.location_hint
                     ? `No classes found in ${formatSlug(parsed.location_hint)} — here are other great options nearby:`
                     : parsed?.hobby_slug && parsed?.date_filter?.type
                     ? `No ${formatSlug(parsed.hobby_slug)} classes found for that time — here are the next available:`
@@ -194,6 +199,7 @@ const Search = () => {
                       time={event.time}
                       location={event.location}
                       price_cents={event.price_cents}
+                      price_display={event.price_display}
                       emoji={event.emoji}
                       flyer_url={event.flyer_url}
                       hobby_slug={event.hobby_slug}

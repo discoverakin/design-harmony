@@ -17,6 +17,8 @@ export interface DbEvent {
   created_by_name: string;
   price_cents: number;
   hobby_slug: string | null;
+  /** Curated synonyms used by search — see migration 012. */
+  search_terms?: string[] | null;
   status: EventStatus;
   created_at: string;
 }

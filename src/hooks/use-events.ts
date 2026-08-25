@@ -124,18 +124,34 @@ export function useEvents() {
       group_name?: string;
       created_by_name: string;
       price_cents?: number;
+      search_terms?: string[];
     }) => {
       if (!user) return null;
 
-      const { data, error } = await supabase
-        .from("events")
-        .insert({
-          ...input,
-          created_by: user.id,
-          status: "pending" as const,
-        })
-        .select()
-        .single();
+      const insert = (payload: typeof input) =>
+        supabase
+          .from("events")
+          .insert({
+            ...payload,
+            created_by: user.id,
+            status: "pending" as const,
+          })
+          .select()
+          .single();
+
+      let { data, error } = await insert(input);
+
+      // `search_terms` arrives with migration 012, which is applied by hand.
+      // If it hasn't been run yet, drop the column and keep the event.
+      if (error && input.search_terms) {
+        const missingColumn =
+          (error as { code?: string }).code === "42703" ||
+          /search_terms/.test(error.message ?? "");
+        if (missingColumn) {
+          const { search_terms, ...rest } = input;
+          ({ data, error } = await insert(rest));
+        }
+      }
 
       if (error || !data) return null;
 

@@ -41,6 +41,20 @@ export function parseEventDates(description: string | null | undefined): ParsedE
   return { classification: "single", datesText };
 }
 
+/**
+ * Scraped listings whose schedule could not be determined carry a far-future
+ * placeholder date (2099-01-01), which would otherwise render as "Thu, Jan 1"
+ * and read as a stale event. Anything this far out is a sentinel, not a class
+ * someone scheduled.
+ */
+const SENTINEL_YEAR_FLOOR = 2090;
+
+export function hasKnownDate(date: string | null | undefined): boolean {
+  if (!date) return false;
+  const year = Number(String(date).slice(0, 4));
+  return Number.isFinite(year) && year > 1970 && year < SENTINEL_YEAR_FLOOR;
+}
+
 /** Short chip label for a classification, or `null` when nothing should render. */
 export function classificationLabel(c: DateClassification): string | null {
   if (c === "ongoing") return "Ongoing";

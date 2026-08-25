@@ -1,5 +1,15 @@
 # Welcome to your Lovable project
 
+## Documentation
+
+This README is Lovable scaffolding boilerplate and largely stale. The maintained
+documentation is in [`docs/`](docs/):
+
+- [Architecture](docs/architecture.md) — backends, routing, data layer, auth model
+- [Development](docs/development.md) — commands, gotchas, testing a preview
+- [Known issues](docs/known-issues.md) — audited, not yet fixed
+- [Hobby taxonomy](docs/hobby-taxonomy.md) — a deferred data/code split
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID

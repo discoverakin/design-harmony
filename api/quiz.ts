@@ -5,6 +5,35 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY!;
 // DEFAULT_RESPONSE — the same canned three hobbies for every user.
 const QUIZ_MODEL = "claude-sonnet-5";
 
+/**
+ * Structured-output schema. Without it the model occasionally wrapped its JSON
+ * in a ```json fence, JSON.parse threw, and every user in that window silently
+ * got DEFAULT_RESPONSE — the same three hobbies for everyone.
+ */
+const QUIZ_SCHEMA = {
+  type: "object",
+  properties: {
+    personality_summary: { type: "string" },
+    recommendations: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          slug: {
+            type: "string",
+            enum: ["cooking", "arts-crafts", "pottery", "knitting", "coding", "dance", "music"],
+          },
+          reason: { type: "string" },
+        },
+        required: ["slug", "reason"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["personality_summary", "recommendations"],
+  additionalProperties: false,
+} as const;
+
 const SYSTEM_PROMPT = `You are a hobby recommendation engine for Discover Akin, a creative studio marketplace in Ann Arbor. Based on a user's quiz answers, generate personalized hobby recommendations. You have access to ALL of these hobbies:
 cooking, arts-crafts, pottery, knitting, coding, dance, music.
 
@@ -62,6 +91,7 @@ export default async function handler(req: any, res: any) {
       body: JSON.stringify({
         model: QUIZ_MODEL,
         max_tokens: 1024,
+        output_config: { format: { type: "json_schema", schema: QUIZ_SCHEMA } },
         // Recommendation, not deep reasoning — and adaptive thinking is on by
         // default on this model, which would eat into max_tokens.
         thinking: { type: "disabled" },
@@ -79,6 +109,12 @@ export default async function handler(req: any, res: any) {
     }
 
     const data = await apiRes.json();
+
+    if (data.stop_reason === "refusal") {
+      console.error("[quiz] Claude declined the request:", JSON.stringify(data.stop_details));
+      return res.status(200).json(DEFAULT_RESPONSE);
+    }
+
     const text = data.content?.find((block: { type?: string }) => block?.type === "text")?.text;
     if (!text) {
       console.error("[quiz] Claude returned no text block:", JSON.stringify(data).slice(0, 300));

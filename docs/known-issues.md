@@ -38,5 +38,8 @@ A complete fix is parked, unmerged, on the local branch
 removed, migration 011 with a commented backfill, 12 tests). Read that commit
 message before starting over. Nothing from it has been applied to the database.
 
+### Event data quality
+Placeholder dates (`2099-01-01`, `2026-01-01`), prices stored as null rather than 0, Toronto events in an Ann Arbor app, and three events with no hobby slug. The app degrades gracefully around all of it; the costs are quiet and cumulative. Sizing queries and the options are in [data-quality.md](data-quality.md).
+
 ### Miscellaneous
 `Dashboard.tsx` hard-codes `const verificationStatus = "verified"` and renders the "Verified Business" badge from that constant, ignoring the real `profiles.verification_status` column.

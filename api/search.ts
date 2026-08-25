@@ -792,10 +792,16 @@ export default async function handler(req: any, res: any) {
   // A past single-date class is not a result the client will ever render, so it
   // must not count as one here either — otherwise a single stale row satisfies
   // a tier, suppresses the fallback, and the user gets an empty page with no
-  // explanation. Skipped when the query asked for a specific date: then the
-  // caller explicitly wants that window, past or not.
+  // explanation.
+  const dropPast = (events: SearchableEvent[]) =>
+    events.filter((event) => !isPastSingleDate(event, todayISO));
+
+  // Only the tier that actually honours the parsed date window may keep past
+  // events, and only because the caller asked for that window. Every fallback
+  // tier has discarded the date filter by definition, so the exemption does not
+  // carry: there, past is past.
   const usable = (events: SearchableEvent[]) =>
-    dateFilter?.type ? events : events.filter((event) => !isPastSingleDate(event, todayISO));
+    dateFilter?.type ? events : dropPast(events);
 
   const respond = (
     results: SearchableEvent[],
@@ -840,9 +846,9 @@ export default async function handler(req: any, res: any) {
       );
 
       if (exact.length > 0) return respond(exact, { location_used: key });
-      if (usable(onTopic).length > 0)
-        return respond(usable(onTopic), { location_used: key, fallback: "relaxed_filters" });
-      return respond(usable(nearby), { location_used: key, fallback: "location_only" });
+      if (dropPast(onTopic).length > 0)
+        return respond(dropPast(onTopic), { location_used: key, fallback: "relaxed_filters" });
+      return respond(dropPast(nearby), { location_used: key, fallback: "location_only" });
     }
   }
 
@@ -893,12 +899,12 @@ export default async function handler(req: any, res: any) {
   const relaxed = await runEventQuery(supabase, (q, includeSearchTerms) =>
     applyFilters(q, includeSearchTerms, { narrow: false })
   );
-  const relaxedUsable = usable(relaxed.data);
+  const relaxedUsable = dropPast(relaxed.data);
   if (relaxedUsable.length > 0) return respond(relaxedUsable, { fallback: "relaxed_filters" });
 
   // Tier 3 — nothing matched the topic at all; show what is on.
   const anything = await runEventQuery(supabase, (q) =>
     q.order("date", { ascending: true }).limit(FETCH_LIMIT)
   );
-  return respond(anything.data, { fallback: "all_events" });
+  return respond(dropPast(anything.data), { fallback: "all_events" });
 }

@@ -56,11 +56,13 @@ const Search = () => {
   const [fallback, setFallback] = useState<string | null>(null);
   const [locationUsed, setLocationUsed] = useState<string | null>(null);
 
-  // Hide past single-day events (keep ongoing/multi). Respect explicit date-range intent.
+  // Hide past single-day events (keep ongoing/multi). An explicit date range is
+  // respected only when the results actually honour it — on a fallback the API
+  // dropped the date filter, so past events would otherwise leak back in.
   const visibleResults = useMemo(() => {
-    if (parsed?.date_filter?.type) return results;
+    if (parsed?.date_filter?.type && !fallback) return results;
     return results.filter((e) => isUpcoming(e));
-  }, [results, parsed]);
+  }, [results, parsed, fallback]);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) return;

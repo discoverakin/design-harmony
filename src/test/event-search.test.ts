@@ -8,6 +8,7 @@ import {
   matchesDateFilter,
   matchesPrice,
   normalizePriceFilter,
+  isPastSingleDate,
   rankEvents,
   scoreEvent,
   tokenize,
@@ -166,8 +167,49 @@ describe("rankEvents", () => {
   });
 
   it("falls back to soonest-first when relevance ties", () => {
-    const ranked = rankEvents([feltingWorkshop, potteryClass], []);
+    const ranked = rankEvents([feltingWorkshop, potteryClass], [], null, "2026-01-01");
     expect(ranked.map((e) => e.date)).toEqual(["2026-02-10", "2026-02-14"]);
+  });
+
+  it("puts past events after upcoming ones, whatever the date order", () => {
+    // The fallback tier drops the date filter, so a plain date sort would fill
+    // the results with the oldest events in the table.
+    const ranked = rankEvents([potteryClass, feltingWorkshop], [], null, "2026-02-12");
+    expect(ranked.map((e) => e.date)).toEqual(["2026-02-14", "2026-02-10"]);
+  });
+});
+
+describe("isPastSingleDate", () => {
+  const today = "2026-02-12";
+
+  it("is past when the single date has gone", () => {
+    expect(isPastSingleDate(potteryClass, today)).toBe(true);
+  });
+
+  it("is not past when the date is today or later", () => {
+    expect(isPastSingleDate(feltingWorkshop, today)).toBe(false);
+    expect(isPastSingleDate({ ...potteryClass, date: today }, today)).toBe(false);
+  });
+
+  it("keeps recurring events whose anchor date has passed", () => {
+    // Multi-date events carry an old anchor plus a "Dates:" prefix.
+    const weekly = {
+      ...potteryClass,
+      description: "Dates: Every Wednesday (incl. Jul 9, 16, 2026), 7:30-9:30 PM. Weekly social.",
+    };
+    expect(isPastSingleDate(weekly, today)).toBe(false);
+  });
+
+  it("keeps multi-session courses whose anchor date has passed", () => {
+    const course = {
+      ...potteryClass,
+      description: "Dates: 6-week course starting March. Hand-building sessions.",
+    };
+    expect(isPastSingleDate(course, today)).toBe(false);
+  });
+
+  it("is not past when there is no date at all", () => {
+    expect(isPastSingleDate({ ...potteryClass, date: null }, today)).toBe(false);
   });
 });
 

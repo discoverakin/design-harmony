@@ -359,17 +359,53 @@ export function scoreEvent(
   return score;
 }
 
-/** Most relevant first, then soonest. */
+/**
+ * Mirrors `isUpcoming` in src/lib/eventDates.ts, which is the source of truth:
+ * multi-date and ongoing events carry a past anchor date plus a "Dates: …"
+ * prefix in the description, so only genuinely single-date events count as
+ * past. Duplicated because api/* is bundled standalone — keep the two in step.
+ */
+const ONGOING_DATES_PATTERN =
+  /\b(ongoing|weekly|monthly|recurring|mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays|every\s+(?:mon|tue|wed|thu|fri|sat|sun)|each\s+(?:mon|tue|wed|thu|fri|sat|sun))/i;
+
+const MULTI_DATES_PATTERN =
+  /\b(through|multiple|sessions?|series|-\s*week|week\s+(?:course|session|program|series)|starting|weekend|-\s*day\b)/i;
+
+export function isPastSingleDate(event: SearchableEvent, todayISO: string): boolean {
+  const date = String(event?.date ?? "");
+  if (!date || date >= todayISO) return false;
+
+  const prefix = String(event?.description ?? "").match(
+    /^\s*dates?\s*:\s*([^\n]*?)(?:\.\s|\.$|$)/i
+  );
+  const datesText = prefix?.[1]?.trim();
+  if (datesText && (ONGOING_DATES_PATTERN.test(datesText) || MULTI_DATES_PATTERN.test(datesText))) {
+    return false;
+  }
+
+  return true;
+}
+
+/** Most relevant first, upcoming before past, then soonest. */
 export function rankEvents<T extends SearchableEvent>(
   events: T[],
   terms: SearchTerm[],
-  hobbySlugs?: string[] | null
+  hobbySlugs?: string[] | null,
+  todayISO: string = new Date().toISOString().split("T")[0]
 ): T[] {
   return [...events]
-    .map((event) => ({ event, score: scoreEvent(event, terms, hobbySlugs) }))
+    .map((event) => ({
+      event,
+      score: scoreEvent(event, terms, hobbySlugs),
+      // Sorting by date alone puts the oldest events first, which is wrong for
+      // every result set and actively misleading on a fallback, where the date
+      // filter the user asked for has been dropped.
+      past: isPastSingleDate(event, todayISO) ? 1 : 0,
+    }))
     .sort(
       (a, b) =>
         b.score - a.score ||
+        a.past - b.past ||
         String(a.event?.date ?? "").localeCompare(String(b.event?.date ?? ""))
     )
     .map((entry) => entry.event);

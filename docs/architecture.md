@@ -65,6 +65,52 @@ if the column is missing it notices once per instance, drops the condition, and
 keeps matching on everything else. The pure helpers are exported and covered by
 `src/test/event-search.test.ts`.
 
+## Browse filters
+
+`/events` carries date, price, and distance filters that are deliberately
+**not** the search path: no model, no network, no typing. The whole approved
+list is already in memory from `useEvents`, so `applyEventFilters`
+(`src/lib/eventFilters.ts`) narrows it synchronously and works the same for
+anonymous visitors. `api/search.ts` still owns natural-language queries; the
+two never call each other.
+
+Three things about it are load-bearing:
+
+- **Missing data is disclosed, not dropped.** A quarter of approved events have
+  no price and some carry the `2099-01-01` no-schedule sentinel (see
+  [data-quality.md](data-quality.md)). An unknown price is neither free nor
+  paid and an unknown date is not "today", so those listings are held back —
+  and `applyEventFilters` returns `hiddenUnpriced` / `hiddenUndated` /
+  `hiddenUnmapped` counts, which `/events` renders as a "Not shown:" line.
+  Each held-back listing is counted once, under the first reason that applies.
+- **Ongoing/recurring listings come back in their own bucket.** Their anchor
+  date is not a date they happen on, so no range can be evaluated for them.
+  They render under "Ongoing" with a note rather than being silently matched
+  or silently dropped.
+- **Filter state lives in the query string** (`date`, `day`, `price`,
+  `radius`), so tapping into an event and coming back keeps it, and a filtered
+  list is shareable. `filtersFromParams` ignores anything malformed.
+
+**Distance is built but held back from the UI.** `DISTANCE_FILTER_ENABLED` in
+`src/lib/eventFilters.ts` is `false`: 116 of 174 upcoming events have no
+`lat`/`lng`, so a radius returns almost exclusively the recurring listings
+(measured 2026-08-26 — [data-quality.md](data-quality.md) §4). While it is off
+the chips do not render and a stale `?radius=` link is ignored, so nothing
+filters without a visible control to undo it. Flipping the constant to `true`
+after the geocode backfill restores all of it — the filtering, the URL param,
+and the tests guarded by the same constant.
+
+When on, distance measures from the device location if the user grants it and
+from downtown Ann Arbor otherwise; the caption under the chips says which, and
+geolocation is only requested once a radius is actually chosen
+(`src/hooks/use-user-location.ts`). `src/lib/geo.ts` does great-circle
+distance — unlike the degree-space approximation in `api/search.ts`, which is
+elliptical at this latitude (see [known-issues.md](known-issues.md)).
+
+Pure helpers are exported and covered by `src/test/event-filters.test.ts`; the
+UI wiring by `src/test/event-filter-bar.test.tsx` and
+`src/test/events-page-filters.test.tsx`.
+
 `src/lib/weeklyShuffle.ts` — deterministic ISO-week-seeded Fisher–Yates, used for "Featured this week" carousels so the order is stable within a week and rolls automatically.
 
 ## Two parallel domains — the single biggest source of confusion

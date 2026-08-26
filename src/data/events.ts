@@ -17,6 +17,10 @@ export interface DbEvent {
   created_by_name: string;
   price_cents: number;
   hobby_slug: string | null;
+  /** Geocoded position. Added by hand in the dashboard — in no migration, and
+   *  null on listings the scout could not place. */
+  lat?: number | null;
+  lng?: number | null;
   /** Curated synonyms used by search — see migration 012. */
   search_terms?: string[] | null;
   status: EventStatus;

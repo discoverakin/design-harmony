@@ -1,7 +1,8 @@
 # Event data quality (deferred)
 
-**Status:** not started, except the price check in section 2, which was run on
-2026-08-25 and came back clean. Noted while fixing search. Nothing here is
+**Status:** not started, except the price check in section 2 (run 2026-08-25,
+came back clean) and the coordinate count in section 4 (measured 2026-08-26 on
+a preview deploy). Noted while fixing search. Nothing here is
 blocking — the app degrades gracefully around all of it — but each item costs
 something quietly, and the source keeps producing more.
 
@@ -81,6 +82,13 @@ cannot always extract a price from the source page) and the same two options:
 accept unpriced listings as a permanent state and design for it, or hold them
 out of `approved` until a price is resolved.
 
+The Free/Paid filter on `/events` now makes the gap visible to seekers rather
+than to a SQL query: an unknown price is neither free nor paid, so those
+listings drop out of a filtered list and the page prints how many it held back
+("Not shown: 75 with no listed price"). Same for the sentinel dates in section
+1 under a date filter. That is honest, but it is a running count of the problem
+displayed to users — the number is worth watching.
+
 ```sql
 select count(*) filter (where price_cents is null) as unknown,
        count(*) filter (where price_cents = 0)    as free,
@@ -107,7 +115,44 @@ need to follow).
 select count(*) from events where location ilike '%toronto%' or location ilike '%, on %';
 ```
 
-## 4. Events with no hobby slug
+## 4. Events with no coordinates — the distance filter can barely work
+
+Measured on the `feat/browse-filters` preview on 2026-08-26, anonymous view,
+upcoming events only (174 of the 306 approved rows; the rest are past).
+
+| | Count | Share |
+|---|---|---|
+| Upcoming events | 174 | — |
+| No `lat`/`lng` at all | **116** | 67% |
+| Mapped, within 10 mi of downtown | 28 | 16% |
+| Mapped, farther than 10 mi | 30 | 17% |
+
+The 28 that a radius can find are **26 ongoing/recurring listings and 2 dated
+ones**. So of 148 dated upcoming events, exactly two can appear under any
+distance filter; the other 146 are either unmapped or out of town (section 3 —
+the >10 mi group is largely the Toronto listings).
+
+The filter itself is correct and said what it held back ("Not shown: 116 not
+yet mapped"), but until the backfill happens a radius mostly returns the
+recurring classes — so **the distance chips are switched off in the UI**
+(`DISTANCE_FILTER_ENABLED` in `src/lib/eventFilters.ts`). Geocode the rows,
+flip the constant, and the filter comes back as-is. `NearYouMap` has the same ceiling — it queries
+`.not("lat", "is", null)`, so two-thirds of the catalogue was never on the map
+either; that was simply invisible before a filter put a number on it.
+
+Same root cause as sections 1 and 2: the scout writes a row whether or not it
+could resolve the field. Geocoding the 116 is a one-off job against an address
+column that already exists (`location`), and it is the cheapest of the three
+gaps to close.
+
+```sql
+select count(*) filter (where lat is null or lng is null) as unmapped,
+       count(*) filter (where lat is not null and lng is not null) as mapped
+from events
+where status = 'approved';
+```
+
+## 5. Events with no hobby slug
 
 Three events have `hobby_slug = null`. They are reachable only by words in
 their own title and description — no hobby path, no mood path, and no

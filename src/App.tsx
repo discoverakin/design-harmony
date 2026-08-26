@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { AuthProvider } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { SavedEventsProvider } from "@/hooks/use-saved-events";
 import AnimatedRoutes from "@/components/AnimatedRoutes";
 
 const queryClient = new QueryClient();
@@ -25,7 +26,9 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <AnimatedRoutes />
+              <SavedEventsProvider>
+                <AnimatedRoutes />
+              </SavedEventsProvider>
             </BrowserRouter>
           </TooltipProvider>
         </ProfileEnsurer>

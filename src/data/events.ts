@@ -27,11 +27,11 @@ export interface DbEvent {
   created_at: string;
 }
 
-/** Enriched event with per-user interaction flags */
+/** Enriched event with per-user interaction flags. Saved state lives in
+ *  `use-saved-events.tsx`, not here — see the note on `useEvents`. */
 export interface CommunityEvent extends DbEvent {
   rsvp_count: number;
   is_attending: boolean;
-  is_saved: boolean;
   has_attended: boolean;
   attendance_minutes: number | null;
   has_paid: boolean;

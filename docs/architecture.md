@@ -43,6 +43,7 @@ All routes live in `src/components/AnimatedRoutes.tsx` — one file, wrapped in 
 There is no global store and React Query is installed but barely used. State lives in hooks under `src/hooks/`, each owning one domain and doing its own Supabase fetching:
 
 - `use-events.ts` — the heaviest. Fetches `events` plus RSVPs/saves/attendances/payments in parallel and *enriches* each `DbEvent` into a `CommunityEvent` with per-user flags (`is_attending`, `is_saved`, `has_paid`, …). Has a separate anonymous branch that skips per-user queries. Also owns `initiatePayment` (calls the checkout edge function directly with the user JWT).
+- `use-saved-events.tsx` — **the exception to the pattern above: a provider, not a per-page hook.** Saving is reachable from the browse cards, the event list and the detail page at once, and `useEvents` is instantiated separately by every page, so save state kept there went stale the moment a card wrote to it. `SavedEventsProvider` (mounted in `App.tsx` inside the router) holds one `Set` of saved event ids, fetched once per session, and every surface reads and writes through it. It also owns the anonymous-tap auth prompt, so a scrolling feed needs one `AuthPromptSheet` rather than one per card. `useEvents` deliberately does **not** carry `is_saved`.
 - `use-groups.ts`, `use-group-membership.ts`, `use-profile.ts` — same shape.
 - `use-activity-log.ts`, `use-tracker-goals.ts` — **localStorage only** (`akin-activity-log`, goals). The hobby tracker is deliberately client-side; do not assume it hits Supabase.
 
@@ -137,6 +138,7 @@ Two more asymmetries: the seeker side uses real FKs to `auth.users` while 008's 
 - Fonts: `font-sans` = Finlandica, `font-heading` = New Spirit.
 - Feature components are grouped by domain (`components/tracker/`, `components/community/`, `components/dashboard/`, `components/social/`, `components/events/`, `components/profile/`).
 - Bottom sheets (`Sheet side="bottom"`) are the standard mobile affordance for create/edit/log flows.
+- **Card-level actions keep their distance from the card's primary CTA.** `SaveEventButton` floats in the top corner of a card's image, the far end from "Book Now", and stops the click itself so it never triggers the surrounding card link — a tester reported mis-taps between the two on mobile.
 
 ## PWA
 

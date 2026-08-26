@@ -69,6 +69,13 @@ describe("SaveEventButton", () => {
     expect(saveButton()).toHaveAccessibleName("Save Wheel Throwing Workshop");
   });
 
+  it("keeps a 44px touch target around the 36px circle", () => {
+    // Measured, not decorative: at 36px flat, a press a pixel outside the icon
+    // fell through to the card link and opened the event.
+    renderInCard();
+    expect(saveButton()).toHaveClass("w-11", "h-11", "border-4", "border-transparent");
+  });
+
   it("saves on tap and persists it", async () => {
     renderInCard();
     fireEvent.click(saveButton());

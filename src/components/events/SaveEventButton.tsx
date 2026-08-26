@@ -19,8 +19,13 @@ interface SaveEventButtonProps {
  * A tester asked for this while scrolling the featured feed, and asked
  * specifically that it sit well away from "Book Now" so a thumb aiming at one
  * never lands on the other. Hence the overlay position — top corner of the
- * image, the far end of the card from the CTA — and a 36px target with the tap
- * stopped here so it never triggers a surrounding card link.
+ * image, the far end of the card from the CTA — and the tap stopped here so it
+ * never triggers a surrounding card link.
+ *
+ * The button is 44px of touch target around a 36px circle: a transparent
+ * border with `bg-clip-padding` grows the hit area without growing the visual.
+ * At 36px flat, a press a single pixel wide of the icon fell through to the
+ * card link and opened the event — the same mis-tap, one control over.
  */
 const SaveEventButton = ({
   eventId,
@@ -46,9 +51,11 @@ const SaveEventButton = ({
       className={cn(
         "flex items-center justify-center rounded-full transition-colors flex-shrink-0",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        // 44px outer target, 36px visible circle.
+        "w-11 h-11 border-4 border-transparent bg-clip-padding",
         variant === "overlay"
-          ? "w-9 h-9 bg-card/90 backdrop-blur-sm shadow-sm hover:bg-card"
-          : "w-9 h-9 hover:bg-secondary",
+          ? "bg-card/90 backdrop-blur-sm shadow-sm hover:bg-card"
+          : "hover:bg-secondary",
         className
       )}
     >

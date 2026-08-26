@@ -109,7 +109,7 @@ const EventCard = ({
         <SaveEventButton
           eventId={id}
           title={title}
-          className="absolute top-1.5 right-1.5"
+          className="absolute top-0.5 right-0.5"
         />
       </div>
 

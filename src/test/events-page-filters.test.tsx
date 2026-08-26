@@ -122,9 +122,11 @@ describe("/events browse filters", () => {
   it("keeps the choice in the URL so a round-trip to an event survives", () => {
     renderEvents();
     fireEvent.click(chip("Free"));
-    fireEvent.click(chip("3 mi"));
-    expect(screen.getByTestId("location-search").textContent).toBe(
-      "?price=free&radius=3"
+    fireEvent.click(chip("Tomorrow"));
+    const params = new URLSearchParams(
+      screen.getByTestId("location-search").textContent ?? ""
     );
+    expect(params.get("date")).toBe("tomorrow");
+    expect(params.get("price")).toBe("free");
   });
 });

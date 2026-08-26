@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import {
   DATE_PRESET_LABELS,
+  DISTANCE_FILTER_ENABLED,
   NO_FILTERS,
   RADIUS_OPTIONS_MILES,
   countActiveFilters,
@@ -145,24 +146,30 @@ const EventFilterBar = ({
           </Chip>
         ))}
 
-        <span className="h-4 w-px bg-border flex-shrink-0" aria-hidden />
+        {/* Held back until the catalogue is geocoded — see
+            DISTANCE_FILTER_ENABLED. */}
+        {DISTANCE_FILTER_ENABLED && (
+          <>
+            <span className="h-4 w-px bg-border flex-shrink-0" aria-hidden />
 
-        <Chip
-          active={filters.radiusMiles == null}
-          onClick={() => onChange({ ...filters, radiusMiles: null })}
-        >
-          Any distance
-        </Chip>
-        {RADIUS_OPTIONS_MILES.map((miles) => (
-          <Chip
-            key={miles}
-            active={filters.radiusMiles === miles}
-            onClick={() => onChange({ ...filters, radiusMiles: miles })}
-          >
-            <MapPin className="w-3 h-3" />
-            {miles} mi
-          </Chip>
-        ))}
+            <Chip
+              active={filters.radiusMiles == null}
+              onClick={() => onChange({ ...filters, radiusMiles: null })}
+            >
+              Any distance
+            </Chip>
+            {RADIUS_OPTIONS_MILES.map((miles) => (
+              <Chip
+                key={miles}
+                active={filters.radiusMiles === miles}
+                onClick={() => onChange({ ...filters, radiusMiles: miles })}
+              >
+                <MapPin className="w-3 h-3" />
+                {miles} mi
+              </Chip>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Caption: what the radius is measured from, and a way back out */}

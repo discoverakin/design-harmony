@@ -4,6 +4,7 @@ import {
   applyFiltersToParams,
   countActiveFilters,
   dateRangeFor,
+  DISTANCE_FILTER_ENABLED,
   filtersFromParams,
   NO_FILTERS,
   type EventFilters,
@@ -292,9 +293,24 @@ describe("eventCoords", () => {
 
 describe("filters in the URL", () => {
   it("round-trips a full set of filters", () => {
-    const original = filters({ date: "next-week", price: "free", radiusMiles: 5 });
+    const original = filters({
+      date: "next-week",
+      price: "free",
+      ...(DISTANCE_FILTER_ENABLED ? { radiusMiles: 5 } : {}),
+    });
     expect(filtersFromParams(applyFiltersToParams(original))).toEqual(original);
   });
+
+  it.skipIf(DISTANCE_FILTER_ENABLED)(
+    "ignores a stale radius link while the chips are held back",
+    () => {
+      // An old shared URL must not filter by distance when there is no chip
+      // on screen to undo it.
+      const params = new URLSearchParams({ price: "free", radius: "3" });
+      expect(filtersFromParams(params).radiusMiles).toBeNull();
+      expect(applyFiltersToParams(filters({ radiusMiles: 3 })).get("radius")).toBeNull();
+    }
+  );
 
   it("writes nothing for defaults", () => {
     expect(applyFiltersToParams(NO_FILTERS).toString()).toBe("");

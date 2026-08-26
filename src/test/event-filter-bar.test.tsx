@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import EventFilterBar from "@/components/events/EventFilterBar";
-import { NO_FILTERS, type EventFilters } from "@/lib/eventFilters";
+import {
+  DISTANCE_FILTER_ENABLED,
+  NO_FILTERS,
+  type EventFilters,
+} from "@/lib/eventFilters";
 
 /**
  * The controls testers asked for have to be *visible without typing* — that was
@@ -16,16 +20,26 @@ const renderBar = (filters: EventFilters = NO_FILTERS) => {
 };
 
 describe("EventFilterBar", () => {
-  it("shows date, price, and distance controls with nothing selected", () => {
+  it("shows the date and price controls with nothing selected", () => {
     renderBar();
     ["Today", "Tomorrow", "This week", "Next week", "This month"].forEach((label) =>
       expect(screen.getByText(label)).toBeInTheDocument()
     );
     expect(screen.getByText("Free")).toBeInTheDocument();
     expect(screen.getByText("Paid")).toBeInTheDocument();
-    expect(screen.getByText("3 mi")).toBeInTheDocument();
     expect(screen.getByText("Pick a date")).toBeInTheDocument();
   });
+
+  it.skipIf(DISTANCE_FILTER_ENABLED)(
+    "holds the distance chips back while the catalogue is barely geocoded",
+    () => {
+      // Two-thirds of upcoming events have no lat/lng, so a radius returns
+      // almost only the recurring listings — docs/data-quality.md §4.
+      renderBar();
+      expect(screen.queryByText("Any distance")).not.toBeInTheDocument();
+      expect(screen.queryByText("3 mi")).not.toBeInTheDocument();
+    }
+  );
 
   it("reports a date preset", () => {
     const onChange = renderBar();
@@ -39,7 +53,7 @@ describe("EventFilterBar", () => {
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ price: "free" }));
   });
 
-  it("reports a radius", () => {
+  it.skipIf(!DISTANCE_FILTER_ENABLED)("reports a radius", () => {
     const onChange = renderBar();
     fireEvent.click(screen.getByText("5 mi"));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ radiusMiles: 5 }));
@@ -71,7 +85,7 @@ describe("EventFilterBar", () => {
     );
   });
 
-  it("says which origin a radius is measured from", () => {
+  it.skipIf(!DISTANCE_FILTER_ENABLED)("says which origin a radius is measured from", () => {
     const onChange = vi.fn();
     render(
       <EventFilterBar

@@ -132,9 +132,11 @@ ones**. So of 148 dated upcoming events, exactly two can appear under any
 distance filter; the other 146 are either unmapped or out of town (section 3 —
 the >10 mi group is largely the Toronto listings).
 
-The filter itself is correct and says what it held back ("Not shown: 116 not
-yet mapped"), but until the backfill happens, tapping a radius mostly returns
-the recurring classes. `NearYouMap` has the same ceiling — it queries
+The filter itself is correct and said what it held back ("Not shown: 116 not
+yet mapped"), but until the backfill happens a radius mostly returns the
+recurring classes — so **the distance chips are switched off in the UI**
+(`DISTANCE_FILTER_ENABLED` in `src/lib/eventFilters.ts`). Geocode the rows,
+flip the constant, and the filter comes back as-is. `NearYouMap` has the same ceiling — it queries
 `.not("lat", "is", null)`, so two-thirds of the catalogue was never on the map
 either; that was simply invisible before a filter put a number on it.
 

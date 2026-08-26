@@ -91,9 +91,18 @@ Three things about it are load-bearing:
   `radius`), so tapping into an event and coming back keeps it, and a filtered
   list is shareable. `filtersFromParams` ignores anything malformed.
 
-Distance measures from the device location when the user grants it and from
-downtown Ann Arbor otherwise; the caption under the chips says which.
-Geolocation is only requested once a radius is actually chosen
+**Distance is built but held back from the UI.** `DISTANCE_FILTER_ENABLED` in
+`src/lib/eventFilters.ts` is `false`: 116 of 174 upcoming events have no
+`lat`/`lng`, so a radius returns almost exclusively the recurring listings
+(measured 2026-08-26 — [data-quality.md](data-quality.md) §4). While it is off
+the chips do not render and a stale `?radius=` link is ignored, so nothing
+filters without a visible control to undo it. Flipping the constant to `true`
+after the geocode backfill restores all of it — the filtering, the URL param,
+and the tests guarded by the same constant.
+
+When on, distance measures from the device location if the user grants it and
+from downtown Ann Arbor otherwise; the caption under the chips says which, and
+geolocation is only requested once a radius is actually chosen
 (`src/hooks/use-user-location.ts`). `src/lib/geo.ts` does great-circle
 distance — unlike the degree-space approximation in `api/search.ts`, which is
 elliptical at this latitude (see [known-issues.md](known-issues.md)).

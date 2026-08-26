@@ -58,6 +58,20 @@ export const DATE_PRESET_LABELS: Record<DatePreset, string> = {
 
 export const RADIUS_OPTIONS_MILES = [1, 3, 5, 10] as const;
 
+/**
+ * Distance filtering is built and tested but held back from the UI.
+ *
+ * Measured on a preview on 2026-08-26: 116 of 174 upcoming events have no
+ * `lat`/`lng`, and of the 28 a 10-mile radius can find, 26 are ongoing and 2
+ * are dated (docs/data-quality.md §4). A radius therefore returns almost
+ * exclusively the recurring listings — correct, but not worth a chip yet.
+ *
+ * Flip this to `true` once the geocode backfill lands. Nothing else needs to
+ * change: the chips reappear, `?radius=` starts being honoured again, and the
+ * tests guarded by this constant start running.
+ */
+export const DISTANCE_FILTER_ENABLED = false;
+
 export function countActiveFilters(f: EventFilters): number {
   return (
     (f.day || f.date !== "any" ? 1 : 0) +
@@ -252,9 +266,13 @@ export function filtersFromParams(params: URLSearchParams): EventFilters {
     date: date && DATE_PRESETS.has(date) ? date : "any",
     day: day && DAY_PATTERN.test(day) ? day : null,
     price: price && PRICE_FILTERS.has(price) ? price : "any",
-    radiusMiles: (RADIUS_OPTIONS_MILES as readonly number[]).includes(radius)
-      ? radius
-      : null,
+    // While the chips are held back, a stale `?radius=` link must not filter
+    // silently — there would be no visible control to undo it.
+    radiusMiles:
+      DISTANCE_FILTER_ENABLED &&
+      (RADIUS_OPTIONS_MILES as readonly number[]).includes(radius)
+        ? radius
+        : null,
   };
 }
 
@@ -270,6 +288,11 @@ export function applyFiltersToParams(
   set("date", filters.date !== "any" && !filters.day ? filters.date : null);
   set("day", filters.day);
   set("price", filters.price !== "any" ? filters.price : null);
-  set("radius", filters.radiusMiles != null ? String(filters.radiusMiles) : null);
+  set(
+    "radius",
+    DISTANCE_FILTER_ENABLED && filters.radiusMiles != null
+      ? String(filters.radiusMiles)
+      : null
+  );
   return next;
 }

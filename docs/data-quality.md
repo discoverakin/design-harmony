@@ -81,6 +81,13 @@ cannot always extract a price from the source page) and the same two options:
 accept unpriced listings as a permanent state and design for it, or hold them
 out of `approved` until a price is resolved.
 
+The Free/Paid filter on `/events` now makes the gap visible to seekers rather
+than to a SQL query: an unknown price is neither free nor paid, so those
+listings drop out of a filtered list and the page prints how many it held back
+("Not shown: 75 with no listed price"). Same for the sentinel dates in section
+1 under a date filter. That is honest, but it is a running count of the problem
+displayed to users — the number is worth watching.
+
 ```sql
 select count(*) filter (where price_cents is null) as unknown,
        count(*) filter (where price_cents = 0)    as free,

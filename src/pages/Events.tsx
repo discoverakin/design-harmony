@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useCallback } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
 import { Plus, CalendarDays, Bookmark, Search, X, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,17 +9,42 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import AuthPromptSheet from "@/components/AuthPromptSheet";
 import EventListCard from "@/components/events/EventListCard";
+import EventFilterBar from "@/components/events/EventFilterBar";
 import { useEvents } from "@/hooks/use-events";
 import { useAuth } from "@/hooks/use-auth";
-import { parseEventDates, isUpcoming } from "@/lib/eventDates";
+import { useUserLocation } from "@/hooks/use-user-location";
+import {
+  applyEventFilters,
+  applyFiltersToParams,
+  countActiveFilters,
+  dateRangeFor,
+  DATE_PRESET_LABELS,
+  filtersFromParams,
+  NO_FILTERS,
+  type EventFilters,
+} from "@/lib/eventFilters";
 
 const Events = () => {
   const { approvedEvents, loading } = useEvents();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
+
+  // Filters live in the URL, so a tap into an event and back keeps them.
+  const filters = useMemo(() => filtersFromParams(searchParams), [searchParams]);
+  const setFilters = useCallback(
+    (next: EventFilters) =>
+      setSearchParams(applyFiltersToParams(next, searchParams), { replace: true }),
+    [searchParams, setSearchParams]
+  );
+
+  // Only ask for the device location once a radius is actually chosen.
+  const { origin, usingDeviceLocation, locating } = useUserLocation(
+    filters.radiusMiles != null
+  );
 
   const handleCreate = () => {
     if (user) {
@@ -55,35 +81,56 @@ const Events = () => {
     [approvedEvents]
   );
 
+  // Date/price/distance are applied here rather than in the query: the whole
+  // approved list is already in memory, so filtering is instant and works the
+  // same for anonymous visitors.
+  const result = useMemo(
+    () => applyEventFilters(filteredEvents, filters, { origin }),
+    [filteredEvents, filters, origin]
+  );
+
+  const activeFilterCount = countActiveFilters(filters);
+  const dateRange = dateRangeFor(filters);
+  const totalShown = result.dated.length + result.recurring.length;
+
+  // With a date filter on, the relative headings below would contradict it
+  // ("Next week" events landing under "This Week"), so the filter names the
+  // one section instead.
+  const dateFilterLabel = filters.day
+    ? format(new Date(filters.day + "T00:00:00"), "EEEE, MMM d")
+    : DATE_PRESET_LABELS[filters.date];
+
   const today = new Date().toISOString().split("T")[0];
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
   const nextWeekEnd = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
 
-  // Time-based sections only for single-day upcoming events; ongoing/multi get
-  // their own section since their anchor date may be in the past.
-  const singleUpcoming = filteredEvents.filter(
-    (e) => parseEventDates(e.description).classification === "single" && e.date >= today
-  );
-  const ongoingRecurring = filteredEvents.filter(
-    (e) => parseEventDates(e.description).classification !== "single"
-  );
-
-  const todayEvents = singleUpcoming.filter((e) => e.date === today);
-  const tomorrowEvents = singleUpcoming.filter((e) => e.date === tomorrow);
-  const thisWeekEvents = singleUpcoming.filter(
+  // Time-based sections only for single-day events; ongoing/multi get their own
+  // section since their anchor date may be in the past.
+  const todayEvents = result.dated.filter((e) => e.date === today);
+  const tomorrowEvents = result.dated.filter((e) => e.date === tomorrow);
+  const thisWeekEvents = result.dated.filter(
     (e) => e.date > tomorrow && e.date <= nextWeekEnd
   );
-  const laterEvents = singleUpcoming.filter((e) => e.date > nextWeekEnd);
+  const laterEvents = result.dated.filter((e) => e.date > nextWeekEnd);
 
-  const upcomingEvents = filteredEvents.filter(isUpcoming);
+  // What a filter had to hold back for lack of data, so it can be said out
+  // loud. A quarter of approved events have no price and some carry the
+  // no-schedule sentinel date — see docs/data-quality.md.
+  const heldBack = [
+    result.hiddenUndated > 0 && `${result.hiddenUndated} with no confirmed date`,
+    result.hiddenUnpriced > 0 && `${result.hiddenUnpriced} with no listed price`,
+    result.hiddenUnmapped > 0 && `${result.hiddenUnmapped} not yet mapped`,
+  ].filter(Boolean) as string[];
 
   const EventSection = ({
     title,
     events,
+    note,
     emptyHidden = true,
   }: {
     title: string;
-    events: typeof filteredEvents;
+    events: typeof result.dated;
+    note?: string;
     emptyHidden?: boolean;
   }) => {
     if (events.length === 0 && emptyHidden) return null;
@@ -97,6 +144,7 @@ const Events = () => {
             {events.length} event{events.length !== 1 ? "s" : ""}
           </span>
         </div>
+        {note && <p className="text-[11px] text-muted-foreground mb-2">{note}</p>}
         <div className="space-y-3">
           {events.map((evt) => (
             <EventListCard key={evt.id} event={evt} />
@@ -185,25 +233,66 @@ const Events = () => {
             </TabsList>
 
             <TabsContent value="upcoming" className="mt-4 space-y-5 pb-6">
+              {/* Filters — always visible, no typing required */}
+              <div className="space-y-2">
+                <EventFilterBar
+                  filters={filters}
+                  onChange={setFilters}
+                  originLabel={
+                    usingDeviceLocation ? "your location" : "downtown Ann Arbor"
+                  }
+                  locating={locating}
+                />
+                {!loading && heldBack.length > 0 && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Not shown: {heldBack.join(" · ")}.
+                  </p>
+                )}
+              </div>
+
               {loading ? (
                 <div className="flex justify-center py-10">
                   <span className="w-6 h-6 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
-              ) : upcomingEvents.length === 0 ? (
+              ) : totalShown === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-3xl mb-2">📅</p>
                   <p className="text-sm text-muted-foreground">
                     No events found
-                    {searchQuery ? ` matching "${searchQuery}"` : ""}.
+                    {searchQuery ? ` matching "${searchQuery}"` : ""}
+                    {activeFilterCount > 0 ? " for these filters" : ""}.
                   </p>
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFilters({ ...NO_FILTERS })}
+                      className="text-sm font-semibold text-primary hover:underline mt-2"
+                    >
+                      Clear filters
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
-                  <EventSection title="Today" events={todayEvents} />
-                  <EventSection title="Tomorrow" events={tomorrowEvents} />
-                  <EventSection title="This Week" events={thisWeekEvents} />
-                  <EventSection title="Coming Up" events={laterEvents} />
-                  <EventSection title="Ongoing" events={ongoingRecurring} />
+                  {dateRange ? (
+                    <EventSection title={dateFilterLabel} events={result.dated} />
+                  ) : (
+                    <>
+                      <EventSection title="Today" events={todayEvents} />
+                      <EventSection title="Tomorrow" events={tomorrowEvents} />
+                      <EventSection title="This Week" events={thisWeekEvents} />
+                      <EventSection title="Coming Up" events={laterEvents} />
+                    </>
+                  )}
+                  <EventSection
+                    title="Ongoing"
+                    events={result.recurring}
+                    note={
+                      dateRange
+                        ? "These run on a repeating schedule, so they may or may not fall on the dates you picked — check the listing."
+                        : undefined
+                    }
+                  />
                 </>
               )}
             </TabsContent>

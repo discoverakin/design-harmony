@@ -16,6 +16,11 @@ exist in production:
 | `2099-01-01` | Permanently "upcoming". Renders as **"Schedule varies"** (see `hasKnownDate` in `src/lib/eventDates.ts`) | Never ages out. As real events pass and drop off, placeholders become a growing share of every undated result set. Invisible to date queries — "this weekend" can never match 2099 — so they are simultaneously always-present and never-findable |
 | `2026-01-01` | In the past, so `isUpcoming` filters it out of the UI entirely | **Lost inventory.** "Intro to Clear Glazes and Slips [Summer 2026]" is a real course no seeker can find. A host would have no way to know why |
 
+**What a seeker sees:** of the 174 events currently listed as upcoming, **29
+carry the `2099-01-01` sentinel**. They appear in the unfiltered list and drop
+out of every date filter, which now says so out loud ("Not shown: 29 with no
+confirmed date").
+
 Several of these records say so in their own description: *"Schedule not
 confirmed: Booking calendar exists on site but dates could not be extracted —
 check site directly."*
@@ -73,6 +78,11 @@ Of **306 approved events**:
 Of those 75, **26 carry a `price_display`** and now show that text ("from $50",
 "$80 per person"). The other **49 have no price information at all** and show
 "See details".
+
+Measured again against the upcoming list on 2026-08-26: of 174 upcoming events,
+**17 are free, 102 are paid, and 55 have no price** — a third, a worse ratio
+than the whole-table figure, because unpriced listings skew toward the
+never-ageing sentinel dates in section 1.
 
 That last number is the finding: **one event in six has no price**. It is a
 bigger gap than the placeholder dates in section 1 — a seeker cannot compare

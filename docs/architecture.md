@@ -21,7 +21,7 @@ Originally scaffolded by Lovable (the README is Lovable boilerplate and largely 
    (a Vercel WAF rule, if the project ever moves to a Pro plan).
 3. **Supabase Edge Functions** (Deno, `supabase/functions/`) — `create-checkout-session` and `stripe-webhook` handle Stripe embedded checkout. Note several functions are invoked from the dashboard (`request-payout`, `stripe-connect-onboarding`, `send-group-announcement`, `send-sponsorship-request`) but are **not in this repo** — they're deployed separately.
 
-The Supabase client degrades gracefully: when `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` are absent it becomes a Proxy that resolves every call to `{ data: null, error }`, so the UI renders against seed data instead of crashing. Preserve that behavior when touching `src/lib/supabase.ts`.
+The Supabase client is *meant* to degrade gracefully: when `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` are absent it becomes a Proxy resolving every call to `{ data: null, error }`, so the UI renders against seed data instead of crashing. **In practice it throws on the second call in any chain** (`supabase.from(x).select(...)`), which is every call site — see "The seed-data fallback does not actually work" in [known-issues.md](known-issues.md). Preserve the intent when touching `src/lib/supabase.ts`, and do not assume the app runs locally without credentials.
 
 ## Env vars
 
@@ -138,7 +138,7 @@ Two more asymmetries: the seeker side uses real FKs to `auth.users` while 008's 
 - Fonts: `font-sans` = Finlandica, `font-heading` = New Spirit.
 - Feature components are grouped by domain (`components/tracker/`, `components/community/`, `components/dashboard/`, `components/social/`, `components/events/`, `components/profile/`).
 - Bottom sheets (`Sheet side="bottom"`) are the standard mobile affordance for create/edit/log flows.
-- **Card-level actions keep their distance from the card's primary CTA.** `SaveEventButton` floats in the top corner of a card's image, the far end from "Book Now", and stops the click itself so it never triggers the surrounding card link — a tester reported mis-taps between the two on mobile.
+- **Card-level actions keep their distance from the card's primary CTA, and carry a 44px touch target.** `SaveEventButton` floats in the top corner of a card's image, the far end from "Book Now", and stops the click itself so it never triggers the surrounding card link — a tester reported mis-taps between the two on mobile. It shipped first at a flat 36px, and a press one pixel outside it fell through to the card link and opened the event; a transparent 4px border with `bg-clip-padding` now gives 44px of target around a 36px circle. Copy that pattern for any control that sits inside a linked card.
 
 ## PWA
 

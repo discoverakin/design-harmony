@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Search as SearchIcon } from "lucide-react";
+import { ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import EventCard from "@/components/EventCard";
+import { useGoBack } from "@/hooks/use-go-back";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
+import { readSearchCache, writeSearchCache } from "@/lib/searchCache";
 import { isUpcoming } from "@/lib/eventDates";
 
 interface ParsedSearch {
@@ -46,6 +49,7 @@ const formatSlug = (slug: string) =>
 const Search = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const goBack = useGoBack("/home");
   const initialQuery = searchParams.get("q") || "";
 
   const [query, setQuery] = useState(initialQuery);
@@ -64,6 +68,19 @@ const Search = () => {
     if (parsed?.date_filter?.type && !fallback) return results;
     return results.filter((e) => isUpcoming(e));
   }, [results, parsed, fallback]);
+
+  /** Paint a cached answer without a spinner or a model call. */
+  const hydrate = useCallback((cached: ReturnType<typeof readSearchCache>) => {
+    if (!cached) return false;
+    setResults(cached.results as SearchResult[]);
+    setParsed(cached.parsed as ParsedSearch | null);
+    setFallback(cached.fallback);
+    setLocationUsed(cached.locationUsed);
+    setHasSearched(true);
+    setError(false);
+    setLoading(false);
+    return true;
+  }, []);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -91,6 +108,15 @@ const Search = () => {
       setParsed(data.parsed ?? null);
       setFallback(data.fallback ?? null);
       setLocationUsed(data.location_used ?? null);
+
+      // Cache it so coming back to this search restores exactly these results.
+      writeSearchCache({
+        query: q,
+        results: data.results ?? [],
+        parsed: data.parsed ?? null,
+        fallback: data.fallback ?? null,
+        locationUsed: data.location_used ?? null,
+      });
     } catch {
       setError(true);
       setResults([]);
@@ -102,19 +128,28 @@ const Search = () => {
     }
   }, []);
 
-  // Search on mount if q param exists
+  // On mount — including arriving back here from an event — show the cached
+  // answer if there is one, and only call the API when there isn't.
   useEffect(() => {
-    if (initialQuery) {
-      doSearch(initialQuery);
-    }
+    if (!initialQuery) return;
+    if (hydrate(readSearchCache(initialQuery))) return;
+    doSearch(initialQuery);
+    // Mount only: the query in the URL is the one to answer. Re-running this on
+    // every render of doSearch/hydrate would re-search as the user types.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
     navigate(`/search?q=${encodeURIComponent(query)}`, { replace: true });
+    // Submitting is an explicit ask, so it always re-runs — that is also how a
+    // user refreshes a cached answer they no longer trust.
     doSearch(query);
   };
+
+  // Put the results grid back where it was when they tapped a class.
+  useScrollRestoration(hasSearched && !loading);
 
   return (
     <div className="flex flex-col min-h-screen bg-background max-w-lg mx-auto shadow-xl">
@@ -122,6 +157,17 @@ const Search = () => {
 
       <main className="flex-1 overflow-y-auto pb-4">
         <div className="bg-card rounded-t-3xl -mt-1 shadow-lg px-5 pt-6 pb-8">
+          {/* Back — the search view had no way out but the bottom nav, which
+              dropped the query. */}
+          <button
+            onClick={goBack}
+            aria-label="Back"
+            className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-3 -ml-1 p-1"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+
           {/* Search input */}
           <form onSubmit={handleSubmit} className="mb-5">
             <div className="relative">
@@ -204,6 +250,10 @@ const Search = () => {
                       flyer_url={event.flyer_url}
                       hobby_slug={event.hobby_slug}
                       description={event.description}
+                      // A result is a specific class. Without this the card
+                      // links to /hobby/:slug and a tap lands the user on the
+                      // whole category, losing the search they just made.
+                      forceEventDetail
                     />
                   ))}
                 </div>

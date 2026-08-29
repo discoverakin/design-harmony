@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { useEvents } from "@/hooks/use-events";
 import { useSavedEvents } from "@/hooks/use-saved-events";
+import { useGoBack } from "@/hooks/use-go-back";
 import { useActivityLog } from "@/hooks/use-activity-log";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +42,7 @@ const EventDetail = () => {
     getEvent, markAttended, unmarkAttended, loading,
   } = useEvents();
   const { isSaved, toggleSave } = useSavedEvents();
+  const goBack = useGoBack("/events");
   const { addLog, logs, deleteLog } = useActivityLog();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -164,7 +166,7 @@ const EventDetail = () => {
       {/* Top bar */}
       <header className="flex items-center gap-3 px-4 py-4 bg-secondary">
         <button
-          onClick={() => navigate(-1)}
+          onClick={goBack}
           className="p-2 -ml-2 rounded-lg hover:bg-accent transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />

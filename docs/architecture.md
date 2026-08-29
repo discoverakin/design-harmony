@@ -36,6 +36,26 @@ All routes live in `src/components/AnimatedRoutes.tsx` — one file, wrapped in 
 - **Protected** (`/profile`, `/settings`, `/quiz`, `/events/create`, `/admin-events`) and **all `/dashboard/*`** — wrapped in `RequireAuth`, which also preserves `?payment=success|cancel` context through the login round-trip.
 - `/` redirects to `/home`. `HomeRoute` forces logged-in-but-not-onboarded users to `/onboarding`.
 
+**Back navigation preserves context, and that is a rule, not an accident.** A
+tester lost a search to three separate defects compounding: search results
+linked to `/hobby/:slug` (so tapping one class opened its whole category),
+`HobbyDetail`'s back button was a hard-coded `navigate("/")`, and returning to
+`/search` re-ran the query from scratch. So:
+
+- **Use `useGoBack(fallback)`** (`src/hooks/use-go-back.ts`) for any back
+  control, never a hard-coded route. It calls `navigate(-1)` normally and falls
+  back to the given route only when `location.key === "default"` — the
+  deep-link case, where going back would leave the app.
+- **A card that represents one thing links to that thing.** `EventCard` links
+  to `/hobby/:slug` unless given `forceEventDetail`; search results and the
+  featured feed both pass it.
+- **List state lives in the URL** (`/events` filters, `/search?q=`), so a
+  history entry is enough to rebuild the view.
+- **`useScrollRestoration(ready)`** (`src/hooks/use-scroll-restoration.ts`) puts
+  a long list back where the user left it. It waits for `ready` because the
+  browser's own restoration fires while the page is still a spinner and lands
+  on 0. Keyed by `location.key`, stored in `sessionStorage`.
+
 `useAuth` (`src/hooks/use-auth.tsx`) wraps Supabase auth (PKCE, storage key `akin-auth`). `useProfile` auto-creates the `profiles` row; `App.tsx` mounts a `ProfileEnsurer` so this happens on every page. Onboarding state reads from the profile with a `localStorage` fallback (`akin-onboarding-complete`).
 
 ## Data layer pattern
@@ -111,6 +131,12 @@ elliptical at this latitude (see [known-issues.md](known-issues.md)).
 Pure helpers are exported and covered by `src/test/event-filters.test.ts`; the
 UI wiring by `src/test/event-filter-bar.test.tsx` and
 `src/test/events-page-filters.test.tsx`.
+
+Search answers are cached per query in `sessionStorage` for an hour
+(`src/lib/searchCache.ts`, 8 entries). Coming back to a search repaints exactly
+the results the user was looking at instead of spending a second and a model
+call to produce a set that may legitimately differ. Submitting the form always
+re-runs, which is also how a user refreshes an answer they no longer trust.
 
 `src/lib/weeklyShuffle.ts` — deterministic ISO-week-seeded Fisher–Yates, used for "Featured this week" carousels so the order is stable within a week and rolls automatically.
 

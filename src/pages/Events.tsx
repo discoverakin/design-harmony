@@ -14,6 +14,7 @@ import { useEvents } from "@/hooks/use-events";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { useSavedEvents } from "@/hooks/use-saved-events";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import {
   applyEventFilters,
   applyFiltersToParams,
@@ -42,6 +43,10 @@ const Events = () => {
       setSearchParams(applyFiltersToParams(next, searchParams), { replace: true }),
     [searchParams, setSearchParams]
   );
+
+  // Coming back from an event should land where they were in the list, not at
+  // the top of it.
+  useScrollRestoration(!loading);
 
   // Only ask for the device location once a radius is actually chosen.
   const { origin, usingDeviceLocation, locating } = useUserLocation(

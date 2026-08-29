@@ -14,7 +14,7 @@ import { SavedEventsProvider } from "@/hooks/use-saved-events";
 
 const { authState, insertMock, deleteMock, selectMock } = vi.hoisted(() => ({
   authState: { user: { id: "user-1" } as { id: string } | null },
-  insertMock: vi.fn(async () => ({ error: null as Error | null })),
+  insertMock: vi.fn(async (_row?: unknown) => ({ error: null as Error | null })),
   deleteMock: vi.fn(async () => ({ error: null as Error | null })),
   selectMock: vi.fn(async () => ({ data: [] as { event_id: string }[] })),
 }));

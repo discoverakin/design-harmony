@@ -2,10 +2,13 @@
 
 Audited 2026-08-14. Findings from a read-only audit. Verify before relying on any of them — and check the live Supabase schema rather than the migration files.
 
-**Status as of 2026-08-25:** all still open except the search-scope and
+**Status as of 2026-08-29:** all still open except the search-scope and
 proximity date-filter items below, which the full-record search change fixed.
-Two other PRs have merged since (signup password revalidation, and the sign-in
-path to account creation); neither touched anything below.
+Four PRs have merged since (signup password revalidation, the sign-in path to
+account creation, the browse filters on `/events`, and save-from-card); none
+touched anything below. The two entries added at the bottom — the broken
+offline fallback and the red test suite — were found while building those and
+are the two most likely to waste the next person's morning.
 
 ### Schema drift — migrations are NOT the source of truth
 `profiles.user_type` and `events.lat`/`events.lng` are read and written by application code but **created by no migration** — they were added by hand in the Supabase dashboard. Assume `supabase/migrations/` is incomplete and verify against the real database.
@@ -43,3 +46,48 @@ Placeholder dates (`2099-01-01`, `2026-01-01`), prices stored as null rather tha
 
 ### Miscellaneous
 `Dashboard.tsx` hard-codes `const verificationStatus = "verified"` and renders the "Verified Business" badge from that constant, ignoring the real `profiles.verification_status` column.
+
+### The seed-data fallback does not actually work
+`CLAUDE.md` and [architecture.md](architecture.md) both say the app "renders
+against seed data instead of crashing" when `VITE_SUPABASE_URL` /
+`VITE_SUPABASE_ANON_KEY` are missing. **It does not.** With no `.env.local`,
+`/events` renders blank and the console shows:
+
+```
+TypeError: supabase.from(...).select is not a function
+    at use-events.ts:12
+```
+
+The Proxy in `src/lib/supabase.ts` returns a callable proxy from `get`, and
+*calling* it hits the `apply` trap, which resolves a real `Promise`. So
+`supabase.from("events")` is a Promise — and a Promise has no `.select`. Every
+call site in the app chains (`.from().select().eq()`), so the fallback fires on
+the first hop and throws on the second. `useEvents` never sets `loading` to
+false, and the page sits empty forever.
+
+Consequences worth knowing before you debug something else:
+
+- **Local development without Supabase credentials is not a working app.** Any
+  page driven by a hook that queries Supabase renders empty. Verify UI work on
+  a Vercel preview, or get real env vars.
+- **Anything mounted app-wide must survive it.** `SavedEventsProvider` wraps
+  every route, so its fetch is wrapped in try/catch specifically to keep a
+  broken client from taking the shell down. Do the same for the next provider.
+
+The fix is to make the proxy chainable — return proxies that are also
+thenables, so `.from().select().eq()` resolves to `{ data: null, error }` at
+whatever depth it is awaited. Small, contained, and it would restore the
+offline story the docs already promise. Not attempted yet; nothing in the app
+depends on the current behaviour, since the current behaviour is a crash.
+
+### `npm test` is not green on `main`
+Three assertions in `src/test/hobbies-search.test.ts` fail: "should have 25
+hobbies total", and the tag lookups for `yoga` and `boxing`. They have been
+failing since `320f8af "update hobby slugs to match real event data"`, which
+changed `src/data/hobbies.ts` without updating the test — the same taxonomy
+drift described in [hobby-taxonomy.md](hobby-taxonomy.md).
+
+They are **not** a signal that your change broke something. Expect
+`3 failed | N passed` and check the names before investigating. Either fix the
+test to the current taxonomy or fold it into the taxonomy work; leaving a red
+suite means the next real failure is invisible.

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import SaveEventButton from "@/components/events/SaveEventButton";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
 import { formatPrice } from "@/lib/format-price";
@@ -150,8 +151,12 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
           </div>
         </div>
 
-        {/* Arrow */}
-        <ChevronRight className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0 group-hover:text-primary transition-colors" />
+        {/* Save + arrow. The whole card is a link, so the save button stops the
+            tap itself (see SaveEventButton) and sits in its own column. */}
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
+          <SaveEventButton eventId={event.id} title={event.title} variant="plain" />
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+        </div>
       </div>
     </Link>
   );

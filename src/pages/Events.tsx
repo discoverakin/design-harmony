@@ -13,6 +13,7 @@ import EventFilterBar from "@/components/events/EventFilterBar";
 import { useEvents } from "@/hooks/use-events";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
+import { useSavedEvents } from "@/hooks/use-saved-events";
 import {
   applyEventFilters,
   applyFiltersToParams,
@@ -27,6 +28,7 @@ import {
 const Events = () => {
   const { approvedEvents, loading } = useEvents();
   const { user } = useAuth();
+  const { savedIds } = useSavedEvents();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,8 +74,8 @@ const Events = () => {
   }, [approvedEvents, searchQuery]);
 
   const savedEvents = useMemo(
-    () => approvedEvents.filter((e) => e.is_saved),
-    [approvedEvents]
+    () => approvedEvents.filter((e) => savedIds.has(e.id)),
+    [approvedEvents, savedIds]
   );
 
   const attendedEvents = useMemo(

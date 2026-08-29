@@ -4,6 +4,11 @@ import { useAuth } from "@/hooks/use-auth";
 import type { CommunityEvent, DbEvent, EventStatus } from "@/data/events";
 import { stripePromise } from "@/lib/stripe";
 
+/**
+ * Note: saved state is NOT here. `use-saved-events.tsx` owns it, because every
+ * page instantiates this hook separately and a save tapped on a card has to be
+ * visible everywhere at once.
+ */
 export function useEvents() {
   const { user } = useAuth();
   const [events, setEvents] = useState<CommunityEvent[]>([]);
@@ -25,7 +30,6 @@ export function useEvents() {
         ...evt,
         rsvp_count: rsvpCounts.get(evt.id) ?? 0,
         is_attending: false,
-        is_saved: false,
         has_attended: false,
         attendance_minutes: null,
         has_paid: false,
@@ -35,12 +39,11 @@ export function useEvents() {
       return;
     }
 
-    const [eventsRes, rsvpsRes, myRsvpsRes, mySavesRes, myAttRes, myPaymentsRes] =
+    const [eventsRes, rsvpsRes, myRsvpsRes, myAttRes, myPaymentsRes] =
       await Promise.all([
         supabase.from("events").select("*").order("date"),
         supabase.from("event_rsvps").select("event_id"),
         supabase.from("event_rsvps").select("event_id").eq("user_id", user.id),
-        supabase.from("event_saves").select("event_id").eq("user_id", user.id),
         supabase
           .from("event_attendances")
           .select("event_id, duration_minutes")
@@ -58,7 +61,6 @@ export function useEvents() {
       rsvpCounts.set(r.event_id, (rsvpCounts.get(r.event_id) ?? 0) + 1);
     });
     const myRsvpIds = new Set((myRsvpsRes.data ?? []).map((r) => r.event_id));
-    const mySaveIds = new Set((mySavesRes.data ?? []).map((s) => s.event_id));
     const myAttMap = new Map(
       (myAttRes.data ?? []).map((a) => [a.event_id, a.duration_minutes as number])
     );
@@ -76,7 +78,6 @@ export function useEvents() {
         ...evt,
         rsvp_count: rsvpCount + (paidButNotCounted ? 1 : 0),
         is_attending: isAttending || hasPaid,
-        is_saved: mySaveIds.has(evt.id),
         has_attended: myAttMap.has(evt.id),
         attendance_minutes: myAttMap.get(evt.id) ?? null,
         has_paid: hasPaid,
@@ -159,7 +160,6 @@ export function useEvents() {
         ...(data as DbEvent),
         rsvp_count: 0,
         is_attending: false,
-        is_saved: false,
         has_attended: false,
         attendance_minutes: null,
         has_paid: false,
@@ -213,37 +213,6 @@ export function useEvents() {
             e.id === eventId
               ? { ...e, is_attending: true, rsvp_count: e.rsvp_count + 1 }
               : e
-          )
-        );
-      }
-    },
-    [user, events]
-  );
-
-  const toggleSave = useCallback(
-    async (eventId: string) => {
-      if (!user) return;
-      const event = events.find((e) => e.id === eventId);
-      if (!event) return;
-
-      if (event.is_saved) {
-        await supabase
-          .from("event_saves")
-          .delete()
-          .eq("event_id", eventId)
-          .eq("user_id", user.id);
-        setEvents((prev) =>
-          prev.map((e) =>
-            e.id === eventId ? { ...e, is_saved: false } : e
-          )
-        );
-      } else {
-        await supabase
-          .from("event_saves")
-          .insert({ event_id: eventId, user_id: user.id });
-        setEvents((prev) =>
-          prev.map((e) =>
-            e.id === eventId ? { ...e, is_saved: true } : e
           )
         );
       }
@@ -339,7 +308,6 @@ export function useEvents() {
     addEvent,
     updateEventStatus,
     toggleRSVP,
-    toggleSave,
     deleteEvent,
     markAttended,
     unmarkAttended,

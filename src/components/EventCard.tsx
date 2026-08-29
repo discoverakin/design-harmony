@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import SaveEventButton from "@/components/events/SaveEventButton";
 import { formatPrice } from "@/lib/format-price";
 import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
@@ -87,21 +88,30 @@ const EventCard = ({
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-      {/* Image (flyer → hobby image) with emoji fallback on missing or failed load */}
-      {imageSrc ? (
-        <div className="w-full h-24 bg-secondary overflow-hidden">
-          <img
-            src={imageSrc}
-            alt={title}
-            className="w-full h-full object-cover"
-            onError={() => setAttemptIdx((i) => i + 1)}
-          />
-        </div>
-      ) : (
-        <div className="w-full h-24 bg-secondary/60 flex items-center justify-center">
-          <span className="text-5xl">{emoji}</span>
-        </div>
-      )}
+      {/* Image (flyer → hobby image) with emoji fallback on missing or failed load.
+          The save button floats here, at the opposite end of the card from
+          "Book Now", so the two cannot be confused by a thumb. */}
+      <div className="relative">
+        {imageSrc ? (
+          <div className="w-full h-24 bg-secondary overflow-hidden">
+            <img
+              src={imageSrc}
+              alt={title}
+              className="w-full h-full object-cover"
+              onError={() => setAttemptIdx((i) => i + 1)}
+            />
+          </div>
+        ) : (
+          <div className="w-full h-24 bg-secondary/60 flex items-center justify-center">
+            <span className="text-5xl">{emoji}</span>
+          </div>
+        )}
+        <SaveEventButton
+          eventId={id}
+          title={title}
+          className="absolute top-0.5 right-0.5"
+        />
+      </div>
 
       {/* Content */}
       <div className="p-3 space-y-1.5">

@@ -23,6 +23,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useEvents } from "@/hooks/use-events";
+import { useSavedEvents } from "@/hooks/use-saved-events";
 import { useActivityLog } from "@/hooks/use-activity-log";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -37,8 +38,9 @@ const EventDetail = () => {
   const { pathname } = useLocation();
   const redirectQuery = `redirect=${encodeURIComponent(pathname)}`;
   const {
-    getEvent, toggleSave, markAttended, unmarkAttended, loading,
+    getEvent, markAttended, unmarkAttended, loading,
   } = useEvents();
+  const { isSaved, toggleSave } = useSavedEvents();
   const { addLog, logs, deleteLog } = useActivityLog();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -89,10 +91,11 @@ const EventDetail = () => {
   );
 
   const handleSave = () => {
+    const wasSaved = isSaved(event.id);
     toggleSave(event.id);
     toast({
-      title: event.is_saved ? "Removed from saved" : "Event saved! 🔖",
-      description: event.is_saved
+      title: wasSaved ? "Removed from saved" : "Event saved! 🔖",
+      description: wasSaved
         ? `Removed ${event.title} from your saved events`
         : `${event.title} saved for later`,
     });
@@ -173,7 +176,7 @@ const EventDetail = () => {
           onClick={handleSave}
           className="p-2 -mr-2 rounded-lg hover:bg-accent transition-colors"
         >
-          {event.is_saved ? (
+          {isSaved(event.id) ? (
             <BookmarkCheck className="w-5 h-5 text-primary" />
           ) : (
             <Bookmark className="w-5 h-5 text-foreground" />

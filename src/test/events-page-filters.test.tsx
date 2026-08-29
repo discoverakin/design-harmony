@@ -14,6 +14,14 @@ import type { CommunityEvent } from "@/data/events";
 vi.mock("@/hooks/use-auth", () => ({ useAuth: () => ({ user: null }) }));
 vi.mock("@/hooks/use-theme", () => ({ useTheme: () => ({ theme: "light" }) }));
 vi.mock("@/lib/supabase", () => ({ supabase: { from: () => ({}) } }));
+vi.mock("@/hooks/use-saved-events", () => ({
+  useSavedEvents: () => ({
+    savedIds: new Set<string>(),
+    isSaved: () => false,
+    toggleSave: () => {},
+    loading: false,
+  }),
+}));
 
 const today = new Date().toISOString().split("T")[0];
 const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
@@ -41,7 +49,6 @@ const makeEvent = (overrides: Partial<CommunityEvent>): CommunityEvent =>
     created_at: "2026-08-01",
     rsvp_count: 0,
     is_attending: false,
-    is_saved: false,
     has_attended: false,
     attendance_minutes: null,
     has_paid: false,

@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { weeklyShuffle } from "@/lib/weeklyShuffle";
 import { isUpcoming } from "@/lib/eventDates";
 import EventCard from "@/components/EventCard";
+import CardCarousel from "@/components/CardCarousel";
 
 interface FeaturedEvent {
   id: string;
@@ -55,57 +56,47 @@ const FeaturedThisWeek = () => {
 
   if (featured === null) {
     return (
-      <section className="pt-6">
-        <h2 className="text-lg font-bold text-foreground px-4 mb-3">
-          Featured this week
-        </h2>
-        <div className="flex gap-3 pl-4 pr-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 w-40 rounded-xl border border-border bg-card overflow-hidden animate-pulse snap-start"
-            >
-              <div className="w-full h-24 bg-secondary" />
-              <div className="p-3 space-y-2">
-                <div className="h-3 bg-secondary rounded w-3/4" />
-                <div className="h-3 bg-secondary rounded w-1/2" />
-                <div className="h-3 bg-secondary rounded w-2/3" />
-              </div>
+      <CardCarousel title="Featured this week" label="Featured events this week">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-40 rounded-xl border border-border bg-card overflow-hidden animate-pulse"
+          >
+            <div className="w-full h-24 bg-secondary" />
+            <div className="p-3 space-y-2">
+              <div className="h-3 bg-secondary rounded w-3/4" />
+              <div className="h-3 bg-secondary rounded w-1/2" />
+              <div className="h-3 bg-secondary rounded w-2/3" />
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        ))}
+      </CardCarousel>
     );
   }
 
   if (featured.length === 0) return null;
 
   return (
-    <section className="pt-6">
-      <h2 className="text-lg font-bold text-foreground px-4 mb-3">
-        Featured this week
-      </h2>
-      <div className="flex gap-3 pl-4 pr-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-        {featured.map((evt) => (
-          <div key={evt.id} className="flex-shrink-0 w-40 snap-start">
-            <EventCard
-              id={evt.id}
-              title={evt.title}
-              date={evt.date}
-              time={evt.time}
-              location={evt.location}
-              price_cents={evt.price_cents}
-              price_display={evt.price_display}
-              emoji={evt.emoji}
-              flyer_url={evt.flyer_url}
-              hobby_slug={evt.hobby_slug}
-              description={evt.description}
-              forceEventDetail
-            />
-          </div>
-        ))}
-      </div>
-    </section>
+    <CardCarousel title="Featured this week" label="Featured events this week">
+      {featured.map((evt) => (
+        <div key={evt.id} className="w-40">
+          <EventCard
+            id={evt.id}
+            title={evt.title}
+            date={evt.date}
+            time={evt.time}
+            location={evt.location}
+            price_cents={evt.price_cents}
+            price_display={evt.price_display}
+            emoji={evt.emoji}
+            flyer_url={evt.flyer_url}
+            hobby_slug={evt.hobby_slug}
+            description={evt.description}
+            forceEventDetail
+          />
+        </div>
+      ))}
+    </CardCarousel>
   );
 };
 

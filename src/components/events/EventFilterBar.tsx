@@ -87,7 +87,7 @@ const EventFilterBar = ({
   return (
     <div className="space-y-2">
       {/* Date */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {DATE_PRESETS.map((preset) => (
           <Chip
             key={preset}
@@ -135,7 +135,7 @@ const EventFilterBar = ({
       </div>
 
       {/* Price and distance */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none items-center">
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide items-center">
         {PRICE_OPTIONS.map((option) => (
           <Chip
             key={option.value}

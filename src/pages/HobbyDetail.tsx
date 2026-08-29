@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
 import { useEvents } from "@/hooks/use-events";
+import { useGoBack } from "@/hooks/use-go-back";
 import { formatPrice } from "@/lib/format-price";
 import { parseEventDates, classificationLabel, isUpcoming } from "@/lib/eventDates";
 
 const HobbyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const goBack = useGoBack("/home");
   const hobby = getHobbyBySlug(slug || "");
   const { getEventsByHobby, loading } = useEvents();
 
@@ -18,7 +20,7 @@ const HobbyDetail = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background max-w-lg mx-auto">
         <p className="text-lg text-muted-foreground">Hobby not found.</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate("/")}>
+        <Button variant="outline" className="mt-4" onClick={goBack}>
           Go back
         </Button>
       </div>
@@ -35,7 +37,7 @@ const HobbyDetail = () => {
         style={{ backgroundColor: hobby.bgColor }}
       >
         <button
-          onClick={() => navigate("/")}
+          onClick={goBack}
           className="flex items-center gap-1 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -12,7 +12,7 @@ finished.
 
 | Feature | PR | Shipped |
 |---|---|---|
-| [Carousel affordances](2026-08-29-carousel-affordances.md) | #9 | pending merge |
+| [Carousel affordances](2026-08-29-carousel-affordances.md) | #9 | 2026-08-30 |
 | [Back-navigation context](2026-08-29-back-navigation-context.md) | #7 | 2026-08-29 |
 | [Save from the card](2026-08-26-save-from-card.md) | #5 | 2026-08-26 |
 | [Browse filters on /events](2026-08-26-browse-filters.md) | #4 | 2026-08-26 |

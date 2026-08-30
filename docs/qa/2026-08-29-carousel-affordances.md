@@ -1,7 +1,7 @@
 # Consistent, discoverable card carousels — QA script
 
-**PR:** #9 · **Shipped:** pending merge · **Test at:** the branch preview while
-the PR is open, then <https://design-harmony-ashen.vercel.app>
+**PR:** #9 · **Shipped:** 2026-08-30 · **Test at:**
+<https://design-harmony-ashen.vercel.app>
 
 Open in a **fresh incognito window** (no service worker, and you start logged
 out). No DevTools panel is needed for the logged-out pass; the signed-in pass

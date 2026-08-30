@@ -12,6 +12,7 @@ finished.
 
 | Feature | PR | Shipped |
 |---|---|---|
+| [How long an event runs](2026-08-30-event-duration.md) | #12 | pending merge |
 | [Price on the events list cards](2026-08-30-price-on-list-cards.md) | #10 | 2026-08-30 |
 | [Carousel affordances](2026-08-29-carousel-affordances.md) | #9 | 2026-08-30 |
 | [Back-navigation context](2026-08-29-back-navigation-context.md) | #7 | 2026-08-29 |

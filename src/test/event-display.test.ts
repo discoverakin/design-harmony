@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice, priceLabel, summarizePriceDisplay } from "@/lib/format-price";
 import { hasKnownDate, isUpcoming } from "@/lib/eventDates";
 
 describe("formatPrice", () => {
@@ -44,5 +44,48 @@ describe("hasKnownDate", () => {
   it("leaves isUpcoming alone — a sentinel event is still listable", () => {
     // Suppressing the date is a display decision, not a filtering one.
     expect(isUpcoming({ date: "2099-01-01", description: "Taster class." })).toBe(true);
+  });
+});
+
+describe("summarizePriceDisplay", () => {
+  it("keeps a single price as-is", () => {
+    expect(summarizePriceDisplay("$35")).toBe("$35");
+    expect(summarizePriceDisplay("$35 per person")).toBe("$35");
+  });
+
+  it("reduces a range or a list to its lowest price", () => {
+    expect(summarizePriceDisplay("$35–$325")).toBe("from $35");
+    expect(summarizePriceDisplay("$35 for workshop and $60 for kit")).toBe("from $35");
+  });
+
+  it("passes through text with no price in it", () => {
+    expect(summarizePriceDisplay("TBD")).toBe("TBD");
+    expect(summarizePriceDisplay("Contact studio for pricing")).toBe(
+      "Contact studio for pricing"
+    );
+  });
+});
+
+describe("priceLabel", () => {
+  it("never returns nothing — a card with no price reads as missing info", () => {
+    // The events list gated its price badge on `price_cents > 0`, so free and
+    // scraped-price classes showed none at all.
+    expect(priceLabel({ price_cents: 0 })).toBe("Free");
+    expect(priceLabel({ price_cents: 8500 })).toBe("$85.00");
+    expect(priceLabel({ price_cents: null })).toBe("See details");
+    expect(priceLabel({})).toBe("See details");
+  });
+
+  it("prefers the scraped free-text price over the cents column", () => {
+    // price_cents is null on scraped listings; price_display carries the truth.
+    expect(priceLabel({ price_cents: null, price_display: "$80 per person" })).toBe(
+      "$80"
+    );
+    expect(priceLabel({ price_cents: 0, price_display: "$35–$325" })).toBe("from $35");
+  });
+
+  it("ignores an empty display string rather than rendering a blank", () => {
+    expect(priceLabel({ price_cents: 2500, price_display: "   " })).toBe("$25.00");
+    expect(priceLabel({ price_cents: 2500, price_display: null })).toBe("$25.00");
   });
 });

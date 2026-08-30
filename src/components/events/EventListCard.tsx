@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import SaveEventButton from "@/components/events/SaveEventButton";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
-import { formatPrice } from "@/lib/format-price";
+import { priceLabel } from "@/lib/format-price";
 import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
@@ -22,6 +22,11 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
     month: "short",
     day: "numeric",
   });
+
+  // Scraped prices can be whole sentences ("Contact for pricing (scholarships
+  // available)"). Truncated here so it cannot out-shout the title; the event
+  // page shows it in full.
+  const price = priceLabel(event);
 
   const { classification } = parseEventDates(event.description);
   const chipLabel = classificationLabel(classification);
@@ -81,14 +86,17 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
             <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
               {event.title}
             </p>
-            {event.price_cents > 0 && (
-              <Badge
-                variant="outline"
-                className="text-[9px] px-1.5 py-0 flex-shrink-0 font-semibold"
-              >
-                {formatPrice(event.price_cents)}
-              </Badge>
-            )}
+            {/* Always rendered. Gating this on `price_cents > 0` left free and
+                scraped-price classes showing no price at all — 41% of the
+                upcoming list, and a tester's complaint that the cards carried
+                emoji and little else. */}
+            <Badge
+              variant="outline"
+              title={price}
+              className="text-[9px] px-1.5 py-0 flex-shrink-0 font-semibold max-w-[45%] truncate"
+            >
+              {price}
+            </Badge>
             {event.has_attended ? (
               <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0 gap-0.5 bg-primary/15 text-primary border-0">
                 <CheckCircle2 className="w-2.5 h-2.5" />

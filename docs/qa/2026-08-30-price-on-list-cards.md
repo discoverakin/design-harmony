@@ -1,7 +1,7 @@
 # Price on the events list cards — QA script
 
-**PR:** #10 · **Shipped:** pending merge · **Test at:** the branch preview while
-open; <https://design-harmony-ashen.vercel.app/events> once merged.
+**PR:** #10 · **Shipped:** 2026-08-30 · **Test at:**
+<https://design-harmony-ashen.vercel.app/events>
 
 Open in a **fresh incognito window**. No login needed. No DevTools required for
 this one — everything here is visible on the page.

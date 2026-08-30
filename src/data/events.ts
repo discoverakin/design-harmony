@@ -16,6 +16,9 @@ export interface DbEvent {
   created_by: string | null; // auth.users UUID — null for seed data
   created_by_name: string;
   price_cents: number;
+  /** Scraped free-text price ("$80 per person", "$35–$325"). Preferred over
+   *  `price_cents` for display; see `priceLabel`. */
+  price_display?: string | null;
   hobby_slug: string | null;
   /** Geocoded position. Added by hand in the dashboard — in no migration, and
    *  null on listings the scout could not place. */

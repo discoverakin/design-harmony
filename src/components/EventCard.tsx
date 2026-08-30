@@ -4,27 +4,9 @@ import { Calendar, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SaveEventButton from "@/components/events/SaveEventButton";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice, summarizePriceDisplay } from "@/lib/format-price";
 import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
-
-/**
- * Condense a free-form price string into a compact label.
- * "$35 for workshop and $60 for kit" → "from $35"
- * "$35–$325" → "from $35"
- * "$35" → "$35"
- * "TBD" → "TBD" (raw fallback)
- */
-function summarizePriceDisplay(raw: string): string {
-  const matches = [...raw.matchAll(/\$(\d+(?:\.\d{1,2})?)/g)];
-  if (matches.length === 0) return raw;
-  const parsed = matches.map((m) => ({ raw: m[1], num: parseFloat(m[1]) }));
-  const unique = [...new Set(parsed.map((p) => p.num))];
-  if (unique.length === 1) return `$${parsed[0].raw}`;
-  const min = Math.min(...unique);
-  const minRaw = parsed.find((p) => p.num === min)!.raw;
-  return `from $${minRaw}`;
-}
 
 interface EventCardProps {
   id: string;

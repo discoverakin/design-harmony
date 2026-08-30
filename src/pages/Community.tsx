@@ -132,7 +132,7 @@ const Community = () => {
                     </button>
                   )}
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   <Badge
                     variant={activeCategory === null ? "default" : "secondary"}
                     className="cursor-pointer flex-shrink-0 text-[11px] px-3 py-1 rounded-full"

@@ -26,6 +26,14 @@ export interface DbEvent {
   lng?: number | null;
   /** Curated synonyms used by search — see migration 012. */
   search_terms?: string[] | null;
+  /** Scraped schedule fields, added by hand in the dashboard and in no
+   *  migration. `duration_minutes` is the event's length (not to be confused
+   *  with the attendance figure on `CommunityEvent`) and is filled in on
+   *  almost nothing; `schedule_note` is a free-text statement of when the
+   *  thing runs. `resolveEventTiming` reads both — see `lib/eventTimes.ts`. */
+  duration_minutes?: number | null;
+  schedule_note?: string | null;
+  recurrence?: string | null;
   status: EventStatus;
   created_at: string;
 }

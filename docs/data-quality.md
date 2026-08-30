@@ -169,3 +169,53 @@ their own title and description — no hobby path, no mood path, and no
 backfilled `search_terms` (migrations 013/014 key on the slug). Low volume,
 easy to fix by hand, and worth doing whenever the taxonomy work in
 [hobby-taxonomy.md](hobby-taxonomy.md) happens.
+
+## 6. End times exist, but only in prose
+
+**Measured 2026-08-30 on a 58-event sample** drawn through the production
+`/api/search` endpoint (19% of the ~306 approved events; the endpoint returns
+whole rows, so it doubles as a way to see the live column list without
+dashboard access).
+
+A tester asked how long a workshop runs so she could plan the rest of her day.
+`events.time` holds a start and nothing else — but the scout usually captured
+the whole span and then dropped half of it on the way in:
+
+| `events.time` | what the row also says |
+|---|---|
+| `10:30 AM` | `…June 28 & July 12, 2026, 10:30 AM–5:00 PM.` |
+| `6:30 PM` | `Mondays, Jun 15 - Aug 10, 2026, 6:30-7:30 PM` |
+| `See details` | `Runs every Sunday morning 10:00AM–11:30AM` |
+
+`resolveEventTiming` (`src/lib/eventTimes.ts`) recovers the end where it can be
+recovered safely, in the same spirit as the `Dates:` prefix in
+`eventDates.ts` — read what the scrape left behind rather than wait on a schema
+change. **It resolved 16 of 58 (28%).** The rest render exactly as before.
+
+Two findings worth acting on independently of that:
+
+- **`duration_minutes` already exists on the table** — hand-added, in no
+  migration — and is populated on **1 of 58 rows**. It is the right home for
+  this. Every row it gets filled in on is one the parser no longer has to guess
+  at, and the code already prefers it over the prose.
+- **15 of 58 (26%) store no clock at all**, just `See details` or
+  `Evenings and afternoons`. The tester's report was that only the start time
+  is shown; for a quarter of the catalogue not even that is true. This is the
+  larger gap and no amount of parsing fixes it.
+
+What the parser deliberately does **not** do, because a wrong end time is worse
+than none when someone is planning around it: it ignores a span when the
+listing advertises several different ones ("Mon–Fri AM and PM"), when the span
+disagrees with `events.time`, and when the only span sits in marketing copy on
+a row whose `time` is unusable — there is nothing to tell whether it belongs to
+this class or another offering by the same studio. Prose durations
+("2.5 hrs of hands-on wheel time", "6 to 8 classes (3 hrs each)") are also left
+alone; the first is explicitly not the class length, since a demo precedes it.
+
+```sql
+select count(*) filter (where duration_minutes is not null) as has_duration,
+       count(*) filter (where time !~* '^\s*\d{1,2}(:\d{2})?\s*[ap]\.?m\.?') as no_clock,
+       count(*) as approved
+from events
+where status = 'approved';
+```

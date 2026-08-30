@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
 import { priceLabel } from "@/lib/format-price";
 import { parseEventDates } from "@/lib/eventDates";
+import { resolveEventTiming, formatDuration } from "@/lib/eventTimes";
 
 
 const EventDetail = () => {
@@ -73,6 +74,7 @@ const EventDetail = () => {
     );
   }
 
+  const timing = resolveEventTiming(event);
   const dateObj = new Date(event.date + "T00:00:00");
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     weekday: "long",
@@ -275,7 +277,17 @@ const EventDetail = () => {
             )}
             <div className="flex items-center gap-3 text-sm text-foreground">
               <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-              <span>{event.time}</span>
+              {timing ? (
+                <span>
+                  {timing.start} – {timing.end}
+                  <span className="text-muted-foreground">
+                    {" "}
+                    · {formatDuration(timing.durationMinutes)}
+                  </span>
+                </span>
+              ) : (
+                <span>{event.time}</span>
+              )}
             </div>
             <div className="flex items-center gap-3 text-sm text-foreground">
               <MapPin className="w-4 h-4 text-primary flex-shrink-0" />

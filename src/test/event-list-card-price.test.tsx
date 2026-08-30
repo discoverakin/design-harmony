@@ -79,6 +79,22 @@ describe("EventListCard price", () => {
     expect(screen.queryByText("Free")).not.toBeInTheDocument();
   });
 
+  it("keeps a sentence-long scraped price from out-shouting the title", () => {
+    // "Contact for pricing (scholarships available)" is 44 characters and wrapped
+    // onto its own line, taller and louder than the class name.
+    renderCard({
+      price_cents: null,
+      price_display: "Contact for pricing (scholarships available)",
+    });
+    const badge = screen.getByText("Contact for pricing (scholarships available)");
+    expect(badge).toHaveClass("truncate");
+    // The full text stays reachable on hover, and in full on the event page.
+    expect(badge).toHaveAttribute(
+      "title",
+      "Contact for pricing (scholarships available)"
+    );
+  });
+
   it("carries more than an emoji on every card", () => {
     renderCard({ price_cents: null });
     expect(screen.getByText("Wheel Throwing Workshop")).toBeInTheDocument();

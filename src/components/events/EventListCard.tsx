@@ -23,6 +23,11 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
     day: "numeric",
   });
 
+  // Scraped prices can be whole sentences ("Contact for pricing (scholarships
+  // available)"). Truncated here so it cannot out-shout the title; the event
+  // page shows it in full.
+  const price = priceLabel(event);
+
   const { classification } = parseEventDates(event.description);
   const chipLabel = classificationLabel(classification);
   // The anchor date is misleading for ongoing/multi events, so suppress TODAY/TMRW
@@ -87,9 +92,10 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
                 emoji and little else. */}
             <Badge
               variant="outline"
-              className="text-[9px] px-1.5 py-0 flex-shrink-0 font-semibold"
+              title={price}
+              className="text-[9px] px-1.5 py-0 flex-shrink-0 font-semibold max-w-[45%] truncate"
             >
-              {priceLabel(event)}
+              {price}
             </Badge>
             {event.has_attended ? (
               <Badge className="text-[9px] px-1.5 py-0 flex-shrink-0 gap-0.5 bg-primary/15 text-primary border-0">

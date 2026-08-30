@@ -41,15 +41,34 @@ clear the filters and look for the rest.
 class is free is the one mistake this must not make. Report it immediately if
 you see it.
 
-## 3. It matches the featured cards
+## 3. The event page shows the price too
+
+**Do:** tap a card whose price reads **See details** or something like
+"Contact studio for pricing", and look at the top of the event page.
+**Expect:** the same price badge beside the title — in full, not truncated.
+**Fail:** no price on the event page. It had the identical `> 0` gate, so
+tapping through to learn the price used to show nothing.
+
+## 4. Long scraped prices stay in their lane
+
+**Do:** find a card whose price is a sentence ("Contact for pricing
+(scholarships available)", "Varies by class").
+**Expect:** the badge is capped to roughly half the card width and truncated
+with an ellipsis; the class title still reads as the loudest thing on the card.
+Hovering the badge (desktop) shows the full text; the event page shows it in
+full.
+**Fail:** the price wrapping onto its own line and dominating the row.
+
+## 5. It matches the featured cards
 
 **Do:** compare a card on home ("Featured this week") with the same class in
 the `/events` list.
-**Expect:** the same price text in both places.
+**Expect:** the same price text in both places (the list may truncate a long
+one — the leading characters should match).
 **Fail:** a class showing a price on home and none — or a different one — in
 the list. That divergence is what this change removes.
 
-## 4. Nothing else on the card moved
+## 6. Nothing else on the card moved
 
 **Do:** look at a card with several badges — one you are attending, or one
 marked Ongoing.
@@ -68,10 +87,11 @@ same cards, so prices should appear there too.
 
 ## What is shakiest
 
-**"See details" on a narrow screen.** It is the longest of the four labels and
-sits in a small badge next to a truncated title. If it wraps badly on a
-particular phone width, that is worth a screenshot — the logic is deterministic
-but the layout is a judgement call.
+**Truncated scraped prices.** Five upcoming listings carry a sentence rather
+than a number, and the cap that keeps them from taking over the row also means
+a card can read "Contact for pricing (schol…". The full text is on the event
+page, which is the argument for it — but whether the truncated form is useful
+or just noise on a phone is a judgement worth a tester's opinion.
 
 ## Not covered
 

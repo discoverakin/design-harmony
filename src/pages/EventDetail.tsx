@@ -29,7 +29,7 @@ import { useActivityLog } from "@/hooks/use-activity-log";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { groups } from "@/data/community";
-import { formatPrice } from "@/lib/format-price";
+import { priceLabel } from "@/lib/format-price";
 import { parseEventDates } from "@/lib/eventDates";
 
 
@@ -233,11 +233,11 @@ const EventDetail = () => {
                 <h1 className="text-xl font-bold text-foreground leading-tight">
                   {event.title}
                 </h1>
-                {event.price_cents > 0 && (
-                  <Badge variant="outline" className="text-xs font-semibold flex-shrink-0">
-                    {formatPrice(event.price_cents)}
-                  </Badge>
-                )}
+                {/* Always shown, and never truncated here — this is where a
+                    card's "Contact studio for pricing" has to be readable. */}
+                <Badge variant="outline" className="text-xs font-semibold">
+                  {priceLabel(event)}
+                </Badge>
               </div>
               <div className="flex items-center gap-2 mt-1">
                 {event.group_name && (() => {

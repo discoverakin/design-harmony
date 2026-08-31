@@ -6,6 +6,8 @@ import SaveEventButton from "@/components/events/SaveEventButton";
 import type { CommunityEvent } from "@/data/events";
 import { groups } from "@/data/community";
 import { priceLabel } from "@/lib/format-price";
+import { cardLocationLabel } from "@/lib/placeLabel";
+import { useGrantedLocation } from "@/hooks/use-user-location";
 import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
@@ -27,6 +29,11 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
   // available)"). Truncated here so it cannot out-shout the title; the event
   // page shows it in full.
   const price = priceLabel(event);
+  // A tester wanted proximity at a glance rather than the literal address:
+  // a distance when we can work one out, the city when we cannot. The full
+  // address is one tap away on the event page.
+  const origin = useGrantedLocation();
+  const where = cardLocationLabel(event, origin);
 
   const { classification } = parseEventDates(event.description);
   const chipLabel = classificationLabel(classification);
@@ -124,7 +131,7 @@ const EventListCard = ({ event, compact = false }: EventListCardProps) => {
           </div>
           <span className="text-[11px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
             <MapPin className="w-3 h-3" />
-            {event.location}
+            {where}
           </span>
 
           <div className="flex items-center justify-between mt-2">

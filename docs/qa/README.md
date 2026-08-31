@@ -12,6 +12,7 @@ finished.
 
 | Feature | PR | Shipped |
 |---|---|---|
+| [Proximity instead of the street address](2026-08-31-distance-over-address.md) | #16 | pending merge |
 | [How long an event runs](2026-08-30-event-duration.md) | #12 | 2026-08-31 |
 | [Teaching what the search bar does](2026-08-31-search-examples.md) | #13 | 2026-08-31 |
 | [Price on the events list cards](2026-08-30-price-on-list-cards.md) | #10 | 2026-08-30 |

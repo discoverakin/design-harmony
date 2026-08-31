@@ -49,3 +49,51 @@ export function useUserLocation(active: boolean) {
     request,
   };
 }
+
+/**
+ * The user's position, but only if they have already granted it.
+ *
+ * Cards show a distance where they can, and a place name where they cannot —
+ * so this must never trigger a permission prompt. A browse list is the wrong
+ * moment to ask, and a prompt nobody expects gets denied, which would cost us
+ * the answer for good. Anyone who has used the distance filter (or granted the
+ * map) already counts as granted, and their cards start showing distances with
+ * no further ceremony.
+ */
+export function useGrantedLocation() {
+  const [coords, setCoords] = useState<Coords | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+
+    const read = () =>
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          if (!cancelled) {
+            setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          }
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 10 * 60 * 1000 }
+      );
+
+    // No Permissions API (older Safari) means we cannot tell granted from
+    // unasked, and asking is the thing we must not do. Show place names.
+    if (!navigator.permissions?.query) return;
+
+    navigator.permissions
+      .query({ name: "geolocation" as PermissionName })
+      .then((status) => {
+        if (!cancelled && status.state === "granted") read();
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return coords;
+}

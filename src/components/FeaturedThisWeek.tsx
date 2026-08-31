@@ -17,6 +17,8 @@ interface FeaturedEvent {
   hobby_slug: string | null;
   flyer_url: string | null;
   description: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 const FEATURED_COUNT = 8;
@@ -33,7 +35,7 @@ const FeaturedThisWeek = () => {
     supabase
       .from("events")
       .select(
-        "id, title, date, time, location, emoji, price_cents, price_display, hobby_slug, flyer_url, description"
+        "id, title, date, time, location, emoji, price_cents, price_display, hobby_slug, flyer_url, description, lat, lng"
       )
       .eq("status", "approved")
       .order("date", { ascending: true })
@@ -92,6 +94,8 @@ const FeaturedThisWeek = () => {
             flyer_url={evt.flyer_url}
             hobby_slug={evt.hobby_slug}
             description={evt.description}
+            lat={evt.lat}
+            lng={evt.lng}
             forceEventDetail
           />
         </div>

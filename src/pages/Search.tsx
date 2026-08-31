@@ -8,6 +8,7 @@ import EventCard from "@/components/EventCard";
 import { useGoBack } from "@/hooks/use-go-back";
 import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { readSearchCache, writeSearchCache } from "@/lib/searchCache";
+import { SEARCH_EXAMPLES } from "@/data/searchExamples";
 import { isUpcoming } from "@/lib/eventDates";
 
 interface ParsedSearch {
@@ -139,13 +140,22 @@ const Search = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const runSearch = useCallback(
+    (raw: string) => {
+      const q = raw.trim();
+      if (!q) return;
+      setQuery(q);
+      navigate(`/search?q=${encodeURIComponent(q)}`, { replace: true });
+      // An explicit ask always re-runs — that is also how a user refreshes a
+      // cached answer they no longer trust.
+      doSearch(q);
+    },
+    [doSearch, navigate]
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
-    navigate(`/search?q=${encodeURIComponent(query)}`, { replace: true });
-    // Submitting is an explicit ask, so it always re-runs — that is also how a
-    // user refreshes a cached answer they no longer trust.
-    doSearch(query);
+    runSearch(query);
   };
 
   // Put the results grid back where it was when they tapped a class.
@@ -176,11 +186,41 @@ const Search = () => {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search classes... e.g. 'pottery this weekend'"
+                placeholder="Describe what you're after — 'relaxing this weekend'"
                 className="w-full h-12 rounded-xl border border-border bg-secondary/40 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
           </form>
+
+          {/* Nothing searched yet — the one moment there is room to explain
+              what this bar does differently. A tester read the label as an
+              ordinary search box and typed keywords, never finding out she
+              could describe a mood or a budget. Examples rather than a
+              tooltip: they are here every visit, not just the first, and a tap
+              demonstrates the thing instead of describing it. */}
+          {!loading && !error && !hasSearched && (
+            <div className="pb-4">
+              <p className="text-sm text-foreground font-medium mb-1">
+                Say what you're in the mood for
+              </p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Not just a keyword — a vibe, a night, a budget. Akin reads the
+                whole phrase and finds classes that fit.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {SEARCH_EXAMPLES.map((example) => (
+                  <button
+                    key={example.query}
+                    type="button"
+                    onClick={() => runSearch(example.query)}
+                    className="text-[11px] px-3 py-1.5 rounded-full border border-border bg-secondary/40 text-foreground hover:border-primary/50 hover:bg-secondary transition-colors"
+                  >
+                    {example.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Loading */}
           {loading && (

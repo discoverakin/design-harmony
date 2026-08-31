@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, X, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
 import HobbyCategoryCard from "./HobbyCategoryCard";
 import { hobbies } from "@/data/hobbies";
+import { HOME_SEARCH_EXAMPLES } from "@/data/searchExamples";
 
 const INITIAL_COUNT = 6;
 
@@ -70,9 +71,21 @@ const BrowseHobbiesSection = () => {
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
-        <p className="text-[10px] text-muted-foreground/70 mt-1.5">
-          Try saying "relaxing classes" or "meet people this weekend"
-        </p>
+        {/* Tappable, because the point is that a vague phrase works here — a
+            tester read the bar as ordinary search and never tried one. */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          <span className="text-[10px] text-muted-foreground/70">Try:</span>
+          {HOME_SEARCH_EXAMPLES.map((example) => (
+            <button
+              key={example.query}
+              type="button"
+              onClick={() => navigate(`/search?q=${encodeURIComponent(example.query)}`)}
+              className="text-[10px] px-2 py-0.5 rounded-full border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+            >
+              {example.label}
+            </button>
+          ))}
+        </div>
       </form>
 
       {isSearching && filtered.length > 0 && (
@@ -85,10 +98,11 @@ const BrowseHobbiesSection = () => {
         <div className="flex flex-col items-center py-8 text-center">
           <span className="text-3xl mb-2">✨</span>
           <p className="text-sm font-semibold text-foreground mb-1">
-            Search classes with AI
+            No hobby matches "{query.trim().slice(0, 30)}"
           </p>
           <p className="text-xs text-muted-foreground mb-4">
-            Press "Search classes" above to find events matching your vibe
+            Press "Search classes" above and Akin will read it as a description
+            — a mood, a night, a budget — and find classes that fit.
           </p>
         </div>
       ) : (

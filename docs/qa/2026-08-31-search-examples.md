@@ -1,7 +1,7 @@
 # Teaching what the search bar does — QA script
 
-**PR:** #13 · **Shipped:** pending merge · **Test at:** the branch preview while
-open; <https://design-harmony-ashen.vercel.app> once merged.
+**PR:** #13 · **Shipped:** 2026-08-31 · **Test at:**
+<https://design-harmony-ashen.vercel.app/search>
 
 Open in a **fresh incognito window**. No login needed.
 

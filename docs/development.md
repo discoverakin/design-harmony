@@ -61,13 +61,32 @@ A hard reload is not reliably enough. Clear it first, in the page console:
 (await caches.keys()).forEach(n => caches.delete(n));
 ```
 
-Then reload. The same applies to the production origin after a deploy.
+Then reload. **The same applies to the production origin after a deploy**, and
+it is easy to forget because you are not thinking about caches by then: on
+2026-08-31 the first load of production after a merge still showed the
+pre-merge page in a browser that had visited the site before. One stale load,
+then correct. Do not conclude a deploy failed on the strength of a single load.
+
+**The cheapest way around all of it: use the immutable per-deployment URL**,
+`design-harmony-<hash>-discoverakins-projects.vercel.app`, which every
+deployment gets and which the Vercel MCP `list_deployments`/`get_deployment`
+tools return as `url`. It is a *different origin* from both the branch alias and
+production, so no service worker is registered on it and there is nothing to
+clear. The trade-off is that it does not follow the branch — push again and you
+need the new one.
 
 **Getting to a preview.** Every push builds one; the branch alias
 `design-harmony-git-<branch>-discoverakins-projects.vercel.app` always points at
-the newest deployment of that branch. Previews are access-protected, so opening
-one outside the Vercel session needs a share link (Vercel MCP
-`get_access_to_vercel_url`, valid ~23h).
+the newest deployment of that branch — which is exactly why the service worker
+bites there and not on the per-deployment URL.
+
+**Previews are public.** Checked 2026-08-31: password protection, Vercel
+Authentication and trusted IPs are all disabled on this project, and both the
+branch alias and the per-deployment URL answer an unauthenticated `curl` with a
+200. You can paste a preview link to anyone, and no share link is needed. Two
+consequences: a tester needs no Vercel account, and anything on a preview is
+world-readable. If protection is ever switched on, Vercel MCP
+`get_access_to_vercel_url` mints a bypass link valid ~23h.
 
 Two more preview gotchas:
 

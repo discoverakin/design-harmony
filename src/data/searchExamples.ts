@@ -7,10 +7,20 @@
  * page and on the home entry point, and tappable, because one tap that returns
  * real classes teaches more than a sentence explaining the feature.
  *
- * Each one leans on a different thing `api/search.ts` parses — mood, hobby,
- * date, price, location — so between them they map the shape of what it
- * understands. Keep them deliberately un-keyword-like: "pottery" would teach
- * exactly the wrong lesson.
+ * Each leans on a different thing `api/search.ts` parses — mood, price, skill
+ * level, social intent, who you are with — so between them they map the shape
+ * of what it understands. Keep them deliberately un-keyword-like: "pottery"
+ * would teach exactly the wrong lesson.
+ *
+ * **These were measured against the live catalogue on 2026-08-31, not
+ * imagined.** An example that returns one result teaches that the feature does
+ * not work. The five here returned 6-12 classes each and none was dominated by
+ * the out-of-area Toronto listings. Date-constrained phrasings were dropped for
+ * exactly that reason: "relaxing evening this weekend" returned a single
+ * Toronto workshop at 1pm, and "learn something new this month" came back 8/9
+ * Toronto. Dates parse fine — there is just not enough local inventory in a
+ * given week to demonstrate them yet. Re-measure before changing this list, and
+ * revisit once the catalogue question in docs/data-quality.md §3 is settled.
  */
 export interface SearchExample {
   /** What gets searched. */
@@ -20,11 +30,11 @@ export interface SearchExample {
 }
 
 export const SEARCH_EXAMPLES: SearchExample[] = [
-  { query: "relaxing evening this weekend", label: "relaxing evening this weekend" },
-  { query: "something creative with my hands", label: "creative with my hands" },
-  { query: "free things to try near downtown", label: "free, near downtown" },
-  { query: "meet new people who like cooking", label: "meet people who like cooking" },
-  { query: "beginner class next week", label: "beginner class next week" },
+  { query: "something relaxing after work", label: "relaxing after work" },
+  { query: "free classes to try", label: "free classes to try" },
+  { query: "beginner friendly, no experience needed", label: "beginner, no experience" },
+  { query: "meet people and make something", label: "meet people and make something" },
+  { query: "something fun with my kid", label: "fun with my kid" },
 ];
 
 /** The two shown on the home entry point, where space is tight. */

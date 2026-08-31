@@ -204,8 +204,8 @@ const Search = () => {
                 Say what you're in the mood for
               </p>
               <p className="text-xs text-muted-foreground mb-3">
-                Not just a keyword — a vibe, a night, a budget. Akin reads the
-                whole phrase and finds classes that fit.
+                Not just a keyword — a mood, a budget, who you're with. Akin
+                reads the whole phrase and finds classes that fit.
               </p>
               <div className="flex flex-wrap gap-2">
                 {SEARCH_EXAMPLES.map((example) => (

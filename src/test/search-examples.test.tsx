@@ -81,7 +81,7 @@ describe("search page — teaching what the bar does", () => {
   });
 
   it("runs the example when tapped, and puts it in the box", async () => {
-    const fetchSpy = vi.fn(async () => ({
+    const fetchSpy = vi.fn(async (_url?: string, _init?: RequestInit) => ({
       ok: true,
       json: async () => ({ results: [RESULT], parsed: null }),
     }));

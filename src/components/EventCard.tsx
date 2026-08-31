@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SaveEventButton from "@/components/events/SaveEventButton";
 import { formatPrice, summarizePriceDisplay } from "@/lib/format-price";
+import { cardLocationLabel } from "@/lib/placeLabel";
+import { useGrantedLocation } from "@/hooks/use-user-location";
 import { parseEventDates, classificationLabel, hasKnownDate } from "@/lib/eventDates";
 import { HOBBY_IMAGES } from "@/data/hobbyImages";
 
@@ -24,6 +26,10 @@ interface EventCardProps {
   forceEventDetail?: boolean;
   /** Optional description; used to detect and label multi-date/ongoing events. */
   description?: string | null;
+  /** Geocoded position, when the caller has it — turns the location line into
+   *  a distance. Absent on search results, which fall back to the place name. */
+  lat?: number | null;
+  lng?: number | null;
 }
 
 const EventCard = ({
@@ -39,7 +45,12 @@ const EventCard = ({
   price_display,
   forceEventDetail = false,
   description,
+  lat,
+  lng,
 }: EventCardProps) => {
+  // Proximity at a glance rather than a street address — see placeLabel.ts.
+  const origin = useGrantedLocation();
+  const where = cardLocationLabel({ location, lat, lng }, origin);
   const { classification } = parseEventDates(description);
   const chipLabel = classificationLabel(classification);
 
@@ -129,7 +140,7 @@ const EventCard = ({
           </p>
           <p className="text-[10px] text-muted-foreground flex items-center gap-1 truncate">
             <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-            {location}
+            {where}
           </p>
         </div>
 

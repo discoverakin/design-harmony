@@ -11,6 +11,10 @@ import type { CommunityEvent } from "@/data/events";
  * their price in `price_display` showed nothing — 41% of the upcoming list.
  */
 
+vi.mock("@/hooks/use-user-location", () => ({
+  useGrantedLocation: () => null,
+  useUserLocation: () => ({ origin: null, usingDeviceLocation: false, locating: false }),
+}));
 vi.mock("@/hooks/use-saved-events", () => ({
   useSavedEvents: () => ({
     savedIds: new Set<string>(),
@@ -96,9 +100,10 @@ describe("EventListCard price", () => {
   });
 
   it("carries more than an emoji on every card", () => {
-    renderCard({ price_cents: null });
+    renderCard({ price_cents: null, location: "3765 Plaza Dr, Ann Arbor, MI 48108" });
     expect(screen.getByText("Wheel Throwing Workshop")).toBeInTheDocument();
     expect(screen.getByText("See details")).toBeInTheDocument();
-    expect(screen.getByText("Ann Arbor")).toBeInTheDocument();
+    // The place name, not the street address — see placeLabel.ts.
+    expect(screen.getByText("Ann Arbor, MI")).toBeInTheDocument();
   });
 });

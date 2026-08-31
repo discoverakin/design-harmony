@@ -50,3 +50,15 @@ export function eventCoords(event: {
   if (lat === 0 && lng === 0) return null; // null island — a geocode that failed
   return { lat, lng };
 }
+
+/**
+ * How a distance reads on a card: close enough to judge at a glance, honest
+ * about its own precision. A geocode is street-accurate at best, so tenths
+ * below 10 miles and whole numbers above are as much as it can claim.
+ */
+export function distanceLabel(miles: number): string {
+  if (!Number.isFinite(miles) || miles < 0) return "";
+  if (miles < 0.1) return "right here";
+  if (miles < 10) return `${miles.toFixed(1)} mi`;
+  return `${Math.round(miles)} mi`;
+}

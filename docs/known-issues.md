@@ -44,6 +44,11 @@ message before starting over. Nothing from it has been applied to the database.
 ### Event data quality
 Placeholder dates (`2099-01-01`, `2026-01-01`), prices stored as null rather than 0, Toronto events in an Ann Arbor app, and three events with no hobby slug. The app degrades gracefully around all of it; the costs are quiet and cumulative. Sizing queries and the options are in [data-quality.md](data-quality.md).
 
+Two more, measured 2026-08-31 while adding event durations ([data-quality.md](data-quality.md#6-end-times-exist-but-only-in-prose) §6):
+
+- **`duration_minutes` is populated on roughly 1 event in 58.** The column already exists on `events` — hand-added, in no migration — and `resolveEventTiming` already prefers it over parsing prose. Backfilling it is a pure data job that needs no code change, and it is the only way end-time coverage goes above the ~28% the parser manages.
+- **About a quarter of approved events store no clock at all**, just `See details` or `Evenings and afternoons` in `events.time`. A tester reported that only the start time is shown; for these rows not even that is true, and no amount of parsing fixes it.
+
 ### Miscellaneous
 `Dashboard.tsx` hard-codes `const verificationStatus = "verified"` and renders the "Verified Business" badge from that constant, ignoring the real `profiles.verification_status` column.
 

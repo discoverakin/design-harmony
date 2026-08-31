@@ -13,6 +13,7 @@ finished.
 | Feature | PR | Shipped |
 |---|---|---|
 | [How long an event runs](2026-08-30-event-duration.md) | #12 | 2026-08-31 |
+| [Teaching what the search bar does](2026-08-31-search-examples.md) | #13 | pending merge |
 | [Price on the events list cards](2026-08-30-price-on-list-cards.md) | #10 | 2026-08-30 |
 | [Carousel affordances](2026-08-29-carousel-affordances.md) | #9 | 2026-08-30 |
 | [Back-navigation context](2026-08-29-back-navigation-context.md) | #7 | 2026-08-29 |
@@ -24,9 +25,10 @@ Start from [TEMPLATE.md](TEMPLATE.md).
 ## What every script must contain
 
 - **Where to test.** Production, or the branch preview while the PR is open.
-  Preview share links expire after ~23 hours and branch previews disappear once
-  the branch is deleted, so a merged feature's script should point at
-  production: <https://design-harmony-ashen.vercel.app>.
+  Branch previews disappear once the branch is deleted, so a merged feature's
+  script should point at production:
+  <https://design-harmony-ashen.vercel.app>. (Previews themselves need no share
+  link — see "Before you start" below.)
 - **Numbered scenarios**, each as **Do / Expect / Fail**. "Fail" is the part
   people skip and the part that makes a script usable by someone who has never
   seen the feature working — describe the old broken behaviour where there was
@@ -47,3 +49,13 @@ Clear the service worker on the origin you are testing, or you will test an old
 bundle and believe it is new — see
 [../development.md](../development.md#verifying-on-a-vercel-preview). An
 incognito window sidesteps it entirely and is the fastest way in.
+
+This bites on **production too**, not just previews: the first load after a
+deploy can still show the pre-deploy page in a browser that has been to the site
+before. One stale load, then correct — so re-load before reporting that a
+shipped fix did not ship.
+
+When a script points at a preview, prefer the **immutable per-deployment URL**
+(`design-harmony-<hash>-…vercel.app`) over the branch alias. It is a different
+origin, so no service worker exists on it at all. Preview links need no Vercel
+account and no share link — deployment protection is off on this project.

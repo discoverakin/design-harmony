@@ -89,17 +89,17 @@ describe("search page — teaching what the bar does", () => {
     renderSearch();
 
     fireEvent.click(
-      screen.getByRole("button", { name: "relaxing evening this weekend" })
+      screen.getByRole("button", { name: "relaxing after work" })
     );
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
     expect(JSON.parse((fetchSpy.mock.calls[0][1] as RequestInit).body as string)).toEqual({
-      query: "relaxing evening this weekend",
+      query: "something relaxing after work",
     });
     // Seeing it land in the input is half the lesson.
-    expect(screen.getByDisplayValue("relaxing evening this weekend")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("something relaxing after work")).toBeInTheDocument();
     expect(screen.getByTestId("url").textContent).toBe(
-      "/search?q=relaxing evening this weekend"
+      "/search?q=something relaxing after work"
     );
   });
 
@@ -113,7 +113,7 @@ describe("search page — teaching what the bar does", () => {
     );
     renderSearch();
 
-    fireEvent.click(screen.getByRole("button", { name: "creative with my hands" }));
+    fireEvent.click(screen.getByRole("button", { name: "free classes to try" }));
 
     expect(await screen.findByText("Candlelit Restorative Yoga")).toBeInTheDocument();
     expect(screen.queryByText("Say what you're in the mood for")).not.toBeInTheDocument();

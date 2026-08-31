@@ -28,27 +28,29 @@ chips below it.
 ## 2. The examples are phrases, not keywords
 
 **Do:** read the five chips.
-**Expect:** things like "relaxing evening this weekend", "free, near downtown",
-"meet people who like cooking" — each demonstrating something different (mood,
-price, place, company, skill level).
+**Expect:** "relaxing after work", "free classes to try", "beginner, no
+experience", "meet people and make something", "fun with my kid" — each
+demonstrating something different (mood, price, skill level, social intent, who
+you are with).
 **Fail:** a one-word example like "pottery". That teaches the exact habit this
 change exists to break.
 
 ## 3. Tapping an example actually searches it
 
-**Do:** tap **relaxing evening this weekend**.
+**Do:** tap **relaxing after work**.
 **Expect:** it appears in the search box, the URL becomes
-`/search?q=relaxing evening this weekend`, and real classes come back. The
-teaching block disappears once results are on screen.
+`/search?q=something relaxing after work`, and real classes come back (9 at the
+time of writing). The teaching block disappears once results are on screen.
 **Fail:** a chip that fills the box but does not search, or results that look
 like a keyword match on the word "relaxing".
 
 ## 4. The results are worth the promise — the honest check
 
 **Do:** tap two or three different examples and read what comes back.
-**Expect:** results that plausibly answer the phrase. "free, near downtown"
-should skew free and central; "beginner class next week" should skew soon and
-beginner-friendly.
+**Expect:** results that plausibly answer the phrase, and a decent number of
+them. Measured on 2026-08-31 each of the five returned 6-12 classes: relaxing
+after work 9, free classes to try 6, beginner 11, meet people 12, with my kid
+6.
 **Fail:** results that ignore the phrase entirely. Worth reporting with the
 exact wording — a promise made in an example and broken by the results is worse
 than no example, and it points at `api/search.ts` rather than this change.
@@ -86,11 +88,18 @@ not push the layout around when the header shows a signed-in menu.
 
 ## What is shakiest
 
-**Whether the examples are the right five.** They are a judgement call about
-what a first-time user should be taught, not a correctness matter. If a tester
-taps one and the results feel wrong for the phrase, that is the most useful
-feedback this change can get — and it is a signal about the search parsing, not
-about the chips.
+**The examples age with the catalogue.** They were chosen by running candidates
+against the live search and keeping the ones that returned 6-12 classes and
+were not dominated by the out-of-area Toronto listings. As inventory changes
+those counts drift, and an example that returns one result teaches that the
+feature is broken. If a chip comes back nearly empty, that is worth reporting —
+the fix is to re-measure and swap the phrase, not to change the code.
+
+**No example demonstrates dates**, deliberately: "relaxing evening this
+weekend" returned a single Toronto workshop, and "learn something new this
+month" came back 8 of 9 Toronto. Dates parse correctly; there is not enough
+local inventory in a given week to show it off. Worth revisiting after the
+catalogue-scope question in [../data-quality.md](../data-quality.md) §3.
 
 ## Not covered
 

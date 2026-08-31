@@ -1,7 +1,7 @@
 # How long an event runs — QA script
 
-**PR:** #12 · **Shipped:** pending merge · **Test at:** the branch preview while
-the PR is open, then <https://design-harmony-ashen.vercel.app>
+**PR:** #12 · **Shipped:** 2026-08-31 · **Test at:**
+<https://design-harmony-ashen.vercel.app>
 
 Open in a **fresh incognito window** (no service worker, and you start logged
 out). No DevTools needed. Everything here is on the **event detail page**;
